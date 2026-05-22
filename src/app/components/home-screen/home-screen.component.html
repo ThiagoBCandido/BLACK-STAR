@@ -11,12 +11,12 @@
         BLACK STAR
       </h1>
 
-      <button class="flex h-9 w-9 items-center justify-center rounded-full text-white/60 transition hover:bg-white/5">
-        <img
-          src="assets/icons/bell.svg"
-          alt="Menu"
-          class="icon-soft h-5 w-5 object-contain"
-        />
+      <button
+        type="button"
+        (click)="spotifyAuth.isAuthenticated() ? spotifyAuth.logout() : spotifyAuth.login()"
+        class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] font-light text-white/70 transition hover:bg-white/[0.08]"
+      >
+        {{ spotifyAuth.isAuthenticated() ? 'Connected' : 'Spotify' }}
       </button>
     </div>
 

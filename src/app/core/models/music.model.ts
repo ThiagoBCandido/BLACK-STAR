@@ -1,14 +1,16 @@
 export interface Track {
-    id: number;
-    title: string;
-    artist: string;
-    album: string;
-    cover: string;
-    duration: string;
+  id: string;
+  title: string;
+  artist: string;
+  album: string;
+  cover: string;
+  duration: string;
+  spotifyUri?: string;
+  spotifyUrl?: string;
 }
 
 export interface Playlist {
-    title: string;
-    description: string;
-    image: string;
+  title: string;
+  description: string;
+  image: string;
 }

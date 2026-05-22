@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { PlayerStateService } from '../../core/services/player-state.service';
+import { SpotifyAuthService } from '../../core/services/spotify-auth.service';
 
 @Component({
   selector: 'app-home-screen',
@@ -11,4 +12,5 @@ import { PlayerStateService } from '../../core/services/player-state.service';
 })
 export class HomeScreenComponent {
   readonly player = inject(PlayerStateService);
+  readonly spotifyAuth = inject(SpotifyAuthService);
 }

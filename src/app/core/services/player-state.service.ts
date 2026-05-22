@@ -1,12 +1,15 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { PLAYLISTS, TRACKS } from '../data/mock-music.data';
 import { Track } from '../models/music.model';
+import { SpotifyApiService } from './spotify-api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PlayerStateService {
-  readonly tracks = signal(TRACKS);
+  private readonly spotifyApi = inject(SpotifyApiService);
+
+  readonly tracks = signal<Track[]>(TRACKS);
   readonly playlists = signal(PLAYLISTS);
 
   readonly currentTrack = signal<Track>(TRACKS[2]);
@@ -14,8 +17,33 @@ export class PlayerStateService {
   readonly isPlayerOpen = signal(false);
   readonly isPlayerClosing = signal(false);
   readonly isLiked = signal(false);
+  readonly isLoadingSpotifyTracks = signal(false);
 
   private closeTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+  async loadSpotifyTracks(): Promise<void> {
+    this.isLoadingSpotifyTracks.set(true);
+
+    try {
+      let spotifyTracks = await this.spotifyApi.getRecentlyPlayedTracks();
+
+      if (!spotifyTracks.length) {
+        spotifyTracks = await this.spotifyApi.getTopTracks();
+      }
+
+      if (!spotifyTracks.length) {
+        return;
+      }
+
+      this.tracks.set(spotifyTracks);
+      this.currentTrack.set(spotifyTracks[0]);
+      this.isPlaying.set(false);
+    } catch (error) {
+      console.error('Could not load Spotify tracks:', error);
+    } finally {
+      this.isLoadingSpotifyTracks.set(false);
+    }
+  }
 
   selectTrack(track: Track): void {
     this.currentTrack.set(track);

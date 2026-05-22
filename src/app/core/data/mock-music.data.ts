@@ -2,7 +2,7 @@ import { Playlist, Track } from '../models/music.model';
 
 export const TRACKS: Track[] = [
   {
-    id: 1,
+    id: 'mock-1',
     title: 'Void',
     artist: 'Kedr Livanskiy',
     album: 'Night Signals',
@@ -10,7 +10,7 @@ export const TRACKS: Track[] = [
     cover: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=500&q=80',
   },
   {
-    id: 2,
+    id: 'mock-2',
     title: 'Used to Be',
     artist: 'The Plot In You',
     album: 'Static Bloom',
@@ -18,7 +18,7 @@ export const TRACKS: Track[] = [
     cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=500&q=80',
   },
   {
-    id: 3,
+    id: 'mock-3',
     title: 'Under the Surface',
     artist: 'The KVB',
     album: 'Echoes Fade',
@@ -26,7 +26,7 @@ export const TRACKS: Track[] = [
     cover: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=500&q=80',
   },
   {
-    id: 4,
+    id: 'mock-4',
     title: 'Into the Night',
     artist: 'Austra',
     album: 'Glassheart',
