@@ -1,0 +1,221 @@
+<section
+  class="player-overlay"
+  [class.is-closing]="player.isPlayerClosing()"
+>
+  <div class="player-sheet">
+    <header class="flex items-center justify-between px-5 py-5">
+      <button
+        type="button"
+        (click)="player.closePlayer()"
+        class="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-white/5"
+        aria-label="Close player"
+      >
+        <img
+          src="assets/icons/down-arrow.svg"
+          alt=""
+          class="icon-soft h-5 w-5 object-contain"
+        />
+      </button>
+
+      <img
+        src="assets/icons/blackstar_logo.svg"
+        alt="Black Star"
+        class="main-logo main-logo-glow"
+      />
+
+      <button class="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-white/5">
+        <img
+          src="assets/icons/dots.svg"
+          alt="More options"
+          class="icon-soft h-5 w-5 object-contain"
+        />
+      </button>
+    </header>
+
+    <section class="flex-1 overflow-y-auto px-4 pb-8">
+      <div class="turntable mx-auto mt-2">
+        <div
+          class="record"
+          [class.is-playing]="player.isPlaying()"
+          [style.--cover-image]="'url(' + player.currentTrack().cover + ')'"
+        >
+          <div class="record-label"></div>
+          <div class="record-hole"></div>
+        </div>
+
+        <div class="tonearm" [class.is-playing]="player.isPlaying()">
+          <div class="tonearm-base"></div>
+          <div class="tonearm-line"></div>
+          <div class="tonearm-head"></div>
+        </div>
+
+        <div class="turntable-button button-one"></div>
+        <div class="turntable-button button-two"></div>
+      </div>
+
+      <section class="px-2 pt-8">
+        <div class="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h2 class="text-[28px] font-light leading-tight text-white">
+              {{ player.currentTrack().title }}
+            </h2>
+
+            <p class="mt-1 text-base text-white/55">
+              {{ player.currentTrack().artist }}
+            </p>
+          </div>
+
+          <div class="flex gap-3 pt-2">
+            <button type="button" (click)="player.toggleLike()" class="flex h-10 w-10 items-center justify-center">
+              <img
+                [src]="player.isLiked() ? 'assets/icons/star_filled.svg' : 'assets/icons/star.svg'"
+                alt=""
+                class="icon-active h-7 w-7 object-contain"
+              />
+            </button>
+
+            <button class="flex h-10 w-10 items-center justify-center">
+              <img
+                src="assets/icons/dots.svg"
+                alt="More options"
+                class="icon-soft h-6 w-6 object-contain"
+              />
+            </button>
+          </div>
+        </div>
+
+        <div class="mb-2 h-1 rounded-full bg-white/15">
+          <div class="relative h-full w-[42%] rounded-full bg-white">
+            <span class="absolute right-0 top-1/2 h-3 w-3 -translate-y-1/2 translate-x-1/2 rounded-full bg-white"></span>
+          </div>
+        </div>
+
+        <div class="mb-3 flex justify-between text-xs text-white/45">
+          <span>1:32</span>
+          <span>{{ player.currentTrack().duration }}</span>
+        </div>
+
+        <div class="mx-auto mb-8 w-fit rounded-md bg-white/10 px-3 py-1 text-xs tracking-wide text-white/45">
+          HI-FI · 24-BIT
+        </div>
+
+        <div class="main-controls mb-8">
+          <button class="main-side-btn" aria-label="Shuffle">
+            <img
+              src="assets/icons/mix.svg"
+              alt=""
+              class="icon-soft h-5 w-5 object-contain"
+            />
+          </button>
+
+          <button
+            type="button"
+            (click)="player.previousTrack($event)"
+            class="main-skip-btn"
+            aria-label="Previous track"
+          >
+            <img
+              src="assets/icons/skip-previous.svg"
+              alt=""
+              class="icon-white main-skip-icon"
+            />
+          </button>
+
+          <button
+            type="button"
+            (click)="player.togglePlay($event)"
+            class="main-play-btn"
+            aria-label="Play or pause"
+          >
+            <img
+              [src]="player.isPlaying() ? 'assets/icons/pause.svg' : 'assets/icons/play-button.svg'"
+              alt=""
+              class="icon-white main-play-icon"
+            />
+          </button>
+
+          <button
+            type="button"
+            (click)="player.nextTrack($event)"
+            class="main-skip-btn"
+            aria-label="Next track"
+          >
+            <img
+              src="assets/icons/next.svg"
+              alt=""
+              class="icon-white main-skip-icon"
+            />
+          </button>
+
+          <button class="main-side-btn" aria-label="Repeat">
+            <img
+              src="assets/icons/loop.svg"
+              alt=""
+              class="icon-soft h-5 w-5 object-contain"
+            />
+          </button>
+        </div>
+
+        <section class="rounded-t-3xl border border-white/10 bg-white/[0.04] px-4 py-5">
+          <div class="mb-5 grid grid-cols-2 text-center text-sm">
+            <button class="relative pb-3 text-white">
+              Queue
+              <span class="absolute bottom-0 left-1/2 h-px w-10 -translate-x-1/2 bg-white"></span>
+            </button>
+
+            <button class="pb-3 text-white/40">
+              Lyrics
+            </button>
+          </div>
+
+          <div class="space-y-2">
+            <button
+              type="button"
+              *ngFor="let track of player.tracks(); index as i"
+              (click)="player.selectTrack(track)"
+              class="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-white/[0.05]"
+              [class.bg-white]="track.id === player.currentTrack().id"
+              [class.bg-opacity-5]="track.id === player.currentTrack().id"
+            >
+              <span class="w-5 text-sm text-white/50">
+                {{ i + 1 }}
+              </span>
+
+              <img [src]="track.cover" [alt]="track.title" class="h-12 w-12 rounded object-cover grayscale" />
+
+              <div class="min-w-0 flex-1">
+                <h4 class="truncate text-sm font-light text-white">
+                  {{ track.title }}
+                </h4>
+
+                <p class="truncate text-xs text-white/45">
+                  {{ track.artist }}
+                </p>
+              </div>
+
+              <span class="flex h-8 w-8 items-center justify-center">
+                <span
+                  *ngIf="track.id === player.currentTrack().id"
+                  class="equalizer"
+                  [class.is-playing]="player.isPlaying()"
+                  aria-label="Now playing"
+                >
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </span>
+
+                <img
+                  *ngIf="track.id !== player.currentTrack().id"
+                  src="assets/icons/dots.svg"
+                  alt="Track options"
+                  class="icon-soft h-5 w-5 object-contain"
+                />
+              </span>
+            </button>
+          </div>
+        </section>
+      </section>
+    </section>
+  </div>
+</section>

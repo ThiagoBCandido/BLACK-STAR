@@ -16,3 +16,34 @@ body {
 button {
   font-family: inherit;
 }
+
+.icon-white {
+  filter: brightness(0) invert(1);
+}
+
+.icon-soft {
+  filter: brightness(0) invert(1);
+  opacity: 0.65;
+}
+
+.icon-active {
+  filter: brightness(0) invert(1);
+  opacity: 0.95;
+}
+
+.logo-white {
+  filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(255, 255, 255, 0.35));
+  opacity: 0.95;
+}
+
+.main-logo {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  filter: none;
+  opacity: 1;
+}
+
+.main-logo-glow {
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.18));
+}

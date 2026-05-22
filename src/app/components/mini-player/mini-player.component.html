@@ -1,0 +1,63 @@
+<section
+  class="fixed bottom-[64px] left-1/2 z-40 w-full max-w-md -translate-x-1/2 border-t border-white/10 bg-zinc-950/95 px-4 py-3 shadow-[0_-20px_50px_rgba(0,0,0,.8)] backdrop-blur-xl"
+  (click)="player.openPlayer()"
+>
+  <div class="flex items-center gap-3">
+    <img
+      [src]="player.currentTrack().cover"
+      [alt]="player.currentTrack().title"
+      class="h-12 w-12 rounded object-cover grayscale"
+    />
+
+    <div class="min-w-0 flex-1">
+      <h4 class="truncate text-sm font-light text-white">
+        {{ player.currentTrack().title }}
+      </h4>
+
+      <p class="truncate text-xs text-white/45">
+        {{ player.currentTrack().artist }}
+      </p>
+    </div>
+
+    <div class="mini-controls">
+      <button
+        type="button"
+        (click)="player.previousTrack($event)"
+        class="mini-control-btn"
+        aria-label="Previous track"
+      >
+        <img
+          src="assets/icons/skip-previous.svg"
+          alt=""
+          class="icon-white mini-control-icon"
+        />
+      </button>
+
+      <button
+        type="button"
+        (click)="player.togglePlay($event)"
+        class="mini-play-btn"
+        aria-label="Play or pause"
+      >
+        <img
+          [src]="player.isPlaying() ? 'assets/icons/pause.svg' : 'assets/icons/play-button.svg'"
+          alt=""
+          class="icon-white mini-play-icon"
+        />
+      </button>
+
+      <button
+        type="button"
+        (click)="player.nextTrack($event)"
+        class="mini-control-btn"
+        aria-label="Next track"
+      >
+        <img
+          src="assets/icons/next.svg"
+          alt=""
+          class="icon-white mini-control-icon"
+        />
+      </button>
+    </div>
+  </div>
+</section>
