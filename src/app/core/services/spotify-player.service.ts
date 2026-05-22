@@ -31,6 +31,8 @@ interface SpotifyPlayer {
   activateElement(): Promise<void>;
   getCurrentState(): Promise<SpotifyPlaybackState | null>;
   seek(positionMs: number): Promise<void>;
+  getVolume(): Promise<number>;
+  setVolume(volume: number): Promise<void>;
   addListener(event: string, callback: (data: any) => void): boolean;
   removeListener(event: string): boolean;
 }
@@ -70,6 +72,8 @@ export class SpotifyPlayerService {
   readonly currentTrackUri = signal<string | null>(null);
   readonly isShuffleEnabled = signal(false);
   readonly repeatMode = signal<'off' | 'context' | 'track'>('off');
+  readonly volumePercent = signal(80);
+  readonly isMuted = signal(false);
 
   private readonly sdkScriptId = 'spotify-web-playback-sdk';
   private readonly apiBaseUrl = 'https://api.spotify.com/v1';
@@ -77,6 +81,7 @@ export class SpotifyPlayerService {
   private player: SpotifyPlayer | null = null;
   private sdkLoadPromise: Promise<void> | null = null;
   private progressIntervalId: ReturnType<typeof setInterval> | null = null;
+  private lastVolumeBeforeMute = 80;
 
   async initialize(): Promise<void> {
     if (this.player || this.isInitializing()) {
@@ -121,6 +126,7 @@ export class SpotifyPlayerService {
       }
 
       await this.waitUntilReady();
+      await this.loadVolumeFromPlayer();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown Spotify player error.';
       this.errorMessage.set(message);
@@ -172,6 +178,33 @@ export class SpotifyPlayerService {
 
     await this.player.seek(safePosition);
     this.positionMs.set(safePosition);
+  }
+
+  async setVolumePercent(percent: number): Promise<void> {
+    await this.ensureReady();
+
+    if (!this.player) {
+      return;
+    }
+
+    const safePercent = Math.max(0, Math.min(percent, 100));
+    const sdkVolume = safePercent / 100;
+
+    await this.player.setVolume(sdkVolume);
+
+    this.volumePercent.set(safePercent);
+    this.isMuted.set(safePercent === 0);
+
+    if (safePercent > 0) {
+      this.lastVolumeBeforeMute = safePercent;
+    }
+  }
+
+  async toggleMute(): Promise<void> {
+    const shouldMute = this.volumePercent() > 0;
+    const nextVolume = shouldMute ? 0 : this.lastVolumeBeforeMute || 80;
+
+    await this.setVolumePercent(nextVolume);
   }
 
   async nextTrack(): Promise<void> {
@@ -255,6 +288,26 @@ export class SpotifyPlayerService {
 
     if (!this.deviceId()) {
       await this.waitUntilReady();
+    }
+  }
+
+  private async loadVolumeFromPlayer(): Promise<void> {
+    if (!this.player) {
+      return;
+    }
+
+    try {
+      const volume = await this.player.getVolume();
+      const percent = Math.round(volume * 100);
+
+      this.volumePercent.set(percent);
+      this.isMuted.set(percent === 0);
+
+      if (percent > 0) {
+        this.lastVolumeBeforeMute = percent;
+      }
+    } catch (error) {
+      console.error('Could not load Spotify player volume:', error);
     }
   }
 

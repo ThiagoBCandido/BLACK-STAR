@@ -59,6 +59,8 @@ export class PlayerStateService {
   readonly durationLabel = computed(() => this.formatDuration(this.durationMs()));
   readonly isShuffleEnabled = computed(() => this.spotifyPlayer.isShuffleEnabled());
   readonly repeatMode = computed(() => this.spotifyPlayer.repeatMode());
+  readonly volumePercent = computed(() => this.spotifyPlayer.volumePercent());
+  readonly isMuted = computed(() => this.spotifyPlayer.isMuted());
 
   private closeTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
@@ -229,6 +231,27 @@ export class PlayerStateService {
       await this.spotifyPlayer.cycleRepeatMode();
     } catch (error) {
       console.error('Could not change Spotify repeat mode:', error);
+    }
+  }
+
+  async setVolumeFromInput(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const value = Number(input.value);
+
+    try {
+      await this.spotifyPlayer.setVolumePercent(value);
+    } catch (error) {
+      console.error('Could not change Spotify volume:', error);
+    }
+  }
+
+  async toggleMute(event?: Event): Promise<void> {
+    event?.stopPropagation();
+
+    try {
+      await this.spotifyPlayer.toggleMute();
+    } catch (error) {
+      console.error('Could not toggle Spotify mute:', error);
     }
   }
 
