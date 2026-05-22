@@ -99,6 +99,7 @@ export class SpotifyApiService {
       album: track.album.name,
       cover: track.album.images[0]?.url ?? '',
       duration: this.formatDuration(track.duration_ms),
+      durationMs: track.duration_ms,
       spotifyUri: track.uri,
       spotifyUrl: track.external_urls.spotify,
     };

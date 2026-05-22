@@ -1,21 +1,24 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { SpotifyAuthService } from './spotify-auth.service';
 
+interface SpotifyPlaybackTrack {
+  id: string;
+  name: string;
+  uri: string;
+  duration_ms: number;
+  artists: Array<{ name: string }>;
+  album: {
+    name: string;
+    images: Array<{ url: string }>;
+  };
+}
+
 interface SpotifyPlaybackState {
   paused: boolean;
   position: number;
   duration: number;
   track_window: {
-    current_track: {
-      id: string;
-      name: string;
-      uri: string;
-      artists: Array<{ name: string }>;
-      album: {
-        name: string;
-        images: Array<{ url: string }>;
-      };
-    };
+    current_track: SpotifyPlaybackTrack;
   };
 }
 
@@ -27,6 +30,7 @@ interface SpotifyPlayer {
   previousTrack(): Promise<void>;
   activateElement(): Promise<void>;
   getCurrentState(): Promise<SpotifyPlaybackState | null>;
+  seek(positionMs: number): Promise<void>;
   addListener(event: string, callback: (data: any) => void): boolean;
   removeListener(event: string): boolean;
 }
@@ -58,13 +62,19 @@ export class SpotifyPlayerService {
   readonly isReady = signal(false);
   readonly isInitializing = signal(false);
   readonly errorMessage = signal<string | null>(null);
+
   readonly playbackState = signal<SpotifyPlaybackState | null>(null);
+  readonly isPaused = signal(true);
+  readonly positionMs = signal(0);
+  readonly durationMs = signal(0);
+  readonly currentTrackUri = signal<string | null>(null);
 
   private readonly sdkScriptId = 'spotify-web-playback-sdk';
   private readonly apiBaseUrl = 'https://api.spotify.com/v1';
 
   private player: SpotifyPlayer | null = null;
   private sdkLoadPromise: Promise<void> | null = null;
+  private progressIntervalId: ReturnType<typeof setInterval> | null = null;
 
   async initialize(): Promise<void> {
     if (this.player || this.isInitializing()) {
@@ -132,8 +142,7 @@ export class SpotifyPlayerService {
     try {
       await this.player.activateElement();
     } catch {
-      // Some browsers only allow this during direct user interaction.
-      // If it fails here, the play endpoint below may still work after user interaction.
+      // Alguns navegadores exigem interação direta do usuário.
     }
 
     await this.transferPlayback(false);
@@ -148,6 +157,19 @@ export class SpotifyPlayerService {
     }
 
     await this.player.togglePlay();
+  }
+
+  async seekTo(positionMs: number): Promise<void> {
+    await this.ensureReady();
+
+    if (!this.player) {
+      return;
+    }
+
+    const safePosition = Math.max(0, Math.min(positionMs, this.durationMs()));
+
+    await this.player.seek(safePosition);
+    this.positionMs.set(safePosition);
   }
 
   async nextTrack(): Promise<void> {
@@ -170,13 +192,31 @@ export class SpotifyPlayerService {
     await this.player.previousTrack();
   }
 
+  async refreshCurrentState(): Promise<void> {
+    if (!this.player) {
+      return;
+    }
+
+    const state = await this.player.getCurrentState();
+
+    if (state) {
+      this.updatePlaybackState(state);
+    }
+  }
+
   disconnect(): void {
+    this.clearProgressTimer();
+
     this.player?.disconnect();
     this.player = null;
 
     this.deviceId.set(null);
     this.isReady.set(false);
     this.playbackState.set(null);
+    this.isPaused.set(true);
+    this.positionMs.set(0);
+    this.durationMs.set(0);
+    this.currentTrackUri.set(null);
   }
 
   private async ensureReady(): Promise<void> {
@@ -238,6 +278,7 @@ export class SpotifyPlayerService {
 
       this.deviceId.set(null);
       this.isReady.set(false);
+      this.clearProgressTimer();
     });
 
     player.addListener('player_state_changed', (state: SpotifyPlaybackState | null) => {
@@ -245,7 +286,7 @@ export class SpotifyPlayerService {
         return;
       }
 
-      this.playbackState.set(state);
+      this.updatePlaybackState(state);
     });
 
     player.addListener('initialization_error', ({ message }: { message: string }) => {
@@ -271,6 +312,43 @@ export class SpotifyPlayerService {
     player.addListener('autoplay_failed', () => {
       console.warn('Spotify autoplay failed. User interaction is required.');
     });
+  }
+
+  private updatePlaybackState(state: SpotifyPlaybackState): void {
+    this.playbackState.set(state);
+    this.isPaused.set(state.paused);
+    this.positionMs.set(state.position);
+    this.durationMs.set(state.duration);
+    this.currentTrackUri.set(state.track_window.current_track.uri);
+
+    if (state.paused) {
+      this.clearProgressTimer();
+      return;
+    }
+
+    this.startProgressTimer();
+  }
+
+  private startProgressTimer(): void {
+    this.clearProgressTimer();
+
+    this.progressIntervalId = setInterval(() => {
+      const nextPosition = Math.min(this.positionMs() + 1000, this.durationMs());
+      this.positionMs.set(nextPosition);
+
+      if (nextPosition >= this.durationMs()) {
+        this.clearProgressTimer();
+      }
+    }, 1000);
+  }
+
+  private clearProgressTimer(): void {
+    if (!this.progressIntervalId) {
+      return;
+    }
+
+    clearInterval(this.progressIntervalId);
+    this.progressIntervalId = null;
   }
 
   private async waitUntilReady(): Promise<void> {

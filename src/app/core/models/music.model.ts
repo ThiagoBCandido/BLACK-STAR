@@ -5,6 +5,7 @@ export interface Track {
   album: string;
   cover: string;
   duration: string;
+  durationMs?: number;
   spotifyUri?: string;
   spotifyUrl?: string;
 }

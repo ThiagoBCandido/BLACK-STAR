@@ -84,15 +84,20 @@
           </div>
         </div>
 
-        <div class="mb-2 h-1 rounded-full bg-white/15">
-          <div class="relative h-full w-[42%] rounded-full bg-white">
-            <span class="absolute right-0 top-1/2 h-3 w-3 -translate-y-1/2 translate-x-1/2 rounded-full bg-white"></span>
-          </div>
-        </div>
+        <button
+          type="button"
+          class="progress-bar mb-2"
+          (click)="player.seekFromProgressClick($event)"
+          aria-label="Seek track"
+        >
+          <span class="progress-fill" [style.width.%]="player.progressPercent()">
+            <span class="progress-thumb"></span>
+          </span>
+        </button>
 
         <div class="mb-3 flex justify-between text-xs text-white/45">
-          <span>1:32</span>
-          <span>{{ player.currentTrack().duration }}</span>
+          <span>{{ player.positionLabel() }}</span>
+          <span>{{ player.durationLabel() }}</span>
         </div>
 
         <div class="mx-auto mb-8 w-fit rounded-md bg-white/10 px-3 py-1 text-xs tracking-wide text-white/45">
