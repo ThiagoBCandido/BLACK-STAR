@@ -25,6 +25,7 @@ interface Playlist {
 })
 export class AppComponent {
   isPlayerOpen = false;
+  isPlayerClosing = false;
   isPlaying = false;
   isLiked = false;
 
@@ -81,15 +82,21 @@ export class AppComponent {
   selectTrack(track: Track): void {
     this.currentTrack = track;
     this.isPlaying = true;
-    this.isPlayerOpen = true;
+    this.openPlayer();
   }
 
   openPlayer(): void {
+    this.isPlayerClosing = false;
     this.isPlayerOpen = true;
   }
 
   closePlayer(): void {
-    this.isPlayerOpen = false;
+    this.isPlayerClosing = true;
+
+    setTimeout(() => {
+      this.isPlayerOpen = false;
+      this.isPlayerClosing = false;
+    }, 320);
   }
 
   togglePlay(event?: Event): void {
