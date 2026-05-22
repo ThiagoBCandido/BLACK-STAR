@@ -57,6 +57,8 @@ export class PlayerStateService {
 
   readonly positionLabel = computed(() => this.formatDuration(this.positionMs()));
   readonly durationLabel = computed(() => this.formatDuration(this.durationMs()));
+  readonly isShuffleEnabled = computed(() => this.spotifyPlayer.isShuffleEnabled());
+  readonly repeatMode = computed(() => this.spotifyPlayer.repeatMode());
 
   private closeTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
@@ -212,6 +214,22 @@ export class PlayerStateService {
     this.isPlaying.set(true);
 
     await this.playCurrentTrackOnSpotify();
+  }
+
+  async toggleShuffle(): Promise<void> {
+    try {
+      await this.spotifyPlayer.toggleShuffle();
+    } catch (error) {
+      console.error('Could not toggle Spotify shuffle:', error);
+    }
+  }
+
+  async cycleRepeatMode(): Promise<void> {
+    try {
+      await this.spotifyPlayer.cycleRepeatMode();
+    } catch (error) {
+      console.error('Could not change Spotify repeat mode:', error);
+    }
   }
 
   async seekFromProgressClick(event: MouseEvent): Promise<void> {

@@ -68,6 +68,8 @@ export class SpotifyPlayerService {
   readonly positionMs = signal(0);
   readonly durationMs = signal(0);
   readonly currentTrackUri = signal<string | null>(null);
+  readonly isShuffleEnabled = signal(false);
+  readonly repeatMode = signal<'off' | 'context' | 'track'>('off');
 
   private readonly sdkScriptId = 'spotify-web-playback-sdk';
   private readonly apiBaseUrl = 'https://api.spotify.com/v1';
@@ -190,6 +192,33 @@ export class SpotifyPlayerService {
     }
 
     await this.player.previousTrack();
+  }
+
+  async toggleShuffle(): Promise<void> {
+    const nextState = !this.isShuffleEnabled();
+
+    await this.request(`/me/player/shuffle?state=${nextState}`, {
+      method: 'PUT',
+    });
+
+    this.isShuffleEnabled.set(nextState);
+  }
+
+  async cycleRepeatMode(): Promise<void> {
+    const currentMode = this.repeatMode();
+
+    const nextMode =
+      currentMode === 'off'
+        ? 'context'
+        : currentMode === 'context'
+          ? 'track'
+          : 'off';
+
+    await this.request(`/me/player/repeat?state=${nextMode}`, {
+      method: 'PUT',
+    });
+
+    this.repeatMode.set(nextMode);
   }
 
   async refreshCurrentState(): Promise<void> {

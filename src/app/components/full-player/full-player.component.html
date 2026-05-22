@@ -105,11 +105,19 @@
         </div>
 
         <div class="main-controls mb-8">
-          <button class="main-side-btn" aria-label="Shuffle">
+          <button
+            type="button"
+            class="main-side-btn"
+            [class.is-active]="player.isShuffleEnabled()"
+            (click)="player.toggleShuffle()"
+            aria-label="Shuffle"
+          >
             <img
               src="assets/icons/mix.svg"
               alt=""
-              class="icon-soft h-5 w-5 object-contain"
+              class="h-5 w-5 object-contain"
+              [class.icon-active]="player.isShuffleEnabled()"
+              [class.icon-soft]="!player.isShuffleEnabled()"
             />
           </button>
 
@@ -152,12 +160,27 @@
             />
           </button>
 
-          <button class="main-side-btn" aria-label="Repeat">
+          <button
+            type="button"
+            class="main-side-btn relative"
+            [class.is-active]="player.repeatMode() !== 'off'"
+            (click)="player.cycleRepeatMode()"
+            aria-label="Repeat"
+          >
             <img
               src="assets/icons/loop.svg"
               alt=""
-              class="icon-soft h-5 w-5 object-contain"
+              class="h-5 w-5 object-contain"
+              [class.icon-active]="player.repeatMode() !== 'off'"
+              [class.icon-soft]="player.repeatMode() === 'off'"
             />
+
+            <span
+              *ngIf="player.repeatMode() === 'track'"
+              class="repeat-one-indicator"
+            >
+              1
+            </span>
           </button>
         </div>
 
