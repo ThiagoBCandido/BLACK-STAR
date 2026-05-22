@@ -2,12 +2,14 @@ import { Injectable, inject, signal } from '@angular/core';
 import { PLAYLISTS, TRACKS } from '../data/mock-music.data';
 import { Track } from '../models/music.model';
 import { SpotifyApiService } from './spotify-api.service';
+import { SpotifyPlayerService } from './spotify-player.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PlayerStateService {
   private readonly spotifyApi = inject(SpotifyApiService);
+  private readonly spotifyPlayer = inject(SpotifyPlayerService);
 
   readonly tracks = signal<Track[]>(TRACKS);
   readonly playlists = signal(PLAYLISTS);
@@ -45,29 +47,35 @@ export class PlayerStateService {
     }
   }
 
-  selectTrack(track: Track): void {
+  async selectTrack(track: Track): Promise<void> {
     this.currentTrack.set(track);
     this.isPlaying.set(true);
+
+    await this.playCurrentTrackOnSpotify();
   }
 
-  selectTrackAndOpenPlayer(track: Track): void {
+  async selectTrackAndOpenPlayer(track: Track): Promise<void> {
     this.currentTrack.set(track);
     this.isPlaying.set(true);
     this.openPlayer();
+
+    await this.playCurrentTrackOnSpotify();
   }
 
-  toggleTrackPlayback(track: Track, event: Event): void {
+  async toggleTrackPlayback(track: Track, event: Event): Promise<void> {
     event.stopPropagation();
 
     const isCurrentTrack = track.id === this.currentTrack().id;
 
     if (isCurrentTrack) {
-      this.isPlaying.update((value) => !value);
+      await this.togglePlay();
       return;
     }
 
     this.currentTrack.set(track);
     this.isPlaying.set(true);
+
+    await this.playCurrentTrackOnSpotify();
   }
 
   openPlayer(): void {
@@ -90,16 +98,29 @@ export class PlayerStateService {
     }, 320);
   }
 
-  togglePlay(event?: Event): void {
+  async togglePlay(event?: Event): Promise<void> {
     event?.stopPropagation();
-    this.isPlaying.update((value) => !value);
+
+    const hasSpotifyUri = Boolean(this.currentTrack().spotifyUri);
+
+    if (!hasSpotifyUri) {
+      this.isPlaying.update((value) => !value);
+      return;
+    }
+
+    try {
+      await this.spotifyPlayer.togglePlayback();
+      this.isPlaying.update((value) => !value);
+    } catch (error) {
+      console.error('Could not toggle Spotify playback:', error);
+    }
   }
 
   toggleLike(): void {
     this.isLiked.update((value) => !value);
   }
 
-  nextTrack(event?: Event): void {
+  async nextTrack(event?: Event): Promise<void> {
     event?.stopPropagation();
 
     const tracks = this.tracks();
@@ -108,9 +129,11 @@ export class PlayerStateService {
 
     this.currentTrack.set(tracks[nextIndex]);
     this.isPlaying.set(true);
+
+    await this.playCurrentTrackOnSpotify();
   }
 
-  previousTrack(event?: Event): void {
+  async previousTrack(event?: Event): Promise<void> {
     event?.stopPropagation();
 
     const tracks = this.tracks();
@@ -119,5 +142,23 @@ export class PlayerStateService {
 
     this.currentTrack.set(tracks[previousIndex]);
     this.isPlaying.set(true);
+
+    await this.playCurrentTrackOnSpotify();
+  }
+
+  private async playCurrentTrackOnSpotify(): Promise<void> {
+    const uri = this.currentTrack().spotifyUri;
+
+    if (!uri) {
+      return;
+    }
+
+    try {
+      await this.spotifyPlayer.playTrack(uri);
+      this.isPlaying.set(true);
+    } catch (error) {
+      this.isPlaying.set(false);
+      console.error('Could not play Spotify track:', error);
+    }
   }
 }
