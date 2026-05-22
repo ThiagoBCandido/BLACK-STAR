@@ -16,6 +16,8 @@ interface PlaybackTrack {
   };
 }
 
+type AppScreen = 'home' | 'search' | 'library' | 'profile';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -32,9 +34,12 @@ export class PlayerStateService {
   readonly isPlayerClosing = signal(false);
   readonly isLiked = signal(false);
   readonly isLoadingSpotifyTracks = signal(false);
-
+  readonly activeScreen = signal<AppScreen>('home');
+  readonly searchQuery = signal('');
+  readonly searchResults = signal<Track[]>([]);
+  readonly isSearching = signal(false);
+  readonly hasSearched = signal(false);
   readonly positionMs = computed(() => this.spotifyPlayer.positionMs());
-
   readonly durationMs = computed(() => {
     const spotifyDuration = this.spotifyPlayer.durationMs();
 
@@ -63,6 +68,7 @@ export class PlayerStateService {
   readonly isMuted = computed(() => this.spotifyPlayer.isMuted());
 
   private closeTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private searchRequestId = 0;
 
   constructor() {
     effect(
@@ -118,6 +124,57 @@ export class PlayerStateService {
     } finally {
       this.isLoadingSpotifyTracks.set(false);
     }
+  }
+
+  setActiveScreen(screen: AppScreen): void {
+    this.activeScreen.set(screen);
+  }
+
+  updateSearchQuery(query: string): void {
+    this.searchQuery.set(query);
+  }
+
+  async searchTracks(): Promise<void> {
+    const query = this.searchQuery().trim();
+    const requestId = ++this.searchRequestId;
+
+    if (query.length < 2) {
+      this.searchResults.set([]);
+      this.hasSearched.set(false);
+      this.isSearching.set(false);
+      return;
+    }
+
+    this.isSearching.set(true);
+    this.hasSearched.set(true);
+
+    try {
+      const results = await this.spotifyApi.searchTracks(query);
+
+      if (requestId !== this.searchRequestId) {
+        return;
+      }
+
+      this.searchResults.set(results);
+    } catch (error) {
+      console.error('Could not search Spotify tracks:', error);
+
+      if (requestId === this.searchRequestId) {
+        this.searchResults.set([]);
+      }
+    } finally {
+      if (requestId === this.searchRequestId) {
+        this.isSearching.set(false);
+      }
+    }
+  }
+
+  clearSearch(): void {
+    this.searchRequestId++;
+    this.searchQuery.set('');
+    this.searchResults.set([]);
+    this.hasSearched.set(false);
+    this.isSearching.set(false);
   }
 
   async selectTrack(track: Track): Promise<void> {

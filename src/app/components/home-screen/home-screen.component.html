@@ -140,14 +140,14 @@
   </section>
 
   <nav class="fixed bottom-0 left-1/2 z-40 grid h-16 w-full max-w-md -translate-x-1/2 grid-cols-4 border-t border-white/10 bg-black/95 backdrop-blur-xl">
-    <button class="flex flex-col items-center justify-center gap-1 text-white">
-      <img src="assets/icons/home.svg" alt="Home" class="icon-active h-5 w-5 object-contain" />
-      <span class="text-[10px]">Home</span>
+    <button type="button" (click)="player.setActiveScreen('home')" class="flex flex-col items-center justify-center gap-1 text-white">
+        <img src="assets/icons/blackstar_logo.svg" alt="Home" class="icon-active h-5 w-5 object-contain" />
+        <span class="text-[10px]">Home</span>
     </button>
 
-    <button class="flex flex-col items-center justify-center gap-1 text-white/45">
-      <img src="assets/icons/search.svg" alt="Search" class="icon-soft h-5 w-5 object-contain" />
-      <span class="text-[10px]">Search</span>
+    <button type="button" (click)="player.setActiveScreen('search')" class="flex flex-col items-center justify-center gap-1 text-white/45">
+        <img src="assets/icons/search.svg" alt="Search" class="icon-soft h-5 w-5 object-contain" />
+        <span class="text-[10px]">Search</span>
     </button>
 
     <button class="flex flex-col items-center justify-center gap-1 text-white/45">

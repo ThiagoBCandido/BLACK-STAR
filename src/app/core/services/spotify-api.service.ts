@@ -39,6 +39,12 @@ interface TopTracksResponse {
   items: SpotifyTrack[];
 }
 
+interface SearchTracksResponse {
+  tracks: {
+    items: SpotifyTrack[];
+  };
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -70,21 +76,55 @@ export class SpotifyApiService {
     return response.items.map((track) => this.mapSpotifyTrack(track));
   }
 
+  async searchTracks(query: string): Promise<Track[]> {
+  const trimmedQuery = query.trim();
+
+  if (!trimmedQuery) {
+    return [];
+  }
+
+  const params = new URLSearchParams();
+
+  params.set('q', trimmedQuery);
+  params.set('type', 'track');
+
+  const response = await this.request<SearchTracksResponse>(
+    `/search?${params.toString()}`
+  );
+
+  if (!response?.tracks?.items?.length) {
+    return [];
+  }
+
+    return response.tracks.items.map((track) => this.mapSpotifyTrack(track));
+ }
+
   private async request<T>(endpoint: string): Promise<T | null> {
     const token = this.auth.getAccessToken();
 
     if (!token) {
+      console.error('Spotify API error: missing access token.');
       return null;
     }
 
-    const response = await fetch(`${this.apiBaseUrl}${endpoint}`, {
+    const url = `${this.apiBaseUrl}${endpoint}`;
+
+    const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
     if (!response.ok) {
-      console.error('Spotify API error:', response.status, response.statusText);
+      const errorBody = await response.text();
+
+      console.error('Spotify API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        url,
+        body: errorBody,
+      });
+
       return null;
     }
 

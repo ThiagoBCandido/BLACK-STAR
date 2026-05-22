@@ -1,6 +1,6 @@
 <main class="min-h-screen bg-black text-white">
-  <app-home-screen></app-home-screen>
+  <app-home-screen *ngIf="player.activeScreen() === 'home'"></app-home-screen>
+  <app-search-screen *ngIf="player.activeScreen() === 'search'"></app-search-screen>
   <app-mini-player></app-mini-player>
-
   <app-full-player *ngIf="player.isPlayerOpen()"></app-full-player>
 </main>
