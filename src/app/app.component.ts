@@ -82,6 +82,25 @@ export class AppComponent {
   selectTrack(track: Track): void {
     this.currentTrack = track;
     this.isPlaying = true;
+  }
+
+  toggleTrackPlayback(track: Track, event: Event): void {
+    event.stopPropagation();
+
+    const isCurrentTrack = track.id === this.currentTrack.id;
+
+    if (isCurrentTrack) {
+      this.isPlaying = !this.isPlaying;
+      return;
+    }
+
+    this.currentTrack = track;
+    this.isPlaying = true;
+  }
+
+  selectTrackAndOpenPlayer(track: Track): void {
+    this.currentTrack = track;
+    this.isPlaying = true;
     this.openPlayer();
   }
 

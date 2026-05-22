@@ -296,6 +296,32 @@
   width: 30px;
 }
 
+.track-play-btn,
+.track-menu-btn {
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+}
+
+.track-play-btn.is-current {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.track-play-icon {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+}
+
+.track-menu-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
 .player-overlay {
   position: fixed;
   inset: 0;

@@ -50,12 +50,15 @@
 
             <button
               type="button"
-              (click)="selectTrack(currentTrack)"
+              (click)="selectTrackAndOpenPlayer(currentTrack)"
               class="flex w-fit items-center gap-2 rounded-full border border-white/20 bg-black/30 px-4 py-2 text-sm text-white/90 backdrop-blur-md transition hover:bg-white/10"
             >
-              <span class="text-xs">
-                <img src="assets/icons/play-button.svg" alt="Play" class="icon-active h-3.5 w-3.5 object-contain"/>
-              </span>
+              <img
+                src="assets/icons/play-button.svg"
+                alt="Play"
+                class="icon-white h-3.5 w-3.5 object-contain"
+              />
+
               Play Now
             </button>
           </div>
@@ -137,6 +140,8 @@
             *ngFor="let track of tracks"
             (click)="selectTrack(track)"
             class="flex w-full items-center gap-3 py-2.5 text-left transition hover:bg-white/[0.03]"
+            [class.bg-white]="track.id === currentTrack.id"
+            [class.bg-opacity-5]="track.id === currentTrack.id"
           >
             <img [src]="track.cover" [alt]="track.title" class="h-11 w-11 rounded object-cover grayscale" />
 
@@ -150,12 +155,34 @@
               </p>
             </div>
 
-            <span class="text-white/80">
-              <img src="assets/icons/play-button.svg" alt="Play track" class="icon-active h-4 w-4 object-contain"/>
-            </span>
-            <span class="text-lg leading-none text-white/35">
-              <img src="assets/icons/menu.svg" alt="More options" class="icon-soft h-5 w-5 object-contain"/>
-            </span>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                (click)="toggleTrackPlayback(track, $event)"
+                class="track-play-btn"
+                [class.is-current]="track.id === currentTrack.id"
+                aria-label="Play or pause track"
+              >
+                <img
+                  [src]="track.id === currentTrack.id && isPlaying ? 'assets/icons/pause.svg' : 'assets/icons/play-button.svg'"
+                  alt=""
+                  class="track-play-icon icon-white"
+                />
+              </button>
+
+              <button
+                type="button"
+                (click)="$event.stopPropagation()"
+                class="track-menu-btn"
+                aria-label="More options"
+              >
+                <img
+                  src="assets/icons/menu.svg"
+                  alt=""
+                  class="track-menu-icon icon-soft"
+                />
+              </button>
+            </div>
           </button>
         </div>
       </section>
