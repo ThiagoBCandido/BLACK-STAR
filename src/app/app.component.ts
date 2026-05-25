@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
+import { BottomNavComponent } from './components/bottom-nav/bottom-nav.component';
 import { FullPlayerComponent } from './components/full-player/full-player.component';
 import { HomeScreenComponent } from './components/home-screen/home-screen.component';
 import { MiniPlayerComponent } from './components/mini-player/mini-player.component';
@@ -11,7 +12,14 @@ import { SpotifyPlayerService } from './core/services/spotify-player.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, HomeScreenComponent, SearchScreenComponent, MiniPlayerComponent, FullPlayerComponent],
+  imports: [
+    CommonModule,
+    HomeScreenComponent,
+    SearchScreenComponent,
+    MiniPlayerComponent,
+    FullPlayerComponent,
+    BottomNavComponent,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
