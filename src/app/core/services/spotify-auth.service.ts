@@ -13,6 +13,11 @@ interface SpotifyUserProfile {
   id: string;
   display_name: string;
   email?: string;
+  country?: string;
+  product?: string;
+  external_urls?: {
+    spotify?: string;
+  };
   images?: Array<{
     url: string;
     height: number | null;

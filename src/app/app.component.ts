@@ -5,6 +5,7 @@ import { FullPlayerComponent } from './components/full-player/full-player.compon
 import { HomeScreenComponent } from './components/home-screen/home-screen.component';
 import { LibraryScreenComponent } from './components/library-screen/library-screen.component';
 import { MiniPlayerComponent } from './components/mini-player/mini-player.component';
+import { ProfileScreenComponent } from './components/profile-screen/profile-screen.component';
 import { SearchScreenComponent } from './components/search-screen/search-screen.component';
 import { PlayerStateService } from './core/services/player-state.service';
 import { SpotifyAuthService } from './core/services/spotify-auth.service';
@@ -18,6 +19,7 @@ import { SpotifyPlayerService } from './core/services/spotify-player.service';
     HomeScreenComponent,
     SearchScreenComponent,
     LibraryScreenComponent,
+    ProfileScreenComponent,
     MiniPlayerComponent,
     FullPlayerComponent,
     BottomNavComponent,

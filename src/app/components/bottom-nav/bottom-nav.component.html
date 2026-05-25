@@ -1,28 +1,73 @@
-<nav class="fixed bottom-0 left-1/2 z-40 grid h-16 w-full max-w-md -translate-x-1/2 grid-cols-4 border-t border-white/10 bg-black/95 backdrop-blur-xl">
-  <button type="button" (click)="player.setActiveScreen('home')" class="flex flex-col items-center justify-center gap-1 text-[10px] transition" [ngClass]="player.activeScreen() === 'home' ? 'text-white' : 'text-white/45'">
+<nav
+  class="fixed bottom-0 left-1/2 z-40 grid h-16 w-full max-w-md -translate-x-1/2 grid-cols-4 border-t border-white/10 bg-black/95 backdrop-blur-xl"
+>
+  <button
+    type="button"
+    (click)="player.setActiveScreen('home')"
+    class="flex flex-col items-center justify-center gap-1 text-[10px] transition"
+    [ngClass]="player.activeScreen() === 'home' ? 'text-white' : 'text-white/45'"
+  >
     <span class="flex h-5 w-5 items-center justify-center overflow-hidden">
-      <img src="assets/icons/blackstar_logo.svg" alt="Home" class="h-5 w-5 max-h-5 max-w-5 object-contain [filter:none]" [class.opacity-100]="player.activeScreen() === 'home'" [class.opacity-45]="player.activeScreen() !== 'home'"/>
+      <img
+        src="assets/icons/blackstar_logo.svg"
+        alt="Home"
+        class="h-5 w-5 max-h-5 max-w-5 object-contain [filter:none]"
+        [class.opacity-100]="player.activeScreen() === 'home'"
+        [class.opacity-45]="player.activeScreen() !== 'home'"
+      />
     </span>
-    <span>
-      Home
-    </span>
+
+    <span>Home</span>
   </button>
-  <button type="button" (click)="player.setActiveScreen('search')" class="flex flex-col items-center justify-center gap-1 text-[10px] transition" [ngClass]="player.activeScreen() === 'search' ? 'text-white' : 'text-white/45'">
-    <img src="assets/icons/search.svg" alt="Search" class="h-5 w-5 object-contain" [class.icon-active]="player.activeScreen() === 'search'" [class.icon-soft]="player.activeScreen() !== 'search'"/>
-    <span>
-      Search
-    </span>
+
+  <button
+    type="button"
+    (click)="player.setActiveScreen('search')"
+    class="flex flex-col items-center justify-center gap-1 text-[10px] transition"
+    [ngClass]="player.activeScreen() === 'search' ? 'text-white' : 'text-white/45'"
+  >
+    <img
+      src="assets/icons/search.svg"
+      alt="Search"
+      class="h-5 w-5 object-contain"
+      [class.icon-active]="player.activeScreen() === 'search'"
+      [class.icon-soft]="player.activeScreen() !== 'search'"
+    />
+
+    <span>Search</span>
   </button>
-  <button type="button" (click)="player.setActiveScreen('library')" class="flex flex-col items-center justify-center gap-1 text-[10px] transition" [ngClass]="player.activeScreen() === 'library' ? 'text-white' : 'text-white/45'">
-    <img src="assets/icons/library.svg" alt="Library" class="h-5 w-5 object-contain" [class.icon-active]="player.activeScreen() === 'library'" [class.icon-soft]="player.activeScreen() !== 'library'"/>
-    <span>
-      Library
-    </span>
+
+  <button
+    type="button"
+    (click)="player.setActiveScreen('library')"
+    class="flex flex-col items-center justify-center gap-1 text-[10px] transition"
+    [ngClass]="player.activeScreen() === 'library' ? 'text-white' : 'text-white/45'"
+  >
+    <img
+      src="assets/icons/library.svg"
+      alt="Library"
+      class="h-5 w-5 object-contain"
+      [class.icon-active]="player.activeScreen() === 'library'"
+      [class.icon-soft]="player.activeScreen() !== 'library'"
+    />
+
+    <span>Library</span>
   </button>
-  <button type="button" class="flex flex-col items-center justify-center gap-1 text-[10px] text-white/45 opacity-55">
-    <img src="assets/icons/icon-profile.svg" alt="Profile" class="icon-soft h-5 w-5 object-contain"/>
-    <span>
-      Profile
-    </span>
+
+  <button
+    type="button"
+    (click)="player.setActiveScreen('profile')"
+    class="flex flex-col items-center justify-center gap-1 text-[10px] transition"
+    [ngClass]="player.activeScreen() === 'profile' ? 'text-white' : 'text-white/45'"
+  >
+    <img
+      src="assets/icons/icon-profile.svg"
+      alt="Profile"
+      class="h-5 w-5 object-contain"
+      [class.icon-active]="player.activeScreen() === 'profile'"
+      [class.icon-soft]="player.activeScreen() !== 'profile'"
+    />
+
+    <span>Profile</span>
   </button>
 </nav>
