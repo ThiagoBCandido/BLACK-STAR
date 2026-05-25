@@ -26,13 +26,16 @@ export class PlayerStateService {
   private readonly spotifyApi = inject(SpotifyApiService);
   private readonly spotifyAuth = inject(SpotifyAuthService);
   private readonly spotifyPlayer = inject(SpotifyPlayerService);
-
+  readonly likedSongs = signal<Track[]>([]);
+  readonly isLikedSongsOpen = signal(false);
+  readonly isLoadingLikedSongs = signal(false);
   readonly tracks = signal<Track[]>(TRACKS);
   readonly playlists = signal(PLAYLISTS);
   readonly libraryPlaylists = signal<Playlist[]>([]);
+  readonly selectedPlaylist = signal<Playlist | null>(null);
+  readonly selectedPlaylistTracks = signal<Track[]>([]);
   readonly isLoadingLibrary = signal(false);
   readonly libraryError = signal<string | null>(null);
-
   readonly currentTrack = signal<Track>(TRACKS[2]);
   readonly isPlaying = signal(false);
   readonly isPlayerOpen = signal(false);
@@ -160,12 +163,46 @@ export class PlayerStateService {
     }
   }
 
-  selectPlaylist(playlist: Playlist): void {
-    this.libraryError.set(
-      'Playlist track loading is temporarily disabled. Use Search to play tracks for now.'
-    );
+  async openLikedSongs(): Promise<void> {
+    this.isLikedSongsOpen.set(true);
+    this.selectedPlaylist.set(null);
+    this.libraryError.set(null);
 
-    console.warn('Playlist selected:', playlist);
+    if (this.likedSongs().length) {
+      return;
+    }
+
+    await this.loadLikedSongs();
+  }
+
+  async loadLikedSongs(): Promise<void> {
+    this.isLoadingLikedSongs.set(true);
+    this.libraryError.set(null);
+
+    try {
+      const tracks = await this.spotifyApi.getSavedTracks();
+
+      this.likedSongs.set(tracks);
+
+      if (!tracks.length) {
+        this.libraryError.set('No liked songs found in your Spotify library.');
+      }
+    } catch (error) {
+      console.error('Could not load liked songs:', error);
+      this.libraryError.set('Could not load your liked songs. Try reconnecting Spotify.');
+    } finally {
+      this.isLoadingLikedSongs.set(false);
+    }
+  }
+
+  closeLikedSongs(): void {
+    this.isLikedSongsOpen.set(false);
+  }
+
+  showPlaylistUnavailable(): void {
+    this.libraryError.set(
+      'Playlist track loading is temporarily disabled. Use Liked Songs or Search to play tracks for now.'
+    );
   }
 
   updateSearchQuery(query: string): void {
