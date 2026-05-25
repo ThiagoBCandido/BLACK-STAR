@@ -11,7 +11,11 @@ export interface Track {
 }
 
 export interface Playlist {
+  id: string;
   title: string;
   description: string;
   image: string;
+  owner?: string;
+  totalTracks?: number;
+  isAccessible?: boolean;
 }

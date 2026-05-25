@@ -1,7 +1,8 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { PLAYLISTS, TRACKS } from '../data/mock-music.data';
-import { Track } from '../models/music.model';
+import { Playlist, Track } from '../models/music.model';
 import { SpotifyApiService } from './spotify-api.service';
+import { SpotifyAuthService } from './spotify-auth.service';
 import { SpotifyPlayerService } from './spotify-player.service';
 
 interface PlaybackTrack {
@@ -23,10 +24,14 @@ type AppScreen = 'home' | 'search' | 'library' | 'profile';
 })
 export class PlayerStateService {
   private readonly spotifyApi = inject(SpotifyApiService);
+  private readonly spotifyAuth = inject(SpotifyAuthService);
   private readonly spotifyPlayer = inject(SpotifyPlayerService);
 
   readonly tracks = signal<Track[]>(TRACKS);
   readonly playlists = signal(PLAYLISTS);
+  readonly libraryPlaylists = signal<Playlist[]>([]);
+  readonly isLoadingLibrary = signal(false);
+  readonly libraryError = signal<string | null>(null);
 
   readonly currentTrack = signal<Track>(TRACKS[2]);
   readonly isPlaying = signal(false);
@@ -128,6 +133,39 @@ export class PlayerStateService {
 
   setActiveScreen(screen: AppScreen): void {
     this.activeScreen.set(screen);
+
+    if (screen === 'library' && !this.libraryPlaylists().length) {
+      void this.loadLibraryPlaylists();
+    }
+  }
+
+  async loadLibraryPlaylists(): Promise<void> {
+    this.isLoadingLibrary.set(true);
+    this.libraryError.set(null);
+
+    try {
+      const currentUserId = this.spotifyAuth.profile()?.id;
+      const playlists = await this.spotifyApi.getUserPlaylists(currentUserId);
+
+      this.libraryPlaylists.set(playlists);
+
+      if (!playlists.length) {
+        this.libraryError.set('No Spotify playlists found.');
+      }
+    } catch (error) {
+      console.error('Could not load Spotify playlists:', error);
+      this.libraryError.set('Could not load your Spotify playlists.');
+    } finally {
+      this.isLoadingLibrary.set(false);
+    }
+  }
+
+  selectPlaylist(playlist: Playlist): void {
+    this.libraryError.set(
+      'Playlist track loading is temporarily disabled. Use Search to play tracks for now.'
+    );
+
+    console.warn('Playlist selected:', playlist);
   }
 
   updateSearchQuery(query: string): void {

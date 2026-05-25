@@ -73,6 +73,7 @@ export class SpotifyAuthService {
       code_challenge_method: 'S256',
       code_challenge: codeChallenge,
       state,
+      show_dialog: 'true',
     }).toString();
 
     window.location.href = authUrl.toString();

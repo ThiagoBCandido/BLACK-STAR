@@ -1,142 +1,141 @@
 <section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black">
   <header class="border-b border-white/10 px-5 pb-4 pt-5">
     <div class="mb-7 flex items-center justify-between">
-      <img src="assets/icons/blackstar_logo.svg" alt="Black Star" class="main-logo main-logo-glow" />
-
+      <img src="assets/icons/blackstar_logo.svg" alt="Black Star" class="main-logo main-logo-glow"/>
       <h1 class="text-[22px] font-light tracking-[0.48em] text-white/90">
         BLACK STAR
       </h1>
-
       <button type="button" (click)="spotifyAuth.isAuthenticated() ? spotifyAuth.logout() : spotifyAuth.login()" class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] font-light text-white/70 transition hover:bg-white/[0.08]">
         {{ spotifyAuth.isAuthenticated() ? 'Connected' : 'Spotify' }}
       </button>
     </div>
-
     <nav class="flex items-center justify-between text-sm">
       <button class="relative pb-3 text-white">
         Discover
-        <span class="absolute bottom-0 left-0 h-px w-full bg-white"></span>
+        <span class="absolute bottom-0 left-0 h-px w-full bg-white">
+        </span>
       </button>
-
-      <button class="pb-3 text-white/40">For You</button>
-      <button class="pb-3 text-white/40">Genres</button>
-      <button class="pb-3 text-white/40">New Releases</button>
+      <button class="pb-3 text-white/40">
+        For You
+      </button>
+      <button class="pb-3 text-white/40">
+        Genres
+      </button>
+      <button class="pb-3 text-white/40">
+        New Releases
+      </button>
     </nav>
   </header>
-
   <section class="flex-1 overflow-y-auto pb-36">
     <section class="px-5 py-5">
       <div class="relative h-[185px] overflow-hidden rounded-xl border border-white/10 bg-zinc-950" [style.backgroundImage]="'linear-gradient(90deg, rgba(0,0,0,.88) 0%, rgba(0,0,0,.55) 42%, rgba(0,0,0,.1) 100%), url(' + player.currentTrack().cover + ')'">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
+        </div>
         <div class="relative z-10 flex h-full flex-col justify-end p-5">
           <p class="mb-3 text-[10px] uppercase tracking-[0.35em] text-white/35">
             Featured
           </p>
-
           <h2 class="mb-2 text-2xl font-light text-white">
             Night Signals
           </h2>
-
           <p class="mb-5 max-w-[190px] text-sm leading-5 text-white/65">
             A dark pop journey through the afterhours.
           </p>
-
           <button type="button" (click)="player.selectTrackAndOpenPlayer(player.currentTrack())" class="flex w-fit items-center gap-2 rounded-full border border-white/20 bg-black/30 px-4 py-2 text-sm text-white/90 backdrop-blur-md transition hover:bg-white/10">
-            <img src="assets/icons/play-button.svg" alt="Play" class="icon-white h-3.5 w-3.5 object-contain" />
-
+            <img src="assets/icons/play-button.svg" alt="Play" class="icon-white h-3.5 w-3.5 object-contain"/>
             Play Now
           </button>
         </div>
       </div>
-
       <div class="mt-4 flex justify-center gap-3">
-        <span class="h-1.5 w-1.5 rounded-full bg-white"></span>
-        <span class="h-1.5 w-1.5 rounded-full bg-white/35"></span>
-        <span class="h-1.5 w-1.5 rounded-full bg-white/35"></span>
-        <span class="h-1.5 w-1.5 rounded-full bg-white/35"></span>
-        <span class="h-1.5 w-1.5 rounded-full bg-white/35"></span>
+        <span class="h-1.5 w-1.5 rounded-full bg-white">
+        </span>
+        <span class="h-1.5 w-1.5 rounded-full bg-white/35">
+        </span>
+        <span class="h-1.5 w-1.5 rounded-full bg-white/35">
+        </span>
+        <span class="h-1.5 w-1.5 rounded-full bg-white/35">
+        </span>
+        <span class="h-1.5 w-1.5 rounded-full bg-white/35">
+        </span>
       </div>
     </section>
-
     <section class="px-5 pb-6">
       <div class="mb-3 flex items-center justify-between">
-        <h3 class="text-base font-light text-white/90">New Releases</h3>
-        <button class="text-xs text-white/45">View all</button>
+        <h3 class="text-base font-light text-white/90">
+          New Releases
+        </h3>
+        <button class="text-xs text-white/45">
+          View all
+        </button>
       </div>
-
       <div class="scrollbar-hide flex gap-3 overflow-x-auto pb-2">
         <button type="button" *ngFor="let track of player.tracks()" (click)="player.selectTrack(track)" class="w-[132px] shrink-0 text-left">
           <div class="mb-2 h-[132px] w-[132px] overflow-hidden rounded-md border border-white/10 bg-zinc-950">
-            <img [src]="track.cover" [alt]="track.album" class="h-full w-full object-cover grayscale" />
+            <img [src]="track.cover" [alt]="track.album" class="h-full w-full object-cover grayscale"/>
           </div>
-
           <h4 class="truncate text-sm font-light text-white/90">
             {{ track.album }}
           </h4>
-
           <p class="truncate text-xs text-white/45">
             {{ track.artist }}
           </p>
         </button>
       </div>
     </section>
-
     <section class="px-5 pb-6">
       <div class="mb-3 flex items-center justify-between">
-        <h3 class="text-base font-light text-white/90">Curated Playlists</h3>
-        <button class="text-xs text-white/45">View all</button>
+        <h3 class="text-base font-light text-white/90">
+          Curated Playlists
+        </h3>
+        <button class="text-xs text-white/45">
+          View all
+        </button>
       </div>
-
       <div class="grid grid-cols-2 gap-3">
         <button type="button" *ngFor="let playlist of player.playlists()" class="flex min-h-[96px] items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-3 text-left transition hover:bg-white/[0.06]">
           <div class="flex-1">
             <h4 class="mb-1 text-sm font-light text-white">
               {{ playlist.title }}
             </h4>
-
             <p class="line-clamp-2 text-xs leading-4 text-white/45">
               {{ playlist.description }}
             </p>
           </div>
-
-          <img [src]="playlist.image" [alt]="playlist.title" class="h-14 w-14 rounded object-cover grayscale" />
+          <img [src]="playlist.image" [alt]="playlist.title" class="h-14 w-14 rounded object-cover grayscale"/>
         </button>
       </div>
     </section>
-
     <section class="px-5 pb-6">
       <div class="mb-3 flex items-center justify-between">
-        <h3 class="text-base font-light text-white/90">Recently Played</h3>
-        <button class="text-xs text-white/45">View all</button>
+        <h3 class="text-base font-light text-white/90">
+          Recently Played
+        </h3>
+        <button class="text-xs text-white/45">
+          View all
+        </button>
       </div>
-
       <div class="divide-y divide-white/5 border-y border-white/5">
         <button type="button" *ngFor="let track of player.tracks()" (click)="player.selectTrack(track)" class="flex w-full items-center gap-3 py-2.5 text-left transition hover:bg-white/[0.03]" [class.bg-white]="track.id === player.currentTrack().id" [class.bg-opacity-5]="track.id === player.currentTrack().id">
-          <img [src]="track.cover" [alt]="track.title" class="h-11 w-11 rounded object-cover grayscale" />
-
+          <img [src]="track.cover" [alt]="track.title" class="h-11 w-11 rounded object-cover grayscale"/>
           <div class="min-w-0 flex-1">
             <h4 class="truncate text-sm font-light text-white/90">
               {{ track.title }}
             </h4>
-
             <p class="truncate text-xs text-white/45">
               {{ track.artist }}
             </p>
           </div>
-
           <div class="flex items-center gap-2">
             <button type="button" (click)="player.toggleTrackPlayback(track, $event)" class="track-play-btn" [class.is-current]="track.id === player.currentTrack().id" aria-label="Play or pause track">
-              <img [src]="track.id === player.currentTrack().id && player.isPlaying() ? 'assets/icons/pause.svg' : 'assets/icons/play-button.svg'" alt="" class="track-play-icon icon-white" />
+              <img [src]="track.id === player.currentTrack().id && player.isPlaying() ? 'assets/icons/pause.svg' : 'assets/icons/play-button.svg'" alt="" class="track-play-icon icon-white"/>
             </button>
-
             <button type="button" (click)="$event.stopPropagation()" class="track-menu-btn" aria-label="More options">
-              <img src="assets/icons/dots.svg" alt="" class="track-menu-icon icon-soft" />
+              <img src="assets/icons/dots.svg" alt="" class="track-menu-icon icon-soft"/>
             </button>
           </div>
         </button>
       </div>
     </section>
   </section>
-  
 </section>

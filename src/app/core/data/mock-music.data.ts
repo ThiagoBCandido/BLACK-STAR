@@ -37,13 +37,19 @@ export const TRACKS: Track[] = [
 
 export const PLAYLISTS: Playlist[] = [
   {
+    id: 'mock-playlist-1',
     title: 'Night Drive',
     description: 'Dark, atmospheric tracks for late nights.',
     image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=300&q=80',
+    owner: 'BLACK STAR',
+    totalTracks: 12,
   },
   {
+    id: 'mock-playlist-2',
     title: 'Black Star Essentials',
     description: 'Our favorite underground picks.',
     image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=300&q=80',
+    owner: 'BLACK STAR',
+    totalTracks: 24,
   },
 ];
