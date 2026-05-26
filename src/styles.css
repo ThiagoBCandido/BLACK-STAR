@@ -42,7 +42,3 @@ button {
   filter: none;
   opacity: 1;
 }
-
-.main-logo-glow {
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.18));
-}
