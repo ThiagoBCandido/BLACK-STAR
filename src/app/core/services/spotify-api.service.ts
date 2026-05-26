@@ -73,6 +73,31 @@ interface UserPlaylistsResponse {
   items: SpotifyPlaylist[];
 }
 
+interface SpotifyPlaybackDevice {
+  id: string | null;
+  name: string;
+  type: string;
+  is_active: boolean;
+}
+
+interface CurrentPlaybackResponse {
+  device?: SpotifyPlaybackDevice;
+  is_playing: boolean;
+  progress_ms: number | null;
+  item: SpotifyTrack | null;
+}
+
+export interface CurrentPlaybackSnapshot {
+  isPlaying: boolean;
+  progressMs: number;
+  durationMs: number;
+  track: Track | null;
+  deviceId: string | null;
+  deviceName: string | null;
+  deviceType: string | null;
+  isActiveDevice: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -109,6 +134,38 @@ export class SpotifyApiService {
     return response.items.map((item) => item.track).filter((track): track is SpotifyTrack => {
       return Boolean(track && track.id && track.uri && track.type === 'track' && !track.is_local);
     }).map((track) => this.mapSpotifyTrack(track));
+  }
+
+  async getCurrentPlayback(): Promise<CurrentPlaybackSnapshot | null> {
+    const response = await this.request<CurrentPlaybackResponse>(
+      '/me/player?additional_types=track'
+    );
+
+    if (!response) {
+      return null;
+    }
+
+    const item = response.item;
+    const isPlayableTrack = Boolean(
+      item &&
+      item.id &&
+      item.uri &&
+      item.type === 'track' &&
+      !item.is_local
+    );
+
+    const track = isPlayableTrack && item ? this.mapSpotifyTrack(item) : null;
+
+    return {
+      isPlaying: response.is_playing,
+      progressMs: response.progress_ms ?? 0,
+      durationMs: track?.durationMs ?? 0,
+      track,
+      deviceId: response.device?.id ?? null,
+      deviceName: response.device?.name ?? null,
+      deviceType: response.device?.type ?? null,
+      isActiveDevice: response.device?.is_active ?? false,
+    };
   }
 
   async searchTracks(query: string): Promise<Track[]> {
@@ -162,6 +219,10 @@ export class SpotifyApiService {
       },
     });
 
+    if (response.status === 204) {
+      return null;
+    }
+
     if (!response.ok) {
       const errorBody = await response.text();
 
@@ -171,6 +232,10 @@ export class SpotifyApiService {
         url,
         body: errorBody,
       });
+
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('Spotify access denied. Reconnect your Spotify account.');
+      }
 
       return null;
     }

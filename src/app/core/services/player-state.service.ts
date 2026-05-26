@@ -50,6 +50,10 @@ export class PlayerStateService {
   readonly selectedOptionsTrack = signal<Track | null>(null);
   readonly trackOptionsMessage = signal<string | null>(null);
   readonly isTrackOptionsOpen = computed(() => Boolean(this.selectedOptionsTrack()));
+  readonly activeSpotifyDeviceName = signal<string | null>(null);
+  readonly activeSpotifyDeviceType = signal<string | null>(null);
+  readonly isExternalPlaybackActive = signal(false);
+  readonly isPlaybackSyncEnabled = signal(false);
   readonly positionMs = computed(() => this.spotifyPlayer.positionMs());
   readonly durationMs = computed(() => {
     const spotifyDuration = this.spotifyPlayer.durationMs();
@@ -80,6 +84,8 @@ export class PlayerStateService {
 
   private closeTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private searchRequestId = 0;
+  private playbackSyncIntervalId: ReturnType<typeof setInterval> | null = null;
+  private isSyncingCurrentPlayback = false;
 
   constructor() {
     effect(
@@ -134,6 +140,88 @@ export class PlayerStateService {
       console.error('Could not load Spotify tracks:', error);
     } finally {
       this.isLoadingSpotifyTracks.set(false);
+    }
+  }
+
+  startPlaybackSync(): void {
+    if (this.playbackSyncIntervalId) {
+      return;
+    }
+
+    this.isPlaybackSyncEnabled.set(true);
+
+    void this.syncCurrentPlayback();
+
+    this.playbackSyncIntervalId = setInterval(() => {
+      void this.syncCurrentPlayback();
+    }, 3000);
+  }
+
+  stopPlaybackSync(): void {
+    if (this.playbackSyncIntervalId) {
+      clearInterval(this.playbackSyncIntervalId);
+      this.playbackSyncIntervalId = null;
+    }
+
+    this.isPlaybackSyncEnabled.set(false);
+    this.activeSpotifyDeviceName.set(null);
+    this.activeSpotifyDeviceType.set(null);
+    this.isExternalPlaybackActive.set(false);
+  }
+
+  async syncCurrentPlayback(): Promise<void> {
+    if (this.isSyncingCurrentPlayback) {
+      return;
+    }
+
+    this.isSyncingCurrentPlayback = true;
+
+    try {
+      const playback = await this.spotifyApi.getCurrentPlayback();
+
+      if (!playback) {
+        this.isPlaying.set(false);
+        this.activeSpotifyDeviceName.set(null);
+        this.activeSpotifyDeviceType.set(null);
+        this.isExternalPlaybackActive.set(false);
+
+        this.spotifyPlayer.applyExternalPlaybackState({
+          isPlaying: false,
+          positionMs: 0,
+          durationMs: this.durationMs(),
+          trackUri: this.currentTrack().spotifyUri ?? null,
+        });
+
+        return;
+      }
+
+      this.activeSpotifyDeviceName.set(playback.deviceName);
+      this.activeSpotifyDeviceType.set(playback.deviceType);
+
+      const blackStarDeviceId = this.spotifyPlayer.deviceId();
+      const isExternalDevice = Boolean(
+        playback.deviceId &&
+        blackStarDeviceId &&
+        playback.deviceId !== blackStarDeviceId
+      );
+
+      this.isExternalPlaybackActive.set(isExternalDevice);
+      this.isPlaying.set(playback.isPlaying);
+
+      if (playback.track) {
+        this.syncCurrentTrackFromSpotify(playback.track);
+      }
+
+      this.spotifyPlayer.applyExternalPlaybackState({
+        isPlaying: playback.isPlaying,
+        positionMs: playback.progressMs,
+        durationMs: playback.durationMs,
+        trackUri: playback.track?.spotifyUri ?? null,
+      });
+    } catch (error) {
+      console.error('Could not sync Spotify playback:', error);
+    } finally {
+      this.isSyncingCurrentPlayback = false;
     }
   }
 
@@ -466,6 +554,24 @@ export class PlayerStateService {
     } catch (error) {
       this.isPlaying.set(false);
       console.error('Could not play Spotify track:', error);
+    }
+  }
+
+  private syncCurrentTrackFromSpotify(track: Track): void {
+    const existsInTracks = this.tracks().some((item) => item.id === track.id);
+
+    if (!existsInTracks) {
+      this.tracks.update((tracks) => [track, ...tracks]);
+    }
+
+    const existsInLikedSongs = this.likedSongs().some((item) => item.id === track.id);
+
+    if (this.likedSongs().length && !existsInLikedSongs) {
+      this.likedSongs.update((tracks) => [track, ...tracks]);
+    }
+
+    if (this.currentTrack().id !== track.id) {
+      this.currentTrack.set(track);
     }
   }
 

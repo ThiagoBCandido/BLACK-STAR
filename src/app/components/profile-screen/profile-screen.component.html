@@ -104,6 +104,18 @@
               {{ player.volumePercent() }}%
             </span>
           </div>
+          <div class="flex items-center justify-between gap-4 border-b border-white/5 pb-3">
+            <span class="text-sm text-white/45">Device</span>
+            <span class="max-w-[180px] truncate text-sm text-white">
+              {{ player.activeSpotifyDeviceName() || 'Not connected' }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between gap-4">
+            <span class="text-sm text-white/45">Source</span>
+            <span class="max-w-[180px] truncate text-sm text-white">
+              {{ player.isExternalPlaybackActive() ? 'External Spotify device' : 'BLACK STAR Player' }}
+            </span>
+          </div>
         </div>
       </section>
     </ng-container>

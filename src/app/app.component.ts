@@ -41,6 +41,7 @@ export class AppComponent implements OnInit {
     if (this.spotifyAuth.isAuthenticated()) {
       await this.player.loadSpotifyTracks();
       await this.spotifyPlayer.initialize();
+      this.player.startPlaybackSync();
     }
   }
 }

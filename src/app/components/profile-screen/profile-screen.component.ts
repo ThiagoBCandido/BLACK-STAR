@@ -21,7 +21,8 @@ export class ProfileScreenComponent {
   }
   
   disconnectSpotify(): void {
-    this.spotifyAuth.logout();
+    this.player.stopPlaybackSync();
     this.spotifyPlayer.disconnect();
+    this.spotifyAuth.logout();
   }
 }

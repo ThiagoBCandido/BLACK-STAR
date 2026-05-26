@@ -266,6 +266,25 @@ export class SpotifyPlayerService {
     }
   }
 
+  applyExternalPlaybackState(data: {
+    isPlaying: boolean;
+    positionMs: number;
+    durationMs: number;
+    trackUri?: string | null;
+  }): void {
+    this.isPaused.set(!data.isPlaying);
+    this.positionMs.set(data.positionMs);
+    this.durationMs.set(data.durationMs);
+    this.currentTrackUri.set(data.trackUri ?? null);
+
+    if (data.isPlaying) {
+      this.startProgressTimer();
+      return;
+    }
+
+    this.clearProgressTimer();
+  }
+
   disconnect(): void {
     this.clearProgressTimer();
 
