@@ -1,7 +1,7 @@
 <nav class="fixed bottom-0 left-1/2 z-40 grid h-16 w-full max-w-md -translate-x-1/2 grid-cols-4 border-t border-white/10 bg-black/95 backdrop-blur-xl">
   <button type="button" (click)="player.setActiveScreen('home')" class="flex flex-col items-center justify-center gap-1 text-[10px] transition" [ngClass]="player.activeScreen() === 'home' ? 'text-white' : 'text-white/45'">
     <span class="flex h-5 w-5 items-center justify-center overflow-hidden">
-      <img src="assets/icons/blackstar_logo.svg" alt="Home" class="h-5 w-5 max-h-5 max-w-5 object-contain [filter:none]" [class.opacity-100]="player.activeScreen() === 'home'" [class.opacity-45]="player.activeScreen() !== 'home'"/>
+      <img src="assets/icons/blackstarpng.png" alt="Home" class="h-6 w-6 max-h-6 max-w-6 object-contain [filter:none]" [class.opacity-100]="player.activeScreen() === 'home'" [class.opacity-45]="player.activeScreen() !== 'home'"/>
     </span>
     <span>Home</span>
   </button>

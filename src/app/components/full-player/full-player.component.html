@@ -26,21 +26,26 @@
           </div>
         </div>
         <div class="turntable-button button-one">
+          <img
+            src="assets/icons/blackstarpng.png"
+            alt="Black Star"
+            class="turntable-logo-mark"
+          />
         </div>
         <div class="turntable-button button-two">
         </div>
       </div>
       <section class="px-2 pt-8">
-        <div class="mb-6 flex items-start justify-between gap-4">
-          <div>
-            <h2 class="text-[28px] font-light leading-tight text-white">
+        <div class="mb-6 flex min-w-0 items-start justify-between gap-4">
+          <div class="min-w-0 flex-1">
+            <h2 class="truncate text-[28px] font-light leading-tight text-white">
               {{ player.currentTrack().title }}
             </h2>
-            <p class="mt-1 text-base text-white/55">
+            <p class="mt-1 truncate text-base text-white/55">
               {{ player.currentTrack().artist }}
             </p>
           </div>
-          <div class="flex gap-3 pt-2">
+          <div class="flex shrink-0 gap-3 pt-2">
             <button type="button" (click)="player.toggleLike()" class="flex h-10 w-10 items-center justify-center">
               <img [src]="player.isLiked() ? 'assets/icons/star_filled.svg' : 'assets/icons/star.svg'" alt="" class="icon-active h-7 w-7 object-contain"/>
             </button>

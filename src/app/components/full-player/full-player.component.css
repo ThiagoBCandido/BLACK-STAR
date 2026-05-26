@@ -24,6 +24,7 @@
   height: 96dvh;
   max-height: 96dvh;
   overflow: hidden;
+  overflow-x: hidden;
   border-radius: 28px 28px 0 0;
   background: #000000;
   color: #ffffff;
@@ -40,8 +41,14 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
+  scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+}
+
+.player-content::-webkit-scrollbar {
+  display: none;
 }
 
 .turntable {
@@ -49,13 +56,21 @@
   width: min(100%, 390px);
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 18px;
   background:
-    radial-gradient(circle at 18% 16%, rgba(255, 255, 255, 0.05), transparent 8%),
-    linear-gradient(145deg, #171717 0%, #070707 48%, #111111 100%);
+    radial-gradient(circle at 9% 9%, rgba(255, 255, 255, 0.16) 0 1.8%, rgba(255, 255, 255, 0.04) 2.2%, transparent 4%),
+    radial-gradient(circle at 16% 18%, rgba(255, 255, 255, 0.08), transparent 12%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 5px),
+    linear-gradient(145deg, #1a1a1a 0%, #070707 42%, #111111 100%);
+  background-size:
+    auto,
+    auto,
+    5px 5px,
+    auto;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 0 8px rgba(255, 255, 255, 0.015),
     inset 0 -40px 90px rgba(0, 0, 0, 0.75),
     0 30px 80px rgba(0, 0, 0, 0.75);
 }
@@ -64,11 +79,32 @@
   content: '';
   position: absolute;
   inset: 0;
-  opacity: 0.18;
+  z-index: 0;
+  opacity: 0.2;
   background-image:
-    linear-gradient(90deg, transparent 0 49%, rgba(255, 255, 255, 0.06) 50%, transparent 51%),
-    linear-gradient(0deg, transparent 0 49%, rgba(255, 255, 255, 0.04) 50%, transparent 51%);
-  background-size: 6px 6px;
+    radial-gradient(circle at 50% 50%, transparent 0 38%, rgba(255, 255, 255, 0.16) 38.5%, transparent 39.5%),
+    repeating-radial-gradient(circle at 50% 50%, transparent 0 4px, rgba(255, 255, 255, 0.018) 5px, transparent 6px);
+  background-position: -29px -13px, -29px -13px;
+  background-size: 330px 330px, 330px 330px;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.turntable::after {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 29px;
+  z-index: 2;
+  width: 302px;
+  height: 302px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.02),
+    0 0 0 7px rgba(0, 0, 0, 0.75),
+    0 0 0 10px rgba(255, 255, 255, 0.045),
+    inset 0 0 22px rgba(255, 255, 255, 0.08);
   pointer-events: none;
 }
 
@@ -78,16 +114,15 @@
   position: absolute;
   left: 17px;
   top: 27px;
+  z-index: 1;
   width: 300px;
   height: 300px;
   border-radius: 999px;
   background:
-    radial-gradient(circle at 42% 34%, rgba(255, 255, 255, 0.18), transparent 8%),
     radial-gradient(circle at 50% 50%, transparent 0 17%, rgba(255, 255, 255, 0.18) 17.3% 17.8%, transparent 18.2%),
-    repeating-radial-gradient(circle, #050505 0 4px, #111111 4px 6px, #030303 6px 8px);
+    repeating-radial-gradient(circle, #030303 0 2px, #111111 2.5px 3.5px, #050505 4px 5px);
   box-shadow:
-    inset 0 0 30px rgba(255, 255, 255, 0.08),
-    inset 0 0 80px rgba(0, 0, 0, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
     0 18px 50px rgba(0, 0, 0, 0.85);
 }
 
@@ -97,6 +132,8 @@
   inset: 10px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.06);
+  background:
+    conic-gradient(from 0deg, transparent 0 18%, rgba(255, 255, 255, 0.055) 23%, transparent 29% 54%, rgba(255, 255, 255, 0.035) 60%, transparent 68% 100%);
   box-shadow:
     0 0 0 7px rgba(255, 255, 255, 0.015),
     0 0 0 13px rgba(255, 255, 255, 0.02),
@@ -107,10 +144,13 @@
     0 0 0 53px rgba(255, 255, 255, 0.014),
     0 0 0 64px rgba(255, 255, 255, 0.012),
     0 0 0 77px rgba(255, 255, 255, 0.014);
+  animation: spin-record-grooves 5s linear infinite;
+  animation-play-state: paused;
+  pointer-events: none;
 }
 
-.record.is-playing {
-  animation: spin-record 5s linear infinite;
+.record.is-playing::before {
+  animation-play-state: running;
 }
 
 .record-label {
@@ -120,15 +160,22 @@
   width: 96px;
   height: 96px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 999px;
   background-image: var(--cover-image);
   background-position: center;
   background-size: cover;
   box-shadow:
+    inset 0 0 24px rgba(0, 0, 0, 0.38),
     0 0 0 8px rgba(255, 255, 255, 0.03),
     0 12px 35px rgba(0, 0, 0, 0.75);
   transform: translate(-50%, -50%);
+  animation: spin-record-label 5s linear infinite;
+  animation-play-state: paused;
+}
+
+.record.is-playing .record-label {
+  animation-play-state: running;
 }
 
 .record-hole {
@@ -147,14 +194,16 @@
   position: absolute;
   right: 33px;
   top: 30px;
+  z-index: 4;
   width: 120px;
   height: 230px;
   transform-origin: 100px 38px;
-  transition: transform 700ms ease;
+  transform: rotate(12deg);
+  transition: transform 260ms ease;
 }
 
 .tonearm.is-playing {
-  transform: rotate(18deg);
+  transform: rotate(16deg);
 }
 
 .tonearm-base {
@@ -163,61 +212,141 @@
   top: 0;
   width: 64px;
   height: 64px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 999px;
   background:
-    radial-gradient(circle, #090909 0 32%, #1c1c1c 33% 55%, #050505 56% 100%);
+    radial-gradient(circle at 50% 50%, #d8d8d8 0 5%, #747474 6% 9%, #090909 10% 29%, #222222 30% 51%, #050505 52% 100%);
   box-shadow:
     inset 0 0 15px rgba(255, 255, 255, 0.08),
     0 15px 30px rgba(0, 0, 0, 0.8);
+}
+
+.tonearm-base::before {
+  content: '';
+  position: absolute;
+  inset: 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 0 12px rgba(0, 0, 0, 0.9),
+    0 0 0 8px rgba(0, 0, 0, 0.35);
+}
+
+.tonearm-base::after {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 30px;
+  width: 42px;
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  transform: rotate(28deg);
 }
 
 .tonearm-line {
   position: absolute;
   right: 31px;
   top: 36px;
-  width: 12px;
+  width: 11px;
   height: 178px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #707070, #e1e1e1 45%, #5d5d5d);
+  background: linear-gradient(90deg, #3f3f3f 0%, #f0f0f0 28%, #8d8d8d 49%, #ffffff 61%, #4c4c4c 100%);
   box-shadow:
     inset 0 0 5px rgba(0, 0, 0, 0.8),
-    0 0 10px rgba(255, 255, 255, 0.12);
+    0 0 12px rgba(255, 255, 255, 0.16),
+    8px 10px 18px rgba(0, 0, 0, 0.75);
   transform: rotate(22deg);
   transform-origin: top center;
+}
+
+.tonearm-line::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 14px;
+  width: 3px;
+  height: 148px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
 }
 
 .tonearm-head {
   position: absolute;
   right: 65px;
   bottom: 18px;
-  width: 46px;
-  height: 25px;
-  border-radius: 4px;
-  background: linear-gradient(145deg, #252525, #050505);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  width: 50px;
+  height: 29px;
+  border-radius: 5px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent 28%),
+    linear-gradient(145deg, #303030, #050505);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   transform: rotate(22deg);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
+}
+
+.tonearm-head::before,
+.tonearm-head::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.38);
+  box-shadow: 0 10px 0 rgba(255, 255, 255, 0.18);
+}
+
+.tonearm-head::before {
+  left: 11px;
+}
+
+.tonearm-head::after {
+  right: 11px;
 }
 
 .turntable-button {
   position: absolute;
   right: 18px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: radial-gradient(circle, #1a1a1a, #050505);
+}
+
+.turntable-logo-mark {
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+  opacity: 1;
+  transform: scale(1.18);
+  pointer-events: none;
 }
 
 .button-one {
   bottom: 87px;
   width: 48px;
   height: 48px;
+  background: #070707;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 0 14px rgba(255, 255, 255, 0.08),
+    0 10px 25px rgba(0, 0, 0, 0.55);
 }
 
 .button-two {
   bottom: 32px;
   width: 42px;
   height: 42px;
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 255, 255, 0.03),
+    inset 0 0 16px rgba(255, 255, 255, 0.08),
+    0 9px 24px rgba(0, 0, 0, 0.65);
 }
 
 .main-controls {
@@ -315,7 +444,17 @@
   }
 }
 
-@keyframes spin-record {
+@keyframes spin-record-label {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes spin-record-grooves {
   from {
     transform: rotate(0deg);
   }

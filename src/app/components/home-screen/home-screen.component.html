@@ -1,4 +1,4 @@
-<section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black">
+<section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
   <header class="border-b border-white/10 px-5 pb-4 pt-5">
     <div class="mb-7 flex items-center justify-between">
       <img src="assets/icons/blackstar_logo.svg" alt="Black Star" class="main-logo"/>
@@ -26,38 +26,71 @@
       </button>
     </nav>
   </header>
-  <section class="flex-1 overflow-y-auto pb-36">
-    <section class="px-5 py-5">
-      <div class="relative h-[185px] overflow-hidden rounded-xl border border-white/10 bg-zinc-950" [style.backgroundImage]="'linear-gradient(90deg, rgba(0,0,0,.88) 0%, rgba(0,0,0,.55) 42%, rgba(0,0,0,.1) 100%), url(' + player.currentTrack().cover + ')'">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
-        </div>
-        <div class="relative z-10 flex h-full flex-col justify-end p-5">
-          <p class="mb-3 text-[10px] uppercase tracking-[0.35em] text-white/35">
-            Featured
-          </p>
-          <h2 class="mb-2 text-2xl font-light text-white">
-            Night Signals
-          </h2>
-          <p class="mb-5 max-w-[190px] text-sm leading-5 text-white/65">
-            A dark pop journey through the afterhours.
-          </p>
-          <button type="button" (click)="player.selectTrackAndOpenPlayer(player.currentTrack())" class="flex w-fit items-center gap-2 rounded-full border border-white/20 bg-black/30 px-4 py-2 text-sm text-white/90 backdrop-blur-md transition hover:bg-white/10">
-            <img src="assets/icons/play-button.svg" alt="Play" class="icon-white h-3.5 w-3.5 object-contain"/>
-            Play Now
-          </button>
-        </div>
+  <section class="flex-1 overflow-y-auto">
+    <section class="px-5 pt-4">
+      <div class="mb-3 flex items-center justify-between">
+        <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+          Featured Release
+        </p>
       </div>
-      <div class="mt-4 flex justify-center gap-3">
-        <span class="h-1.5 w-1.5 rounded-full bg-white">
-        </span>
-        <span class="h-1.5 w-1.5 rounded-full bg-white/35">
-        </span>
-        <span class="h-1.5 w-1.5 rounded-full bg-white/35">
-        </span>
-        <span class="h-1.5 w-1.5 rounded-full bg-white/35">
-        </span>
-        <span class="h-1.5 w-1.5 rounded-full bg-white/35">
-        </span>
+
+      <article class="relative overflow-hidden rounded-3xl border border-white/10">
+        <img
+          [src]="featuredRelease.cover"
+          [alt]="featuredRelease.title"
+          class="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-2xl"
+        />
+
+        <div class="absolute inset-0 bg-black/65"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/35"></div>
+
+        <div class="relative flex items-center justify-between gap-4 p-4">
+          <div class="min-w-0 flex-1">
+            <p class="mb-1 text-[10px] uppercase tracking-[0.32em] text-white/35">
+              Featured Release
+            </p>
+
+            <h2 class="truncate text-[30px] font-light leading-none text-white">
+              {{ featuredRelease.title }}
+            </h2>
+
+            <p class="mt-2 truncate text-sm text-white/60">
+              {{ featuredRelease.artist }}
+            </p>
+
+            <p class="mt-3 max-w-[190px] text-sm leading-5 text-white/75">
+              {{ featuredRelease.description }}
+            </p>
+
+            <button
+              type="button"
+              (click)="player.selectTrack(featuredRelease.track)"
+              class="mt-4 inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-sm font-medium text-black transition hover:scale-[1.02]"
+            >
+              <img
+                src="assets/icons/play-button.svg"
+                alt=""
+                class="h-3.5 w-3.5 object-contain"
+              />
+              <span>Play Now</span>
+            </button>
+          </div>
+
+          <div class="h-28 w-28 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-[0_12px_28px_rgba(0,0,0,0.35)]">
+            <img
+              [src]="featuredRelease.cover"
+              [alt]="featuredRelease.title"
+              class="h-full w-full object-cover grayscale"
+            />
+          </div>
+        </div>
+      </article>
+
+      <div class="mt-3 flex items-center justify-center gap-2">
+        <span class="h-1.5 w-1.5 rounded-full bg-white"></span>
+        <span class="h-1.5 w-1.5 rounded-full bg-white/25"></span>
+        <span class="h-1.5 w-1.5 rounded-full bg-white/25"></span>
+        <span class="h-1.5 w-1.5 rounded-full bg-white/25"></span>
       </div>
     </section>
     <section class="px-5 pb-6">

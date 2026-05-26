@@ -13,4 +13,16 @@ import { SpotifyAuthService } from '../../core/services/spotify-auth.service';
 export class HomeScreenComponent {
   readonly player = inject(PlayerStateService);
   readonly spotifyAuth = inject(SpotifyAuthService);
+
+  get featuredRelease() {
+    const track = this.player.tracks()[0] ?? this.player.currentTrack();
+
+    return {
+      title: track.title,
+      artist: track.artist,
+      description: 'A dark pop journey through the afterhours.',
+      cover: track.cover,
+      track,
+    };
+  }
 }
