@@ -2,7 +2,6 @@ import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { PLAYLISTS, TRACKS } from '../data/mock-music.data';
 import { Playlist, Track } from '../models/music.model';
 import { SpotifyApiService } from './spotify-api.service';
-import { SpotifyAuthService } from './spotify-auth.service';
 import { SpotifyPlayerService } from './spotify-player.service';
 
 interface PlaybackTrack {
@@ -24,7 +23,6 @@ type AppScreen = 'home' | 'search' | 'library' | 'profile';
 })
 export class PlayerStateService {
   private readonly spotifyApi = inject(SpotifyApiService);
-  private readonly spotifyAuth = inject(SpotifyAuthService);
   private readonly spotifyPlayer = inject(SpotifyPlayerService);
   readonly likedSongs = signal<Track[]>([]);
   readonly isLikedSongsOpen = signal(false);
@@ -32,8 +30,6 @@ export class PlayerStateService {
   readonly tracks = signal<Track[]>(TRACKS);
   readonly playlists = signal(PLAYLISTS);
   readonly libraryPlaylists = signal<Playlist[]>([]);
-  readonly selectedPlaylist = signal<Playlist | null>(null);
-  readonly selectedPlaylistTracks = signal<Track[]>([]);
   readonly isLoadingLibrary = signal(false);
   readonly libraryError = signal<string | null>(null);
   readonly currentTrack = signal<Track>(TRACKS[2]);
@@ -41,7 +37,6 @@ export class PlayerStateService {
   readonly isPlayerOpen = signal(false);
   readonly isPlayerClosing = signal(false);
   readonly isLiked = signal(false);
-  readonly isLoadingSpotifyTracks = signal(false);
   readonly activeScreen = signal<AppScreen>('home');
   readonly searchQuery = signal('');
   readonly searchResults = signal<Track[]>([]);
@@ -51,9 +46,7 @@ export class PlayerStateService {
   readonly trackOptionsMessage = signal<string | null>(null);
   readonly isTrackOptionsOpen = computed(() => Boolean(this.selectedOptionsTrack()));
   readonly activeSpotifyDeviceName = signal<string | null>(null);
-  readonly activeSpotifyDeviceType = signal<string | null>(null);
   readonly isExternalPlaybackActive = signal(false);
-  readonly isPlaybackSyncEnabled = signal(false);
   readonly positionMs = computed(() => this.spotifyPlayer.positionMs());
   readonly durationMs = computed(() => {
     const spotifyDuration = this.spotifyPlayer.durationMs();
@@ -120,8 +113,6 @@ export class PlayerStateService {
   }
 
   async loadSpotifyTracks(): Promise<void> {
-    this.isLoadingSpotifyTracks.set(true);
-
     try {
       let spotifyTracks = await this.spotifyApi.getRecentlyPlayedTracks();
 
@@ -138,8 +129,6 @@ export class PlayerStateService {
       this.isPlaying.set(false);
     } catch (error) {
       console.error('Could not load Spotify tracks:', error);
-    } finally {
-      this.isLoadingSpotifyTracks.set(false);
     }
   }
 
@@ -147,8 +136,6 @@ export class PlayerStateService {
     if (this.playbackSyncIntervalId) {
       return;
     }
-
-    this.isPlaybackSyncEnabled.set(true);
 
     void this.syncCurrentPlayback();
 
@@ -163,9 +150,7 @@ export class PlayerStateService {
       this.playbackSyncIntervalId = null;
     }
 
-    this.isPlaybackSyncEnabled.set(false);
     this.activeSpotifyDeviceName.set(null);
-    this.activeSpotifyDeviceType.set(null);
     this.isExternalPlaybackActive.set(false);
   }
 
@@ -182,7 +167,6 @@ export class PlayerStateService {
       if (!playback) {
         this.isPlaying.set(false);
         this.activeSpotifyDeviceName.set(null);
-        this.activeSpotifyDeviceType.set(null);
         this.isExternalPlaybackActive.set(false);
 
         this.spotifyPlayer.applyExternalPlaybackState({
@@ -196,7 +180,6 @@ export class PlayerStateService {
       }
 
       this.activeSpotifyDeviceName.set(playback.deviceName);
-      this.activeSpotifyDeviceType.set(playback.deviceType);
 
       const blackStarDeviceId = this.spotifyPlayer.deviceId();
       const isExternalDevice = Boolean(
@@ -238,8 +221,7 @@ export class PlayerStateService {
     this.libraryError.set(null);
 
     try {
-      const currentUserId = this.spotifyAuth.profile()?.id;
-      const playlists = await this.spotifyApi.getUserPlaylists(currentUserId);
+      const playlists = await this.spotifyApi.getUserPlaylists();
 
       this.libraryPlaylists.set(playlists);
 
@@ -256,7 +238,6 @@ export class PlayerStateService {
 
   async openLikedSongs(): Promise<void> {
     this.isLikedSongsOpen.set(true);
-    this.selectedPlaylist.set(null);
     this.libraryError.set(null);
 
     if (this.likedSongs().length) {

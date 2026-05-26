@@ -17,5 +17,4 @@ export interface Playlist {
   image: string;
   owner?: string;
   totalTracks?: number;
-  isAccessible?: boolean;
 }
