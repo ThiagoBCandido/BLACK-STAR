@@ -37,6 +37,7 @@ export class PlayerStateService {
   readonly isPlayerOpen = signal(false);
   readonly isPlayerClosing = signal(false);
   readonly isLiked = signal(false);
+  readonly isLoadingSpotifyTracks = signal(false);
   readonly activeScreen = signal<AppScreen>('home');
   readonly searchQuery = signal('');
   readonly searchResults = signal<Track[]>([]);
@@ -113,6 +114,8 @@ export class PlayerStateService {
   }
 
   async loadSpotifyTracks(): Promise<void> {
+    this.isLoadingSpotifyTracks.set(true);
+
     try {
       let spotifyTracks = await this.spotifyApi.getRecentlyPlayedTracks();
 
@@ -124,11 +127,15 @@ export class PlayerStateService {
         return;
       }
 
-      this.tracks.set(spotifyTracks);
-      this.currentTrack.set(spotifyTracks[0]);
+      const uniqueTracks = this.removeDuplicateTracks(spotifyTracks);
+
+      this.tracks.set(uniqueTracks);
+      this.currentTrack.set(uniqueTracks[0]);
       this.isPlaying.set(false);
     } catch (error) {
       console.error('Could not load Spotify tracks:', error);
+    } finally {
+      this.isLoadingSpotifyTracks.set(false);
     }
   }
 
@@ -376,6 +383,7 @@ export class PlayerStateService {
   async selectTrack(track: Track): Promise<void> {
     this.currentTrack.set(track);
     this.isPlaying.set(true);
+    this.moveTrackToTop(track);
 
     await this.playCurrentTrackOnSpotify();
   }
@@ -383,6 +391,7 @@ export class PlayerStateService {
   async selectTrackAndOpenPlayer(track: Track): Promise<void> {
     this.currentTrack.set(track);
     this.isPlaying.set(true);
+    this.moveTrackToTop(track);
     this.openPlayer();
 
     await this.playCurrentTrackOnSpotify();
@@ -400,6 +409,7 @@ export class PlayerStateService {
 
     this.currentTrack.set(track);
     this.isPlaying.set(true);
+    this.moveTrackToTop(track);
 
     await this.playCurrentTrackOnSpotify();
   }
@@ -454,6 +464,7 @@ export class PlayerStateService {
 
     this.currentTrack.set(tracks[nextIndex]);
     this.isPlaying.set(true);
+    this.moveTrackToTop(tracks[nextIndex]);
 
     await this.playCurrentTrackOnSpotify();
   }
@@ -467,6 +478,7 @@ export class PlayerStateService {
 
     this.currentTrack.set(tracks[previousIndex]);
     this.isPlaying.set(true);
+    this.moveTrackToTop(tracks[previousIndex]);
 
     await this.playCurrentTrackOnSpotify();
   }
@@ -539,11 +551,7 @@ export class PlayerStateService {
   }
 
   private syncCurrentTrackFromSpotify(track: Track): void {
-    const existsInTracks = this.tracks().some((item) => item.id === track.id);
-
-    if (!existsInTracks) {
-      this.tracks.update((tracks) => [track, ...tracks]);
-    }
+    this.moveTrackToTop(track);
 
     const existsInLikedSongs = this.likedSongs().some((item) => item.id === track.id);
 
@@ -554,6 +562,26 @@ export class PlayerStateService {
     if (this.currentTrack().id !== track.id) {
       this.currentTrack.set(track);
     }
+  }
+
+  private moveTrackToTop(track: Track): void {
+    this.tracks.update((tracks) => {
+      const filteredTracks = tracks.filter((item) => item.id !== track.id);
+      return [track, ...filteredTracks];
+    });
+  }
+
+  private removeDuplicateTracks(tracks: Track[]): Track[] {
+    const seenTrackIds = new Set<string>();
+
+    return tracks.filter((track) => {
+      if (seenTrackIds.has(track.id)) {
+        return false;
+      }
+
+      seenTrackIds.add(track.id);
+      return true;
+    });
   }
 
   private mapPlaybackTrack(track: PlaybackTrack, durationMs: number): Track {
