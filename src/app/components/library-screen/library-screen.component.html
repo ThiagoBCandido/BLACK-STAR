@@ -140,7 +140,7 @@
               </h3>
 
               <p class="truncate text-xs text-white/45">
-                {{ playlist.owner }} · {{ playlist.totalTracks || 0 }} tracks
+                {{ playlist.owner }} &middot; {{ playlist.totalTracks || 0 }} tracks
               </p>
 
               <p class="mt-1 line-clamp-1 text-xs text-white/30">
@@ -229,7 +229,7 @@
             </h4>
 
             <p class="truncate text-xs text-white/45">
-              {{ track.artist }} · {{ track.album }}
+              {{ track.artist }} &middot; {{ track.album }}
             </p>
           </div>
 
@@ -244,6 +244,19 @@
               [src]="track.id === player.currentTrack().id && player.isPlaying() ? 'assets/icons/pause.svg' : 'assets/icons/play-button.svg'"
               alt=""
               class="icon-white h-4 w-4 object-contain"
+            />
+          </button>
+
+          <button
+            type="button"
+            (click)="player.openTrackOptions(track, $event)"
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.04] transition hover:bg-white/[0.08]"
+            aria-label="Track options"
+          >
+            <img
+              src="assets/icons/dots.svg"
+              alt=""
+              class="icon-soft h-5 w-5 object-contain"
             />
           </button>
         </button>

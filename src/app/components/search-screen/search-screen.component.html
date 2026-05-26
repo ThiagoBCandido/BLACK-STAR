@@ -46,11 +46,14 @@
             {{ track.title }}
           </h4>
           <p class="truncate text-xs text-white/45">
-            {{ track.artist }} Â· {{ track.album }}
+            {{ track.artist }} &middot; {{ track.album }}
           </p>
         </div>
         <button type="button" (click)="player.toggleTrackPlayback(track, $event)" class="search-play-btn" [class.is-current]="track.id === player.currentTrack().id" aria-label="Play or pause track">
           <img [src]="track.id === player.currentTrack().id && player.isPlaying() ? 'assets/icons/pause.svg' : 'assets/icons/play-button.svg'" alt="" class="icon-white h-4 w-4 object-contain"/>
+        </button>
+        <button type="button" (click)="player.openTrackOptions(track, $event)" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.04] transition hover:bg-white/[0.08]" aria-label="Track options">
+          <img src="assets/icons/dots.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
         </button>
       </button>
     </div>

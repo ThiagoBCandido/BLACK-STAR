@@ -44,8 +44,8 @@
             <button type="button" (click)="player.toggleLike()" class="flex h-10 w-10 items-center justify-center">
               <img [src]="player.isLiked() ? 'assets/icons/star_filled.svg' : 'assets/icons/star.svg'" alt="" class="icon-active h-7 w-7 object-contain"/>
             </button>
-            <button class="flex h-10 w-10 items-center justify-center">
-              <img src="assets/icons/dots.svg" alt="More options" class="icon-soft h-6 w-6 object-contain"/>
+            <button type="button" (click)="player.openTrackOptions(player.currentTrack(), $event)" class="flex h-10 w-10 items-center justify-center">
+              <img src="assets/icons/dots.svg" alt="Menu" class="icon-soft h-6 w-6 object-contain"/>
             </button>
           </div>
         </div>
@@ -129,7 +129,9 @@
                   <span>
                   </span>
                 </span>
-                <img *ngIf="track.id !== player.currentTrack().id" src="assets/icons/dots.svg" alt="Track options" class="icon-soft h-5 w-5 object-contain"/>
+                <button *ngIf="track.id !== player.currentTrack().id" type="button" (click)="player.openTrackOptions(track, $event)" class="flex h-8 w-8 items-center justify-center" aria-label="Track options">
+                  <img src="assets/icons/dots.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
+                </button>
               </span>
             </button>
           </div>

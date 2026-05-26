@@ -130,7 +130,7 @@
             <button type="button" (click)="player.toggleTrackPlayback(track, $event)" class="track-play-btn" [class.is-current]="track.id === player.currentTrack().id" aria-label="Play or pause track">
               <img [src]="track.id === player.currentTrack().id && player.isPlaying() ? 'assets/icons/pause.svg' : 'assets/icons/play-button.svg'" alt="" class="track-play-icon icon-white"/>
             </button>
-            <button type="button" (click)="$event.stopPropagation()" class="track-menu-btn" aria-label="More options">
+            <button type="button" (click)="player.openTrackOptions(track, $event)" class="track-menu-btn" aria-label="More options">
               <img src="assets/icons/dots.svg" alt="" class="track-menu-icon icon-soft"/>
             </button>
           </div>

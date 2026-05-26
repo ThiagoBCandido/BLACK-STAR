@@ -47,6 +47,9 @@ export class PlayerStateService {
   readonly searchResults = signal<Track[]>([]);
   readonly isSearching = signal(false);
   readonly hasSearched = signal(false);
+  readonly selectedOptionsTrack = signal<Track | null>(null);
+  readonly trackOptionsMessage = signal<string | null>(null);
+  readonly isTrackOptionsOpen = computed(() => Boolean(this.selectedOptionsTrack()));
   readonly positionMs = computed(() => this.spotifyPlayer.positionMs());
   readonly durationMs = computed(() => {
     const spotifyDuration = this.spotifyPlayer.durationMs();
@@ -203,6 +206,55 @@ export class PlayerStateService {
     this.libraryError.set(
       'Playlist track loading is temporarily disabled. Use Liked Songs or Search to play tracks for now.'
     );
+  }
+
+  openTrackOptions(track: Track, event?: Event): void {
+    event?.stopPropagation();
+    this.trackOptionsMessage.set(null);
+    this.selectedOptionsTrack.set(track);
+  }
+
+  closeTrackOptions(): void {
+    this.selectedOptionsTrack.set(null);
+    this.trackOptionsMessage.set(null);
+  }
+
+  async playOptionsTrack(): Promise<void> {
+    const track = this.selectedOptionsTrack();
+
+    if (!track) {
+      return;
+    }
+
+    await this.selectTrack(track);
+    this.closeTrackOptions();
+  }
+
+  openSelectedTrackOnSpotify(): void {
+    const track = this.selectedOptionsTrack();
+
+    if (!track?.spotifyUrl) {
+      this.trackOptionsMessage.set('Spotify link is not available for this track.');
+      return;
+    }
+
+    window.open(track.spotifyUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  async copySelectedTrackLink(): Promise<void> {
+    const track = this.selectedOptionsTrack();
+
+    if (!track?.spotifyUrl) {
+      this.trackOptionsMessage.set('Spotify link is not available for this track.');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(track.spotifyUrl);
+      this.trackOptionsMessage.set('Copied to clipboard.');
+    } catch {
+      this.trackOptionsMessage.set('Could not copy the link.');
+    }
   }
 
   updateSearchQuery(query: string): void {
