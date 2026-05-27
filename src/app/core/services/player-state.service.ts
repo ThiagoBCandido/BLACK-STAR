@@ -3,6 +3,7 @@ import { PLAYLISTS, TRACKS } from '../data/mock-music.data';
 import { Playlist, Track } from '../models/music.model';
 import { SpotifyApiService } from './spotify-api.service';
 import { SpotifyPlayerService } from './spotify-player.service';
+import { ToastService } from './toast.service';
 
 interface PlaybackTrack {
   id: string;
@@ -24,6 +25,7 @@ type AppScreen = 'home' | 'search' | 'library' | 'profile';
 export class PlayerStateService {
   private readonly spotifyApi = inject(SpotifyApiService);
   private readonly spotifyPlayer = inject(SpotifyPlayerService);
+  private readonly toast = inject(ToastService);
   readonly likedSongs = signal<Track[]>([]);
   readonly isLikedSongsOpen = signal(false);
   readonly isLoadingLikedSongs = signal(false);
@@ -279,9 +281,7 @@ export class PlayerStateService {
   }
 
   showPlaylistUnavailable(): void {
-    this.libraryError.set(
-      'Playlist track loading is temporarily disabled. Use Liked Songs or Search to play tracks for now.'
-    );
+    this.toast.info('Playlist track loading is disabled for now.');
   }
 
   openTrackOptions(track: Track, event?: Event): void {
@@ -310,26 +310,27 @@ export class PlayerStateService {
     const track = this.selectedOptionsTrack();
 
     if (!track?.spotifyUrl) {
-      this.trackOptionsMessage.set('Spotify link is not available for this track.');
+      this.toast.error('Spotify link is not available for this track.');
       return;
     }
 
     window.open(track.spotifyUrl, '_blank', 'noopener,noreferrer');
+    this.toast.info('Opening Spotify.');
   }
 
   async copySelectedTrackLink(): Promise<void> {
     const track = this.selectedOptionsTrack();
 
     if (!track?.spotifyUrl) {
-      this.trackOptionsMessage.set('Spotify link is not available for this track.');
+      this.toast.error('Spotify link is not available for this track.');
       return;
     }
 
     try {
       await navigator.clipboard.writeText(track.spotifyUrl);
-      this.trackOptionsMessage.set('Copied to clipboard.');
+      this.toast.success('Spotify link copied.');
     } catch {
-      this.trackOptionsMessage.set('Could not copy the link.');
+      this.toast.error('Could not copy the link.');
     }
   }
 

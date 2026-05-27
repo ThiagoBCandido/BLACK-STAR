@@ -7,6 +7,7 @@ import { LibraryScreenComponent } from './components/library-screen/library-scre
 import { MiniPlayerComponent } from './components/mini-player/mini-player.component';
 import { ProfileScreenComponent } from './components/profile-screen/profile-screen.component';
 import { SearchScreenComponent } from './components/search-screen/search-screen.component';
+import { ToastComponent } from './components/toast/toast.component';
 import { TrackOptionsSheetComponent } from './components/track-options-sheet/track-options-sheet.component';
 import { PlayerStateService } from './core/services/player-state.service';
 import { SpotifyAuthService } from './core/services/spotify-auth.service';
@@ -25,6 +26,7 @@ import { SpotifyPlayerService } from './core/services/spotify-player.service';
     FullPlayerComponent,
     BottomNavComponent,
     TrackOptionsSheetComponent,
+    ToastComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',

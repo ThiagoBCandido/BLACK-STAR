@@ -1,0 +1,16 @@
+<section class="pointer-events-none fixed left-1/2 top-4 z-[120] flex w-full max-w-md -translate-x-1/2 flex-col gap-2 px-4">
+  <article *ngFor="let item of toast.toasts()" class="toast-item pointer-events-auto flex items-start gap-3 rounded-2xl px-4 py-3" [class]="getToastClasses(item.type)">
+    <div class="mt-1 h-2 w-2 shrink-0 rounded-full bg-white/80"></div>
+    <div class="min-w-0 flex-1">
+      <p class="mb-0.5 text-[10px] uppercase tracking-[0.28em] text-white/35">
+        {{ getToastLabel(item.type) }}
+      </p>
+      <p class="text-sm leading-5 text-white/80">
+        {{ item.message }}
+      </p>
+    </div>
+    <button type="button" (click)="toast.remove(item.id)" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.04] transition hover:bg-white/[0.1]" aria-label="Close notification">
+      <img src="assets/icons/x.svg" alt="" class="icon-soft h-3 w-3 object-contain"/>
+    </button>
+  </article>
+</section>
