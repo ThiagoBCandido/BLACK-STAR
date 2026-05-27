@@ -372,6 +372,14 @@
   object-fit: contain;
 }
 
+.player-like-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+}
+
 @keyframes spin-record-label {
   from {
     transform: translate(-50%, -50%) rotate(0deg);

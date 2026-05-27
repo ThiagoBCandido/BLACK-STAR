@@ -27,6 +27,7 @@ export class PlayerStateService {
   private readonly spotifyPlayer = inject(SpotifyPlayerService);
   private readonly toast = inject(ToastService);
   readonly likedSongs = signal<Track[]>([]);
+  readonly likedTrackIds = signal<Set<string>>(new Set());
   readonly isLikedSongsOpen = signal(false);
   readonly isLoadingLikedSongs = signal(false);
   readonly tracks = signal<Track[]>(TRACKS);
@@ -50,6 +51,23 @@ export class PlayerStateService {
   readonly isTrackOptionsOpen = computed(() => Boolean(this.selectedOptionsTrack()));
   readonly activeSpotifyDeviceName = signal<string | null>(null);
   readonly isExternalPlaybackActive = signal(false);
+  readonly featuredTrack = computed(() => {
+    const currentTrack = this.currentTrack();
+    const firstTrack = this.tracks()[0];
+
+    return currentTrack ?? firstTrack;
+  });
+
+  readonly featuredDescription = computed(() => {
+    const track = this.featuredTrack();
+
+    if (!track) {
+      return 'A dark music experience through BLACK STAR.';
+    }
+
+    return `${track.album} · ${track.duration}`;
+  });
+
   readonly positionMs = computed(() => this.spotifyPlayer.positionMs());
   readonly durationMs = computed(() => {
     const spotifyDuration = this.spotifyPlayer.durationMs();
@@ -110,6 +128,20 @@ export class PlayerStateService {
         if (this.currentTrack().id !== mappedTrack.id) {
           this.currentTrack.set(mappedTrack);
         }
+      },
+      { allowSignalWrites: true }
+    );
+
+    effect(
+      () => {
+        const track = this.currentTrack();
+
+        if (!track.spotifyUri) {
+          this.isLiked.set(false);
+          return;
+        }
+
+        void this.syncCurrentTrackLikeState(track);
       },
       { allowSignalWrites: true }
     );
@@ -263,7 +295,16 @@ export class PlayerStateService {
     try {
       const tracks = await this.spotifyApi.getSavedTracks();
 
+      if (tracks === null) {
+        this.libraryError.set('Could not refresh Liked Songs right now.');
+        return;
+      }
+
       this.likedSongs.set(tracks);
+      this.likedTrackIds.set(new Set(tracks.map((track) => track.id)));
+
+      const currentTrack = this.currentTrack();
+      this.isLiked.set(tracks.some((track) => track.id === currentTrack.id));
 
       if (!tracks.length) {
         this.libraryError.set('No liked songs found in your Spotify library.');
@@ -470,8 +511,35 @@ export class PlayerStateService {
     }
   }
 
-  toggleLike(): void {
-    this.isLiked.update((value) => !value);
+  async toggleLike(): Promise<void> {
+    const track = this.currentTrack();
+
+    if (!track.spotifyUri) {
+      this.toast.error('This track cannot be added to Liked Songs.');
+      return;
+    }
+
+    const previousState = this.isLiked();
+    const nextState = !previousState;
+
+    this.isLiked.set(nextState);
+
+    try {
+      if (nextState) {
+        await this.spotifyApi.saveItemToLibrary(track.spotifyUri);
+        this.addTrackToLikedState(track);
+        this.toast.success('Added to Liked Songs.');
+        return;
+      }
+
+      await this.spotifyApi.removeItemFromLibrary(track.spotifyUri);
+      this.removeTrackFromLikedState(track);
+      this.toast.info('Removed from Liked Songs.');
+    } catch (error) {
+      console.error('Could not update liked state:', error);
+      this.isLiked.set(previousState);
+      this.toast.error('Could not update Liked Songs.');
+    }
   }
 
   async nextTrack(event?: Event): Promise<void> {
@@ -581,6 +649,53 @@ export class PlayerStateService {
     if (this.currentTrack().id !== track.id) {
       this.currentTrack.set(track);
     }
+  }
+
+  private async syncCurrentTrackLikeState(track: Track): Promise<void> {
+    if (!track.spotifyUri) {
+      this.isLiked.set(false);
+      return;
+    }
+
+    if (this.likedTrackIds().has(track.id)) {
+      this.isLiked.set(true);
+      return;
+    }
+
+    try {
+      const isSaved = await this.spotifyApi.checkLibraryItem(track.spotifyUri);
+
+      this.isLiked.set(isSaved);
+
+      if (isSaved) {
+        this.addTrackToLikedState(track);
+      }
+    } catch (error) {
+      console.error('Could not check liked state:', error);
+    }
+  }
+
+  private addTrackToLikedState(track: Track): void {
+    this.likedTrackIds.update((ids) => {
+      const nextIds = new Set(ids);
+      nextIds.add(track.id);
+      return nextIds;
+    });
+
+    this.likedSongs.update((tracks) => {
+      const filteredTracks = tracks.filter((item) => item.id !== track.id);
+      return [track, ...filteredTracks];
+    });
+  }
+
+  private removeTrackFromLikedState(track: Track): void {
+    this.likedTrackIds.update((ids) => {
+      const nextIds = new Set(ids);
+      nextIds.delete(track.id);
+      return nextIds;
+    });
+
+    this.likedSongs.update((tracks) => tracks.filter((item) => item.id !== track.id));
   }
 
   private moveTrackToTop(track: Track): void {

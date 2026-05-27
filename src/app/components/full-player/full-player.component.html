@@ -46,8 +46,8 @@
             </p>
           </div>
           <div class="flex shrink-0 gap-3 pt-2">
-            <button type="button" (click)="player.toggleLike()" class="flex h-10 w-10 items-center justify-center">
-              <img [src]="player.isLiked() ? 'assets/icons/star_filled.svg' : 'assets/icons/star.svg'" alt="" class="icon-active h-7 w-7 object-contain"/>
+            <button type="button" (click)="player.toggleLike()" class="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.04] transition hover:bg-white/[0.08]" aria-label="Like track">
+              <img [src]="player.isLiked() ? 'assets/icons/star_filled.svg' : 'assets/icons/star.svg'" alt="" class="player-like-icon"/>
             </button>
             <button type="button" (click)="player.openTrackOptions(player.currentTrack(), $event)" class="flex h-10 w-10 items-center justify-center">
               <img src="assets/icons/dots.svg" alt="Menu" class="icon-soft h-6 w-6 object-contain"/>
@@ -67,9 +67,6 @@
           <span>
             {{ player.durationLabel() }}
           </span>
-        </div>
-        <div class="mx-auto mb-8 w-fit rounded-md bg-white/10 px-3 py-1 text-xs tracking-wide text-white/45">
-          HI-FI Â· 24-BIT
         </div>
         <section class="volume-control mb-8">
           <button type="button" class="volume-mute-btn" (click)="player.toggleMute($event)">

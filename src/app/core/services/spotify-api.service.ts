@@ -119,15 +119,68 @@ export class SpotifyApiService {
     return response.items.map((track) => this.mapSpotifyTrack(track));
   }
   
-  async getSavedTracks(): Promise<Track[]> {
-    const response = await this.request<SavedTracksResponse>('/me/tracks');
-    if (!response?.items?.length) {
+  async getSavedTracks(): Promise<Track[] | null> {
+    const params = new URLSearchParams();
+
+    params.set('limit', '50');
+    params.set('market', 'from_token');
+
+    const response = await this.request<SavedTracksResponse>(
+      `/me/tracks?${params.toString()}`
+    );
+
+    if (!response) {
+      return null;
+    }
+
+    if (!response.items?.length) {
       return [];
     }
 
     return response.items.map((item) => item.track).filter((track): track is SpotifyTrack => {
-      return Boolean(track && track.id && track.uri && track.type === 'track' && !track.is_local);
+      return Boolean(track && track.id && track.uri && !track.is_local);
     }).map((track) => this.mapSpotifyTrack(track));
+  }
+
+  async checkLibraryItem(uri: string): Promise<boolean> {
+    if (!uri) {
+      return false;
+    }
+
+    const params = new URLSearchParams();
+    params.set('uris', uri);
+
+    const response = await this.request<boolean[]>(
+      `/me/library/contains?${params.toString()}`
+    );
+
+    return Boolean(response?.[0]);
+  }
+
+  async saveItemToLibrary(uri: string): Promise<void> {
+    if (!uri) {
+      throw new Error('Missing Spotify URI.');
+    }
+
+    const params = new URLSearchParams();
+    params.set('uris', uri);
+
+    await this.request<void>(`/me/library?${params.toString()}`, {
+      method: 'PUT',
+    });
+  }
+
+  async removeItemFromLibrary(uri: string): Promise<void> {
+    if (!uri) {
+      throw new Error('Missing Spotify URI.');
+    }
+
+    const params = new URLSearchParams();
+    params.set('uris', uri);
+
+    await this.request<void>(`/me/library?${params.toString()}`, {
+      method: 'DELETE',
+    });
   }
 
   async getCurrentPlayback(): Promise<CurrentPlaybackSnapshot | null> {
@@ -187,7 +240,7 @@ export class SpotifyApiService {
     return response.items.filter((playlist) => Boolean(playlist?.id)).map((playlist) => this.mapSpotifyPlaylist(playlist));
   }
 
-  private async request<T>(endpoint: string): Promise<T | null> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T | null> {
     const token = await this.auth.getValidAccessToken();
 
     if (!token) {
@@ -198,8 +251,10 @@ export class SpotifyApiService {
     const url = `${this.apiBaseUrl}${endpoint}`;
 
     const response = await fetch(url, {
+      ...options,
       headers: {
         Authorization: `Bearer ${token}`,
+        ...(options.headers ?? {}),
       },
     });
 
@@ -224,7 +279,13 @@ export class SpotifyApiService {
       return null;
     }
 
-    return response.json() as Promise<T>;
+    const text = await response.text();
+
+    if (!text) {
+      return null;
+    }
+
+    return JSON.parse(text) as T;
   }
 
   private mapSpotifyTrack(track: SpotifyTrack): Track {

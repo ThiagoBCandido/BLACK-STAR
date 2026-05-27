@@ -28,36 +28,31 @@
   </header>
   <section class="flex-1 overflow-y-auto">
     <section class="px-5 pt-4">
-      <div class="mb-3 flex items-center justify-between">
-        <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
-          Featured Release
-        </p>
-      </div>
       <article class="relative overflow-hidden rounded-3xl border border-white/10">
-        <img [src]="featuredRelease.cover" [alt]="featuredRelease.title" class="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-2xl"/>
+        <img [src]="player.featuredTrack().cover" [alt]="player.featuredTrack().title" class="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-2xl"/>
         <div class="absolute inset-0 bg-black/65"></div>
-        <div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/35"></div>
-        <div class="relative flex items-center justify-between gap-4 p-4">
+        <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/25"></div>
+        <div class="relative flex min-h-[150px] items-center justify-between gap-4 p-4">
           <div class="min-w-0 flex-1">
-            <p class="mb-1 text-[10px] uppercase tracking-[0.32em] text-white/35">
+            <p class="mb-2 text-[10px] uppercase tracking-[0.35em] text-white/35">
               Featured Release
             </p>
-            <h2 class="truncate text-[30px] font-light leading-none text-white">
-              {{ featuredRelease.title }}
+            <h2 class="truncate text-[28px] font-light leading-none text-white">
+              {{ player.featuredTrack().title }}
             </h2>
             <p class="mt-2 truncate text-sm text-white/60">
-              {{ featuredRelease.artist }}
+              {{ player.featuredTrack().artist }}
             </p>
-            <p class="mt-3 max-w-[190px] text-sm leading-5 text-white/75">
-              {{ featuredRelease.description }}
+            <p class="mt-3 line-clamp-2 max-w-[190px] text-sm leading-5 text-white/70">
+              {{ player.featuredDescription() }}
             </p>
-            <button type="button" (click)="player.selectTrack(featuredRelease.track)" class="mt-4 inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-sm font-medium text-black transition hover:scale-[1.02]">
+            <button type="button" (click)="player.selectTrack(player.featuredTrack())" class="mt-4 inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-sm font-medium text-black transition hover:scale-[1.02]">
               <img src="assets/icons/play-button.svg" alt="" class="h-3.5 w-3.5 object-contain"/>
               <span>Play Now</span>
             </button>
           </div>
-          <div class="h-28 w-28 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-[0_12px_28px_rgba(0,0,0,0.35)]">
-            <img [src]="featuredRelease.cover" [alt]="featuredRelease.title" class="h-full w-full object-cover grayscale"/>
+          <div class="h-28 w-28 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/5 shadow-[0_12px_28px_rgba(0,0,0,0.35)]">
+            <img [src]="player.featuredTrack().cover" [alt]="player.featuredTrack().title" class="h-full w-full object-cover grayscale"/>
           </div>
         </div>
       </article>
