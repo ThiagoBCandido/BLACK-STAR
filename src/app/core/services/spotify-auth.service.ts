@@ -42,7 +42,7 @@ export class SpotifyAuthService {
   async initialize(): Promise<void> {
     await this.handleCallbackIfNeeded();
 
-    const token = this.getAccessToken();
+    const token = await this.getValidAccessToken();
 
     if (!token) {
       this.isAuthenticated.set(false);
@@ -106,11 +106,27 @@ export class SpotifyAuthService {
     const hasExpired = Date.now() >= expiresAt;
 
     if (hasExpired) {
-      this.logout();
       return null;
     }
 
     return token;
+  }
+
+  async getValidAccessToken(): Promise<string | null> {
+    const token = localStorage.getItem(this.accessTokenKey);
+    const expiresAt = Number(localStorage.getItem(this.expiresAtKey));
+
+    if (!token || !expiresAt) {
+      return null;
+    }
+
+    const expiresSoon = Date.now() >= expiresAt - 60_000;
+
+    if (!expiresSoon) {
+      return token;
+    }
+
+    return this.refreshAccessToken();
   }
 
   private async handleCallbackIfNeeded(): Promise<void> {
@@ -170,14 +186,8 @@ export class SpotifyAuthService {
       }
 
       const tokenData = (await response.json()) as SpotifyTokenResponse;
-      const expiresAt = Date.now() + tokenData.expires_in * 1000;
 
-      localStorage.setItem(this.accessTokenKey, tokenData.access_token);
-      localStorage.setItem(this.expiresAtKey, String(expiresAt));
-
-      if (tokenData.refresh_token) {
-        localStorage.setItem(this.refreshTokenKey, tokenData.refresh_token);
-      }
+      this.saveTokenData(tokenData);
 
       localStorage.removeItem(this.codeVerifierKey);
       localStorage.removeItem(this.stateKey);
@@ -191,8 +201,59 @@ export class SpotifyAuthService {
     }
   }
 
+  private async refreshAccessToken(): Promise<string | null> {
+    const refreshToken = localStorage.getItem(this.refreshTokenKey);
+
+    if (!refreshToken) {
+      this.logout();
+      return null;
+    }
+
+    try {
+      const response = await fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken,
+          client_id: environment.spotify.clientId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Could not refresh Spotify access token.');
+      }
+
+      const tokenData = (await response.json()) as SpotifyTokenResponse;
+
+      this.saveTokenData(tokenData, refreshToken);
+      this.isAuthenticated.set(true);
+
+      return tokenData.access_token;
+    } catch (error) {
+      console.error(error);
+      this.logout();
+      return null;
+    }
+  }
+
+  private saveTokenData(tokenData: SpotifyTokenResponse, fallbackRefreshToken?: string): void {
+    const expiresAt = Date.now() + tokenData.expires_in * 1000;
+
+    localStorage.setItem(this.accessTokenKey, tokenData.access_token);
+    localStorage.setItem(this.expiresAtKey, String(expiresAt));
+
+    const refreshToken = tokenData.refresh_token ?? fallbackRefreshToken;
+
+    if (refreshToken) {
+      localStorage.setItem(this.refreshTokenKey, refreshToken);
+    }
+  }
+
   private async loadProfile(): Promise<void> {
-    const token = this.getAccessToken();
+    const token = await this.getValidAccessToken();
 
     if (!token) {
       return;
@@ -232,9 +293,6 @@ export class SpotifyAuthService {
     const data = encoder.encode(codeVerifier);
     const digest = await crypto.subtle.digest('SHA-256', data);
 
-    return btoa(String.fromCharCode(...new Uint8Array(digest)))
-      .replace(/=/g, '')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_');
+    return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
   }
 }

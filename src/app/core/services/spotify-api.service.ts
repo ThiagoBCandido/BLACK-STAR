@@ -188,7 +188,7 @@ export class SpotifyApiService {
   }
 
   private async request<T>(endpoint: string): Promise<T | null> {
-    const token = this.auth.getAccessToken();
+    const token = await this.auth.getValidAccessToken();
 
     if (!token) {
       console.error('Spotify API error: missing access token.');

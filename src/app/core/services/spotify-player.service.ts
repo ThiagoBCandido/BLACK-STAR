@@ -88,7 +88,7 @@ export class SpotifyPlayerService {
       return;
     }
 
-    const token = this.auth.getAccessToken();
+    const token = await this.auth.getValidAccessToken();
 
     if (!token) {
       this.errorMessage.set('Spotify access token is missing.');
@@ -108,11 +108,11 @@ export class SpotifyPlayerService {
       this.player = new window.Spotify.Player({
         name: 'BLACK STAR Player',
         getOAuthToken: (callback) => {
-          const accessToken = this.auth.getAccessToken();
-
-          if (accessToken) {
-            callback(accessToken);
-          }
+          void this.auth.getValidAccessToken().then((accessToken) => {
+            if (accessToken) {
+              callback(accessToken);
+            }
+          });
         },
         volume: 0.8,
       });
@@ -509,7 +509,7 @@ export class SpotifyPlayerService {
   }
 
   private async request(endpoint: string, options: RequestInit): Promise<void> {
-    const token = this.auth.getAccessToken();
+    const token = await this.auth.getValidAccessToken();
 
     if (!token) {
       throw new Error('Spotify access token is missing.');
