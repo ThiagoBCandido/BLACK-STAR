@@ -1,24 +1,5 @@
 <section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
-  <header class="border-b border-white/10 px-5 pb-5 pt-5">
-    <div class="mb-7 grid grid-cols-[42px_1fr_auto] items-center gap-3">
-      <img src="assets/icons/blackstar_logo.svg" alt="Black Star" class="main-logo"/>
-      <h1 class="text-center text-[22px] font-light tracking-[0.48em] text-white/90">
-        LIBRARY
-      </h1>
-      <button type="button" class="flex h-9 items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 text-[11px] font-light text-white/75 transition hover:bg-white/[0.08]" aria-label="Create playlist" title="Coming soon">
-        <img src="assets/icons/add.svg" alt="" class="icon-soft h-3.5 w-3.5 object-contain"/>
-        <span>Playlist</span>
-      </button>
-    </div>
-    <div>
-      <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
-        Spotify
-      </p>
-      <h2 class="mt-1 text-xl font-light text-white">
-        {{ player.isLikedSongsOpen() ? 'Liked Songs' : 'Your Library' }}
-      </h2>
-    </div>
-  </header>
+  <app-screen-header title="LIBRARY" eyebrow="Spotify" [heading]="player.isLikedSongsOpen() ? 'Liked Songs' : 'Your Library'" actionLabel="Playlist" actionIcon="assets/icons/add.svg" actionTitle="Coming soon"></app-screen-header>
   <section class="flex-1 overflow-y-auto px-5 py-5">
     <div *ngIf="player.libraryError()" class="mb-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/60">
       {{ player.libraryError() }}

@@ -1,13 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { PlayerStateService } from '../../core/services/player-state.service';
+import { ScreenHeaderComponent } from '../screen-header/screen-header.component';
 import { TrackListItemComponent } from '../track-list-item/track-list-item.component';
 import { TrackListSkeletonComponent } from '../track-list-skeleton/track-list-skeleton.component';
+import { PlayerStateService } from '../../core/services/player-state.service';
 
 @Component({
   selector: 'app-library-screen',
   standalone: true,
-  imports: [CommonModule, TrackListItemComponent, TrackListSkeletonComponent],
+  imports: [
+    CommonModule,
+    ScreenHeaderComponent,
+    TrackListItemComponent,
+    TrackListSkeletonComponent,
+  ],
   templateUrl: './library-screen.component.html',
   styleUrl: './library-screen.component.css',
 })
