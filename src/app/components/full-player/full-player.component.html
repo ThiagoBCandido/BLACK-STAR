@@ -112,33 +112,7 @@
             </button>
           </div>
           <div class="space-y-2">
-            <button type="button" *ngFor="let track of player.tracks(); index as i" (click)="player.selectTrack(track)" class="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-white/[0.05]" [class.bg-white]="track.id === player.currentTrack().id" [class.bg-opacity-5]="track.id === player.currentTrack().id">
-              <span class="w-5 text-sm text-white/50">
-                {{ i + 1 }}
-              </span>
-              <img [src]="track.cover" [alt]="track.title" class="h-12 w-12 rounded object-cover grayscale"/>
-              <div class="min-w-0 flex-1">
-                <h4 class="truncate text-sm font-light text-white">
-                  {{ track.title }}
-                </h4>
-                <p class="truncate text-xs text-white/45">
-                  {{ track.artist }}
-                </p>
-              </div>
-              <span class="flex h-8 w-8 items-center justify-center">
-                <span *ngIf="track.id === player.currentTrack().id" class="equalizer" [class.is-playing]="player.isPlaying()" aria-label="Now playing">
-                  <span>
-                  </span>
-                  <span>
-                  </span>
-                  <span>
-                  </span>
-                </span>
-                <button *ngIf="track.id !== player.currentTrack().id" type="button" (click)="player.openTrackOptions(track, $event)" class="flex h-8 w-8 items-center justify-center" aria-label="Track options">
-                  <img src="assets/icons/dots.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
-                </button>
-              </span>
-            </button>
+            <app-track-list-item *ngFor="let track of player.tracks()" [track]="track" variant="queue" [showOptions]="true"></app-track-list-item>
           </div>
         </section>
       </section>

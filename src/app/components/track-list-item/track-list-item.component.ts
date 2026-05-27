@@ -4,6 +4,7 @@ import { Track } from '../../core/models/music.model';
 import { PlayerStateService } from '../../core/services/player-state.service';
 
 type TrackListItemSize = 'compact' | 'regular';
+type TrackListItemVariant = 'default' | 'queue';
 
 @Component({
   selector: 'app-track-list-item',
@@ -15,8 +16,8 @@ type TrackListItemSize = 'compact' | 'regular';
 export class TrackListItemComponent {
   @Input({ required: true }) track!: Track;
   @Input() subtitle?: string;
-  @Input() index: number | null = null;
   @Input() size: TrackListItemSize = 'regular';
+  @Input() variant: TrackListItemVariant = 'default';
   @Input() showAlbum = false;
   @Input() showOptions = true;
 
@@ -28,6 +29,10 @@ export class TrackListItemComponent {
 
   get isCurrentTrackPlaying(): boolean {
     return this.isCurrentTrack && this.player.isPlaying();
+  }
+
+  get isQueueVariant(): boolean {
+    return this.variant === 'queue';
   }
 
   get resolvedSubtitle(): string {
