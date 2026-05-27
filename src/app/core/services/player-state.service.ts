@@ -17,7 +17,7 @@ interface PlaybackTrack {
   };
 }
 
-type AppScreen = 'home' | 'search' | 'library' | 'profile';
+type AppScreen = 'home' | 'search' | 'library' | 'profile' | 'recentlyPlayed';
 
 @Injectable({
   providedIn: 'root',

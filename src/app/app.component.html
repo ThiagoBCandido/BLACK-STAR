@@ -7,6 +7,8 @@
 
   <app-profile-screen *ngIf="player.activeScreen() === 'profile'"></app-profile-screen>
 
+  <app-recently-played-screen *ngIf="player.activeScreen() === 'recentlyPlayed'"></app-recently-played-screen>
+
   <app-mini-player></app-mini-player>
 
   <app-bottom-nav></app-bottom-nav>

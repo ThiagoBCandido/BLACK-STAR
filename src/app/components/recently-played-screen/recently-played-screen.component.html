@@ -1,0 +1,43 @@
+<section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
+  <header class="border-b border-white/10 px-5 pb-5 pt-5">
+    <div class="mb-7 grid grid-cols-[42px_1fr_42px] items-center">
+      <button type="button" (click)="player.setActiveScreen('home')" class="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.04] transition hover:bg-white/[0.08]" aria-label="Back to home">
+        <img src="assets/icons/return.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
+      </button>
+      <h1 class="text-center text-[20px] font-light tracking-[0.42em] text-white/90">
+        RECENT
+      </h1>
+      <button type="button" (click)="player.loadSpotifyTracks()" class="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.04] transition hover:bg-white/[0.08]" aria-label="Refresh recently played">
+        <img src="assets/icons/return.svg" alt="" class="icon-soft h-4 w-4 rotate-180 object-contain"/>
+      </button>
+    </div>
+    <div>
+      <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+        Spotify
+      </p>
+      <h2 class="mt-1 text-xl font-light text-white">
+        Recently Played
+      </h2>
+      <p class="mt-2 text-sm leading-6 text-white/45">
+        Your latest unique tracks. Repeated songs move back to the top.
+      </p>
+    </div>
+  </header>
+  <section class="flex-1 overflow-y-auto px-5 py-5">
+    <app-track-list-skeleton *ngIf="player.isLoadingSpotifyTracks()" [items]="8"></app-track-list-skeleton>
+    <div *ngIf="!player.isLoadingSpotifyTracks() && !player.tracks().length" class="empty-state">
+      <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+        Empty
+      </p>
+      <h2 class="mt-3 text-2xl font-light text-white">
+        No recent tracks
+      </h2>
+      <p class="mt-3 max-w-[260px] text-sm leading-6 text-white/45">
+        Play something on Spotify and refresh this screen.
+      </p>
+    </div>
+    <div *ngIf="!player.isLoadingSpotifyTracks() && player.tracks().length" class="space-y-2">
+      <app-track-list-item *ngFor="let track of player.tracks()" [track]="track" [showAlbum]="true"></app-track-list-item>
+    </div>
+  </section>
+</section>
