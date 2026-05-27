@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { TrackListItemComponent } from '../track-list-item/track-list-item.component';
+import { TrackListSkeletonComponent } from '../track-list-skeleton/track-list-skeleton.component';
 import { PlayerStateService } from '../../core/services/player-state.service';
 import { SpotifyAuthService } from '../../core/services/spotify-auth.service';
 
@@ -8,7 +9,7 @@ import { SpotifyAuthService } from '../../core/services/spotify-auth.service';
 @Component({
   selector: 'app-home-screen',
   standalone: true,
-  imports: [CommonModule, TrackListItemComponent],
+  imports: [CommonModule, TrackListItemComponent, TrackListSkeletonComponent],
   templateUrl: './home-screen.component.html',
   styleUrl: './home-screen.component.css',
 })

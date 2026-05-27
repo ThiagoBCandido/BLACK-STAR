@@ -52,8 +52,15 @@
             </h3>
           </div>
         </div>
-        <div *ngIf="player.isLoadingLibrary()" class="py-12 text-center text-sm text-white/45">
-          Loading playlists...
+        <div *ngIf="player.isLoadingLibrary()" class="space-y-3">
+          <div *ngFor="let item of [].constructor(4)" class="flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+            <div class="skeleton-box h-16 w-16 shrink-0 rounded-xl"></div>
+            <div class="min-w-0 flex-1 space-y-2">
+              <div class="skeleton-box h-3 w-3/4 rounded-full"></div>
+              <div class="skeleton-box h-2.5 w-1/2 rounded-full"></div>
+              <div class="skeleton-box h-2.5 w-2/3 rounded-full"></div>
+            </div>
+          </div>
         </div>
         <div *ngIf="!player.isLoadingLibrary() && !player.libraryPlaylists().length" class="empty-state">
           <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
@@ -101,8 +108,8 @@
           </p>
         </div>
       </div>
-      <div *ngIf="player.isLoadingLikedSongs()" class="py-12 text-center text-sm text-white/45">
-        Loading liked songs...
+      <div *ngIf="player.isLoadingLikedSongs()" class="py-2">
+        <app-track-list-skeleton [items]="7"></app-track-list-skeleton>
       </div>
       <div *ngIf="!player.isLoadingLikedSongs() && !player.likedSongs().length" class="empty-state">
         <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">

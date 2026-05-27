@@ -124,7 +124,10 @@
         </button>
       </div>
       <div class="space-y-1 border-y border-white/10 py-1">
-        <app-track-list-item *ngFor="let track of player.tracks()" [track]="track" size="compact"></app-track-list-item>
+        <app-track-list-skeleton *ngIf="player.isLoadingSpotifyTracks()" [items]="4"></app-track-list-skeleton>
+        <ng-container *ngIf="!player.isLoadingSpotifyTracks()">
+          <app-track-list-item *ngFor="let track of player.tracks()" [track]="track" size="compact"></app-track-list-item>
+        </ng-container>
       </div>
     </section>
   </section>

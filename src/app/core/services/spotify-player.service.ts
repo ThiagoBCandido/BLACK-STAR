@@ -157,6 +157,27 @@ export class SpotifyPlayerService {
     await this.startPlayback(uri);
   }
 
+  async addTrackToQueue(uri: string): Promise<void> {
+    if (!uri) {
+      throw new Error('Missing Spotify track URI.');
+    }
+
+    await this.ensureReady();
+
+    const params = new URLSearchParams();
+    params.set('uri', uri);
+
+    const deviceId = this.deviceId();
+
+    if (deviceId) {
+      params.set('device_id', deviceId);
+    }
+
+    await this.request(`/me/player/queue?${params.toString()}`, {
+      method: 'POST',
+    });
+  }
+
   async togglePlayback(): Promise<void> {
     await this.ensureReady();
 

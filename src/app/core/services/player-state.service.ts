@@ -306,6 +306,24 @@ export class PlayerStateService {
     this.closeTrackOptions();
   }
 
+  async addSelectedTrackToQueue(): Promise<void> {
+    const track = this.selectedOptionsTrack();
+
+    if (!track?.spotifyUri) {
+      this.toast.error('This track cannot be added to queue.');
+      return;
+    }
+
+    try {
+      await this.spotifyPlayer.addTrackToQueue(track.spotifyUri);
+      this.toast.success('Added to queue.');
+      this.closeTrackOptions();
+    } catch (error) {
+      console.error('Could not add track to Spotify queue:', error);
+      this.toast.error('Could not add this track to queue.');
+    }
+  }
+
   openSelectedTrackOnSpotify(): void {
     const track = this.selectedOptionsTrack();
 

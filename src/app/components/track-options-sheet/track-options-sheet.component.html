@@ -56,6 +56,25 @@
 
       <button
         type="button"
+        (click)="player.addSelectedTrackToQueue()"
+        class="flex w-full items-center gap-4 rounded-2xl bg-white/[0.04] px-4 py-4 text-left transition hover:bg-white/[0.08]"
+      >
+        <span class="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.05]">
+          <img
+            src="assets/icons/add.svg"
+            alt=""
+            class="icon-soft h-4 w-4 object-contain"
+          />
+        </span>
+
+        <div>
+          <p class="text-sm font-light text-white">Add to queue</p>
+          <p class="text-xs text-white/40">Play this track next</p>
+        </div>
+      </button>
+
+      <button
+        type="button"
         (click)="player.openSelectedTrackOnSpotify()"
         class="flex w-full items-center gap-4 rounded-2xl bg-white/[0.04] px-4 py-4 text-left transition hover:bg-white/[0.08]"
       >

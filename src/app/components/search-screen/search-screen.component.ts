@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, inject } from '@angular/core';
 import { TrackListItemComponent } from '../track-list-item/track-list-item.component';
+import { TrackListSkeletonComponent } from '../track-list-skeleton/track-list-skeleton.component';
 import { PlayerStateService } from '../../core/services/player-state.service';
 
 @Component({
   selector: 'app-search-screen',
   standalone: true,
-  imports: [CommonModule, TrackListItemComponent],
+  imports: [CommonModule, TrackListItemComponent, TrackListSkeletonComponent],
   templateUrl: './search-screen.component.html',
   styleUrl: './search-screen.component.css',
 })
