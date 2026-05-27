@@ -17,7 +17,7 @@ interface PlaybackTrack {
   };
 }
 
-type AppScreen = 'home' | 'search' | 'library' | 'profile' | 'recentlyPlayed';
+type AppScreen = 'home' | 'search' | 'library' | 'profile' | 'recentlyPlayed'| 'topTracks';
 
 @Injectable({
   providedIn: 'root',
@@ -46,6 +46,8 @@ export class PlayerStateService {
   readonly searchResults = signal<Track[]>([]);
   readonly isSearching = signal(false);
   readonly hasSearched = signal(false);
+  readonly topTracks = signal<Track[]>([]);
+  readonly isLoadingTopTracks = signal(false);
   readonly selectedOptionsTrack = signal<Track | null>(null);
   readonly trackOptionsMessage = signal<string | null>(null);
   readonly isTrackOptionsOpen = computed(() => Boolean(this.selectedOptionsTrack()));
@@ -252,8 +254,21 @@ export class PlayerStateService {
   setActiveScreen(screen: AppScreen): void {
     this.activeScreen.set(screen);
 
-    if (screen === 'library' && !this.libraryPlaylists().length) {
-      void this.loadLibraryPlaylists();
+    switch (screen) {
+      case 'library':
+        if (!this.libraryPlaylists().length) {
+          void this.loadLibraryPlaylists();
+        }
+        break;
+
+      case 'topTracks':
+        if (!this.topTracks().length) {
+          void this.loadTopTracks();
+        }
+        break;
+
+      default:
+        break;
     }
   }
 
@@ -345,6 +360,21 @@ export class PlayerStateService {
 
     await this.selectTrack(track);
     this.closeTrackOptions();
+  }
+
+  async loadTopTracks(): Promise<void> {
+    this.isLoadingTopTracks.set(true);
+
+    try {
+      const tracks = await this.spotifyApi.getTopTracks();
+
+      this.topTracks.set(this.removeDuplicateTracks(tracks));
+    } catch (error) {
+      console.error('Could not load Spotify top tracks:', error);
+      this.toast.error('Could not load your top tracks.');
+    } finally {
+      this.isLoadingTopTracks.set(false);
+    }
   }
 
   async addSelectedTrackToQueue(): Promise<void> {

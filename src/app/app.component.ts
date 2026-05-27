@@ -6,7 +6,9 @@ import { HomeScreenComponent } from './components/home-screen/home-screen.compon
 import { LibraryScreenComponent } from './components/library-screen/library-screen.component';
 import { MiniPlayerComponent } from './components/mini-player/mini-player.component';
 import { ProfileScreenComponent } from './components/profile-screen/profile-screen.component';
+import { RecentlyPlayedScreenComponent } from './components/recently-played-screen/recently-played-screen.component';
 import { SearchScreenComponent } from './components/search-screen/search-screen.component';
+import { TopTracksScreenComponent } from './components/top-tracks-screen/top-tracks-screen.component';
 import { ToastComponent } from './components/toast/toast.component';
 import { TrackOptionsSheetComponent } from './components/track-options-sheet/track-options-sheet.component';
 import { PlayerStateService } from './core/services/player-state.service';
@@ -23,6 +25,8 @@ import { SpotifyPlayerService } from './core/services/spotify-player.service';
     SearchScreenComponent,
     LibraryScreenComponent,
     ProfileScreenComponent,
+    RecentlyPlayedScreenComponent,
+    TopTracksScreenComponent,
     MiniPlayerComponent,
     FullPlayerComponent,
     BottomNavComponent,
@@ -43,6 +47,7 @@ export class AppComponent implements OnInit {
 
     if (this.spotifyAuth.isAuthenticated()) {
       await this.player.loadSpotifyTracks();
+      await this.player.loadTopTracks();
       await this.spotifyPlayer.initialize();
       this.player.startPlaybackSync();
     }

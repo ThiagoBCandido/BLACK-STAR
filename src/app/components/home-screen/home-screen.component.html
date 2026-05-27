@@ -68,12 +68,12 @@
         <h3 class="text-base font-light text-white/90">
           New Releases
         </h3>
-        <button class="text-xs text-white/45">
+        <button type="button" (click)="player.setActiveScreen('topTracks')" class="text-xs text-white/45 transition hover:text-white">
           View all
         </button>
       </div>
       <div class="scrollbar-hide flex gap-3 overflow-x-auto pb-2">
-        <button type="button" *ngFor="let track of player.tracks()" (click)="player.selectTrack(track)" class="w-[132px] shrink-0 text-left">
+        <button type="button" *ngFor="let track of player.topTracks().length ? player.topTracks() : player.tracks()" (click)="player.selectTrack(track)" class="w-[132px] shrink-0 text-left">
           <div class="mb-2 h-[132px] w-[132px] overflow-hidden rounded-md border border-white/10 bg-zinc-950">
             <img [src]="track.cover" [alt]="track.album" class="h-full w-full object-cover grayscale"/>
           </div>
@@ -114,11 +114,7 @@
         <h3 class="text-base font-light text-white/90">
           Recently Played
         </h3>
-        <button
-          type="button"
-          (click)="player.setActiveScreen('recentlyPlayed')"
-          class="text-xs text-white/45 transition hover:text-white"
-        >
+        <button type="button" (click)="player.setActiveScreen('recentlyPlayed')" class="text-xs text-white/45 transition hover:text-white">
           View all
         </button>
       </div>
