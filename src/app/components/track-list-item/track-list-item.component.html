@@ -1,0 +1,20 @@
+<div role="button" tabindex="0" (click)="selectTrack()" (keydown.enter)="handleKeyboardSelect($event)" (keydown.space)="handleKeyboardSelect($event)" class="flex w-full items-center gap-3 rounded-2xl p-2 text-left outline-none transition hover:bg-white/[0.05] focus:bg-white/[0.06]" [class.bg-white]="isCurrentTrack" [class.bg-opacity-5]="isCurrentTrack">
+  <span *ngIf="index !== null" class="w-5 shrink-0 text-center text-sm text-white/45">
+    {{ index }}
+  </span>
+  <img [src]="track.cover" [alt]="track.title" class="shrink-0 rounded object-cover grayscale" [ngClass]="size === 'compact' ? 'h-11 w-11' : 'h-14 w-14'"/>
+  <div class="min-w-0 flex-1">
+    <h4 class="truncate text-sm font-light text-white">
+      {{ track.title }}
+    </h4>
+    <p class="truncate text-xs text-white/45">
+      {{ resolvedSubtitle }}
+    </p>
+  </div>
+  <button type="button" (click)="togglePlayback($event)" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.04] transition hover:bg-white/[0.08]" [class.bg-white]="isCurrentTrack" [class.bg-opacity-10]="isCurrentTrack" aria-label="Play or pause track">
+    <img [src]="isCurrentTrackPlaying ? 'assets/icons/pause.svg' : 'assets/icons/play-button.svg'" alt="" class="icon-white h-4 w-4 object-contain"/>
+  </button>
+  <button *ngIf="showOptions" type="button" (click)="openOptions($event)" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.04] transition hover:bg-white/[0.08]" aria-label="Track options">
+    <img src="assets/icons/dots.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
+  </button>
+</div>

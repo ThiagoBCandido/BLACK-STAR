@@ -33,59 +33,34 @@
           Featured Release
         </p>
       </div>
-
       <article class="relative overflow-hidden rounded-3xl border border-white/10">
-        <img
-          [src]="featuredRelease.cover"
-          [alt]="featuredRelease.title"
-          class="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-2xl"
-        />
-
+        <img [src]="featuredRelease.cover" [alt]="featuredRelease.title" class="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-2xl"/>
         <div class="absolute inset-0 bg-black/65"></div>
         <div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/35"></div>
-
         <div class="relative flex items-center justify-between gap-4 p-4">
           <div class="min-w-0 flex-1">
             <p class="mb-1 text-[10px] uppercase tracking-[0.32em] text-white/35">
               Featured Release
             </p>
-
             <h2 class="truncate text-[30px] font-light leading-none text-white">
               {{ featuredRelease.title }}
             </h2>
-
             <p class="mt-2 truncate text-sm text-white/60">
               {{ featuredRelease.artist }}
             </p>
-
             <p class="mt-3 max-w-[190px] text-sm leading-5 text-white/75">
               {{ featuredRelease.description }}
             </p>
-
-            <button
-              type="button"
-              (click)="player.selectTrack(featuredRelease.track)"
-              class="mt-4 inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-sm font-medium text-black transition hover:scale-[1.02]"
-            >
-              <img
-                src="assets/icons/play-button.svg"
-                alt=""
-                class="h-3.5 w-3.5 object-contain"
-              />
+            <button type="button" (click)="player.selectTrack(featuredRelease.track)" class="mt-4 inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-sm font-medium text-black transition hover:scale-[1.02]">
+              <img src="assets/icons/play-button.svg" alt="" class="h-3.5 w-3.5 object-contain"/>
               <span>Play Now</span>
             </button>
           </div>
-
           <div class="h-28 w-28 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-[0_12px_28px_rgba(0,0,0,0.35)]">
-            <img
-              [src]="featuredRelease.cover"
-              [alt]="featuredRelease.title"
-              class="h-full w-full object-cover grayscale"
-            />
+            <img [src]="featuredRelease.cover" [alt]="featuredRelease.title" class="h-full w-full object-cover grayscale"/>
           </div>
         </div>
       </article>
-
       <div class="mt-3 flex items-center justify-center gap-2">
         <span class="h-1.5 w-1.5 rounded-full bg-white"></span>
         <span class="h-1.5 w-1.5 rounded-full bg-white/25"></span>
@@ -148,26 +123,8 @@
           View all
         </button>
       </div>
-      <div class="divide-y divide-white/5 border-y border-white/5">
-        <button type="button" *ngFor="let track of player.tracks()" (click)="player.selectTrack(track)" class="flex w-full items-center gap-3 py-2.5 text-left transition hover:bg-white/[0.03]" [class.bg-white]="track.id === player.currentTrack().id" [class.bg-opacity-5]="track.id === player.currentTrack().id">
-          <img [src]="track.cover" [alt]="track.title" class="h-11 w-11 rounded object-cover grayscale"/>
-          <div class="min-w-0 flex-1">
-            <h4 class="truncate text-sm font-light text-white/90">
-              {{ track.title }}
-            </h4>
-            <p class="truncate text-xs text-white/45">
-              {{ track.artist }}
-            </p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button type="button" (click)="player.toggleTrackPlayback(track, $event)" class="track-play-btn" [class.is-current]="track.id === player.currentTrack().id" aria-label="Play or pause track">
-              <img [src]="track.id === player.currentTrack().id && player.isPlaying() ? 'assets/icons/pause.svg' : 'assets/icons/play-button.svg'" alt="" class="track-play-icon icon-white"/>
-            </button>
-            <button type="button" (click)="player.openTrackOptions(track, $event)" class="track-menu-btn" aria-label="More options">
-              <img src="assets/icons/dots.svg" alt="" class="track-menu-icon icon-soft"/>
-            </button>
-          </div>
-        </button>
+      <div class="space-y-1 border-y border-white/10 py-1">
+        <app-track-list-item *ngFor="let track of player.tracks()" [track]="track" size="compact"></app-track-list-item>
       </div>
     </section>
   </section>
