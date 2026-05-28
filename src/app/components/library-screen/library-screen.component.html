@@ -18,22 +18,33 @@
           </p>
         </div>
       </div>
+      <form class="mb-5 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+        <img src="assets/icons/search.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
+        <input type="text" [value]="player.libraryTrackSearchQuery()" (input)="onLibrarySearchInput($event)" placeholder="Search in this playlist" class="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/35"/>
+        <button *ngIf="player.libraryTrackSearchQuery()" type="button" (click)="player.clearLibraryTrackSearch()" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] transition hover:bg-white/[0.1]" aria-label="Clear search">
+          <img src="assets/icons/x.svg" alt="" class="icon-soft h-3.5 w-3.5 object-contain"/>
+        </button>
+      </form>
       <div *ngIf="player.isLoadingPlaylistTracks()" class="py-2">
         <app-track-list-skeleton [items]="7"></app-track-list-skeleton>
       </div>
-      <div *ngIf="!player.isLoadingPlaylistTracks() && !player.selectedPlaylistTracks().length" class="empty-state">
+      <div *ngIf="!player.isLoadingPlaylistTracks() && !player.filteredSelectedPlaylistTracks().length" class="empty-state">
         <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
           Empty
         </p>
         <h2 class="mt-3 text-2xl font-light text-white">
-          No tracks found
+          {{ player.libraryTrackSearchQuery() ? 'No results found' : 'No tracks found' }}
         </h2>
         <p class="mt-3 max-w-[260px] text-sm leading-6 text-white/45">
-          Add songs to this playlist from the track options menu.
+          {{
+            player.libraryTrackSearchQuery()
+              ? 'Try searching by another song, artist or album.'
+              : 'Add songs from the track options menu.'
+          }}
         </p>
       </div>
-      <div *ngIf="!player.isLoadingPlaylistTracks() && player.selectedPlaylistTracks().length" class="space-y-2">
-        <app-track-list-item *ngFor="let track of player.selectedPlaylistTracks()" [track]="track" [showAlbum]="true"></app-track-list-item>
+      <div *ngIf="!player.isLoadingPlaylistTracks() && player.filteredSelectedPlaylistTracks().length" class="space-y-2">
+        <app-track-list-item *ngFor="let track of player.filteredSelectedPlaylistTracks()" [track]="track" [showAlbum]="true"></app-track-list-item>
       </div>
     </ng-container>
     <ng-template #libraryRoot>
@@ -122,22 +133,33 @@
             </p>
           </div>
         </div>
+        <form class="mb-5 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+          <img src="assets/icons/search.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
+          <input type="text" [value]="player.libraryTrackSearchQuery()" (input)="onLibrarySearchInput($event)" placeholder="Search in liked songs" class="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/35"/>
+          <button *ngIf="player.libraryTrackSearchQuery()" type="button" (click)="player.clearLibraryTrackSearch()" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] transition hover:bg-white/[0.1]" aria-label="Clear search">
+            <img src="assets/icons/x.svg" alt="" class="icon-soft h-3.5 w-3.5 object-contain"/>
+          </button>
+        </form>
         <div *ngIf="player.isLoadingLikedSongs()" class="py-2">
           <app-track-list-skeleton [items]="7"></app-track-list-skeleton>
         </div>
-        <div *ngIf="!player.isLoadingLikedSongs() && !player.likedSongs().length" class="empty-state">
+        <div *ngIf="!player.isLoadingLikedSongs() && !player.filteredLikedSongs().length" class="empty-state">
           <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
             Empty
           </p>
           <h2 class="mt-3 text-2xl font-light text-white">
-            No liked songs
+            {{ player.libraryTrackSearchQuery() ? 'No results found' : 'No tracks found' }}
           </h2>
           <p class="mt-3 max-w-[260px] text-sm leading-6 text-white/45">
-            Songs saved in your Spotify library will appear here.
+            {{
+              player.libraryTrackSearchQuery()
+                ? 'Try searching by another song, artist or album.'
+                : 'Songs saved in your Spotify library will appear here.'
+            }}
           </p>
         </div>
-        <div *ngIf="!player.isLoadingLikedSongs() && player.likedSongs().length" class="space-y-2">
-          <app-track-list-item *ngFor="let track of player.likedSongs()" [track]="track" [showAlbum]="true"></app-track-list-item>
+        <div *ngIf="!player.isLoadingLikedSongs() && player.filteredLikedSongs().length" class="space-y-2">
+          <app-track-list-item *ngFor="let track of player.filteredLikedSongs()" [track]="track" [showAlbum]="true"></app-track-list-item>
         </div>
       </ng-template>
     </ng-template>

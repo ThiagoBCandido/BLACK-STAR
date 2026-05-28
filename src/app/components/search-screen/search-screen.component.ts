@@ -1,19 +1,24 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, inject } from '@angular/core';
+import { ScreenHeaderComponent } from '../screen-header/screen-header.component';
 import { TrackListItemComponent } from '../track-list-item/track-list-item.component';
 import { TrackListSkeletonComponent } from '../track-list-skeleton/track-list-skeleton.component';
-import { PlayerStateService } from '../../core/services/player-state.service';
-import { ScreenHeaderComponent } from '../screen-header/screen-header.component';
+import { SearchStateService } from '../../core/state/search-state.service';
 
 @Component({
   selector: 'app-search-screen',
   standalone: true,
-  imports: [CommonModule, TrackListItemComponent, TrackListSkeletonComponent, ScreenHeaderComponent],
+  imports: [
+    CommonModule,
+    ScreenHeaderComponent,
+    TrackListItemComponent,
+    TrackListSkeletonComponent,
+  ],
   templateUrl: './search-screen.component.html',
   styleUrl: './search-screen.component.css',
 })
 export class SearchScreenComponent implements OnDestroy {
-  readonly player = inject(PlayerStateService);
+  readonly search = inject(SearchStateService);
 
   private searchDebounceId: ReturnType<typeof setTimeout> | null = null;
 
@@ -21,14 +26,14 @@ export class SearchScreenComponent implements OnDestroy {
     const input = event.target as HTMLInputElement;
     const query = input.value;
 
-    this.player.updateSearchQuery(query);
+    this.search.updateSearchQuery(query);
 
     if (this.searchDebounceId) {
       clearTimeout(this.searchDebounceId);
     }
 
     this.searchDebounceId = setTimeout(() => {
-      this.player.searchTracks();
+      void this.search.searchTracks();
     }, 450);
   }
 
@@ -40,7 +45,7 @@ export class SearchScreenComponent implements OnDestroy {
       this.searchDebounceId = null;
     }
 
-    await this.player.searchTracks();
+    await this.search.searchTracks();
   }
 
   clearSearch(): void {
@@ -49,7 +54,7 @@ export class SearchScreenComponent implements OnDestroy {
       this.searchDebounceId = null;
     }
 
-    this.player.clearSearch();
+    this.search.clearSearch();
   }
 
   ngOnDestroy(): void {

@@ -19,4 +19,9 @@ import { PlayerStateService } from '../../core/services/player-state.service';
 })
 export class LibraryScreenComponent {
   readonly player = inject(PlayerStateService);
+
+  onLibrarySearchInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.player.updateLibraryTrackSearchQuery(input.value);
+  }
 }

@@ -256,14 +256,25 @@ export class SpotifyApiService {
 
   async searchTracks(query: string): Promise<Track[]> {
     const trimmedQuery = query.trim();
+
     if (!trimmedQuery) {
       return [];
     }
+
     const params = new URLSearchParams();
+
     params.set('q', trimmedQuery);
     params.set('type', 'track');
+
     const response = await this.request<SearchTracksResponse>(`/search?${params.toString()}`);
-    return this.mapSpotifyTracks(response?.tracks?.items ?? []);
+
+    if (!response?.tracks?.items?.length) {
+      return [];
+    }
+
+    return response.tracks.items
+      .filter((track) => Boolean(track && track.name && track.uri))
+      .map((track) => this.mapSpotifyTrack(track));
   }
 
   async getUserPlaylists(currentUserId?: string): Promise<Playlist[]> {

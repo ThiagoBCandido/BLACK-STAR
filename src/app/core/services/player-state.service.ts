@@ -24,52 +24,66 @@ type AppScreen = 'home' | 'search' | 'library' | 'profile' | 'recentlyPlayed' | 
   providedIn: 'root',
 })
 export class PlayerStateService {
-  /*signals*/
+  /* services */
   private readonly spotifyApi = inject(SpotifyApiService);
   private readonly spotifyAuth = inject(SpotifyAuthService);
   private readonly spotifyPlayer = inject(SpotifyPlayerService);
   private readonly toast = inject(ToastService);
-  
+
+  /* library signals */
+  readonly libraryTrackSearchQuery = signal('');
   readonly likedSongs = signal<Track[]>([]);
   readonly likedTrackIds = signal<Set<string>>(new Set());
   readonly isLikedSongsOpen = signal(false);
   readonly isLoadingLikedSongs = signal(false);
+
+  /* app data signals */
   readonly tracks = signal<Track[]>(TRACKS);
   readonly playlists = signal(PLAYLISTS);
+
+  /* Spotify library signals */
   readonly libraryPlaylists = signal<Playlist[]>([]);
   readonly selectedPlaylist = signal<Playlist | null>(null);
   readonly selectedPlaylistTracks = signal<Track[]>([]);
   readonly isLoadingLibrary = signal(false);
   readonly isLoadingPlaylistTracks = signal(false);
   readonly libraryError = signal<string | null>(null);
+
+  /* playlist creation signals */
   readonly isCreatePlaylistOpen = signal(false);
   readonly createPlaylistName = signal('');
   readonly createPlaylistDescription = signal('');
   readonly createPlaylistIsPublic = signal(false);
   readonly isCreatingPlaylist = signal(false);
+
+  /* playback signals */
   readonly currentTrack = signal<Track>(TRACKS[2]);
   readonly isPlaying = signal(false);
   readonly isPlayerOpen = signal(false);
   readonly isPlayerClosing = signal(false);
   readonly isLiked = signal(false);
   readonly isLoadingSpotifyTracks = signal(false);
+
+  /* navigation signals */
   readonly activeScreen = signal<AppScreen>('home');
-  readonly searchQuery = signal('');
-  readonly searchResults = signal<Track[]>([]);
-  readonly isSearching = signal(false);
-  readonly hasSearched = signal(false);
+
+  /* track action signals */
   readonly isAddToPlaylistOpen = signal(false);
   readonly isAddingTrackToPlaylist = signal(false);
   readonly topTracks = signal<Track[]>([]);
   readonly isLoadingTopTracks = signal(false);
   readonly selectedOptionsTrack = signal<Track | null>(null);
   readonly isTrackOptionsOpen = computed(() => Boolean(this.selectedOptionsTrack()));
+
+  /* Spotify sync signals */
   readonly activeSpotifyDeviceName = signal<string | null>(null);
   readonly isExternalPlaybackActive = signal(false);
+
+  /* home computed values */
   readonly featuredTrack = computed(() => {
-  
     const currentTrack = this.currentTrack();
     const firstTrack = this.tracks()[0];
+
     return currentTrack ?? firstTrack;
   });
 
@@ -83,6 +97,32 @@ export class PlayerStateService {
     return `${track.album} · ${track.duration}`;
   });
 
+  /* library computed values */
+  readonly filteredLikedSongs = computed(() => {
+    const query = this.libraryTrackSearchQuery().trim().toLowerCase();
+
+    if (!query) {
+      return this.likedSongs();
+    }
+
+    return this.likedSongs().filter((track) =>
+      `${track.title} ${track.artist} ${track.album}`.toLowerCase().includes(query)
+    );
+  });
+
+  readonly filteredSelectedPlaylistTracks = computed(() => {
+    const query = this.libraryTrackSearchQuery().trim().toLowerCase();
+
+    if (!query) {
+      return this.selectedPlaylistTracks();
+    }
+
+    return this.selectedPlaylistTracks().filter((track) =>
+      `${track.title} ${track.artist} ${track.album}`.toLowerCase().includes(query)
+    );
+  });
+
+  /* player computed values */
   readonly positionMs = computed(() => this.spotifyPlayer.positionMs());
   readonly durationMs = computed(() => {
     const spotifyDuration = this.spotifyPlayer.durationMs();
@@ -112,7 +152,6 @@ export class PlayerStateService {
   readonly isMuted = computed(() => this.spotifyPlayer.isMuted());
 
   private closeTimeoutId: ReturnType<typeof setTimeout> | null = null;
-  private searchRequestId = 0;
   private playbackSyncIntervalId: ReturnType<typeof setInterval> | null = null;
   private isSyncingCurrentPlayback = false;
 
@@ -368,6 +407,15 @@ export class PlayerStateService {
     }
   }
 
+  /* library methods */
+  updateLibraryTrackSearchQuery(query: string): void {
+    this.libraryTrackSearchQuery.set(query);
+  }
+
+  clearLibraryTrackSearch(): void {
+    this.libraryTrackSearchQuery.set('');
+  }
+
   async loadLibraryPlaylists(): Promise<void> {
     this.isLoadingLibrary.set(true);
     this.libraryError.set(null);
@@ -395,6 +443,7 @@ export class PlayerStateService {
       return;
     }
 
+    this.clearLibraryTrackSearch();
     this.isLikedSongsOpen.set(false);
     this.selectedPlaylist.set(playlist);
     this.selectedPlaylistTracks.set([]);
@@ -420,6 +469,7 @@ export class PlayerStateService {
   }
 
   closeSelectedPlaylist(): void {
+    this.clearLibraryTrackSearch();
     this.selectedPlaylist.set(null);
     this.selectedPlaylistTracks.set([]);
     this.libraryError.set(null);
@@ -489,7 +539,9 @@ export class PlayerStateService {
   }
 
   async openLikedSongs(): Promise<void> {
+    this.clearLibraryTrackSearch();
     this.isLikedSongsOpen.set(true);
+    this.selectedPlaylist.set(null);
     this.libraryError.set(null);
 
     if (this.likedSongs().length) {
@@ -526,6 +578,7 @@ export class PlayerStateService {
   }
 
   closeLikedSongs(): void {
+    this.clearLibraryTrackSearch();
     this.isLikedSongsOpen.set(false);
   }
 
@@ -608,53 +661,6 @@ export class PlayerStateService {
     } catch {
       this.toast.error('Could not copy the link.');
     }
-  }
-
-  updateSearchQuery(query: string): void {
-    this.searchQuery.set(query);
-  }
-
-  async searchTracks(): Promise<void> {
-    const query = this.searchQuery().trim();
-    const requestId = ++this.searchRequestId;
-
-    if (query.length < 2) {
-      this.searchResults.set([]);
-      this.hasSearched.set(false);
-      this.isSearching.set(false);
-      return;
-    }
-
-    this.isSearching.set(true);
-    this.hasSearched.set(true);
-
-    try {
-      const results = await this.spotifyApi.searchTracks(query);
-
-      if (requestId !== this.searchRequestId) {
-        return;
-      }
-
-      this.searchResults.set(results);
-    } catch (error) {
-      console.error('Could not search Spotify tracks:', error);
-
-      if (requestId === this.searchRequestId) {
-        this.searchResults.set([]);
-      }
-    } finally {
-      if (requestId === this.searchRequestId) {
-        this.isSearching.set(false);
-      }
-    }
-  }
-
-  clearSearch(): void {
-    this.searchRequestId++;
-    this.searchQuery.set('');
-    this.searchResults.set([]);
-    this.hasSearched.set(false);
-    this.isSearching.set(false);
   }
 
   async selectTrack(track: Track): Promise<void> {

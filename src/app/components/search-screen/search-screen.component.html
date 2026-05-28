@@ -2,14 +2,14 @@
   <app-screen-header title="SEARCH" eyebrow="Spotify" heading="Search Music" description="Find songs, artists or albums and play them through BLACK STAR.">
     <form (submit)="onSubmit($event)" class="mt-5 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
       <img src="assets/icons/search.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
-      <input type="text" [value]="player.searchQuery()" (input)="onSearchInput($event)" placeholder="Search songs, artists or albums" class="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/35"/>
-      <button *ngIf="player.searchQuery()" type="button" (click)="clearSearch()" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] transition hover:bg-white/[0.1]" aria-label="Clear search">
+      <input type="text" [value]="search.searchQuery()" (input)="onSearchInput($event)" placeholder="Search songs, artists or albums" class="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/35"/>
+      <button *ngIf="search.searchQuery()" type="button" (click)="clearSearch()" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] transition hover:bg-white/[0.1]" aria-label="Clear search">
         <img src="assets/icons/x.svg" alt="" class="icon-soft h-3.5 w-3.5 object-contain"/>
       </button>
     </form>
   </app-screen-header>
   <section class="flex-1 overflow-y-auto px-5 py-5">
-    <div *ngIf="!player.hasSearched() && !player.searchQuery()" class="empty-state">
+    <div *ngIf="!search.hasSearched() && !search.searchQuery()" class="empty-state">
       <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
         Find music
       </p>
@@ -20,19 +20,19 @@
         Start typing a song, artist or album. BLACK STAR will suggest tracks automatically.
       </p>
     </div>
-    <div *ngIf="player.searchQuery().length === 1" class="py-12 text-center text-sm text-white/45">
+    <div *ngIf="search.searchQuery().length === 1" class="py-12 text-center text-sm text-white/45">
       Type at least 2 characters to search.
     </div>
-    <div *ngIf="player.isSearching()" class="py-2">
+    <div *ngIf="search.isSearching()" class="py-2">
       <app-track-list-skeleton [items]="5"></app-track-list-skeleton>
     </div>
-    <div *ngIf="player.hasSearched() && !player.isSearching() && !player.searchResults().length" class="py-12 text-center">
+    <div *ngIf="search.hasSearched() && !search.isSearching() && !search.searchResults().length" class="py-12 text-center">
       <p class="text-sm text-white/50">
         No tracks found.
       </p>
     </div>
-    <div *ngIf="player.searchResults().length" class="space-y-2">
-      <app-track-list-item *ngFor="let track of player.searchResults()" [track]="track" [showAlbum]="true"></app-track-list-item>
+    <div *ngIf="search.searchResults().length" class="space-y-2">
+      <app-track-list-item *ngFor="let track of search.searchResults()" [track]="track" [showAlbum]="true"></app-track-list-item>
     </div>
   </section>
 </section>
