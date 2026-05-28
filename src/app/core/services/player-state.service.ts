@@ -2,9 +2,9 @@ import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { PLAYLISTS, TRACKS } from '../data/mock-music.data';
 import { Playlist, Track } from '../models/music.model';
 import { SpotifyApiService } from './spotify-api.service';
-import { SpotifyAuthService } from './spotify-auth.service';
 import { SpotifyPlayerService } from './spotify-player.service';
 import { ToastService } from './toast.service';
+import { LibraryStateService } from '../state/library-state.service';
 
 interface PlaybackTrack {
   id: string;
@@ -26,28 +26,33 @@ type AppScreen = 'home' | 'search' | 'library' | 'profile' | 'recentlyPlayed' | 
 export class PlayerStateService {
   /* services */
   private readonly spotifyApi = inject(SpotifyApiService);
-  private readonly spotifyAuth = inject(SpotifyAuthService);
   private readonly spotifyPlayer = inject(SpotifyPlayerService);
   private readonly toast = inject(ToastService);
+  private readonly libraryState = inject(LibraryStateService);
 
   /* library signals */
-  readonly libraryTrackSearchQuery = signal('');
-  readonly likedSongs = signal<Track[]>([]);
-  readonly likedTrackIds = signal<Set<string>>(new Set());
-  readonly isLikedSongsOpen = signal(false);
-  readonly isLoadingLikedSongs = signal(false);
+  readonly libraryPlaylists = this.libraryState.libraryPlaylists;
+  readonly selectedPlaylist = this.libraryState.selectedPlaylist;
+  readonly selectedPlaylistTracks = this.libraryState.selectedPlaylistTracks;
+
+  readonly likedSongs = this.libraryState.likedSongs;
+  readonly likedTrackIds = this.libraryState.likedTrackIds;
+  readonly isLikedSongsOpen = this.libraryState.isLikedSongsOpen;
+
+  readonly isLoadingLibrary = this.libraryState.isLoadingLibrary;
+  readonly isLoadingPlaylistTracks = this.libraryState.isLoadingPlaylistTracks;
+  readonly isLoadingLikedSongs = this.libraryState.isLoadingLikedSongs;
+
+  readonly libraryError = this.libraryState.libraryError;
+  readonly libraryTrackSearchQuery = this.libraryState.libraryTrackSearchQuery;
+
+  readonly editablePlaylists = this.libraryState.editablePlaylists;
+  readonly filteredLikedSongs = this.libraryState.filteredLikedSongs;
+  readonly filteredSelectedPlaylistTracks = this.libraryState.filteredSelectedPlaylistTracks;
 
   /* app data signals */
   readonly tracks = signal<Track[]>(TRACKS);
   readonly playlists = signal(PLAYLISTS);
-
-  /* Spotify library signals */
-  readonly libraryPlaylists = signal<Playlist[]>([]);
-  readonly selectedPlaylist = signal<Playlist | null>(null);
-  readonly selectedPlaylistTracks = signal<Track[]>([]);
-  readonly isLoadingLibrary = signal(false);
-  readonly isLoadingPlaylistTracks = signal(false);
-  readonly libraryError = signal<string | null>(null);
 
   /* playlist creation signals */
   readonly isCreatePlaylistOpen = signal(false);
@@ -95,31 +100,6 @@ export class PlayerStateService {
     }
 
     return `${track.album} · ${track.duration}`;
-  });
-
-  /* library computed values */
-  readonly filteredLikedSongs = computed(() => {
-    const query = this.libraryTrackSearchQuery().trim().toLowerCase();
-
-    if (!query) {
-      return this.likedSongs();
-    }
-
-    return this.likedSongs().filter((track) =>
-      `${track.title} ${track.artist} ${track.album}`.toLowerCase().includes(query)
-    );
-  });
-
-  readonly filteredSelectedPlaylistTracks = computed(() => {
-    const query = this.libraryTrackSearchQuery().trim().toLowerCase();
-
-    if (!query) {
-      return this.selectedPlaylistTracks();
-    }
-
-    return this.selectedPlaylistTracks().filter((track) =>
-      `${track.title} ${track.artist} ${track.album}`.toLowerCase().includes(query)
-    );
   });
 
   /* player computed values */
@@ -291,26 +271,8 @@ export class PlayerStateService {
         return;
       }
 
-      this.libraryPlaylists.update((playlists) =>
-        playlists.map((item) =>
-          item.id === playlist.id
-            ? { ...item, totalTracks: (item.totalTracks ?? 0) + 1 }
-            : item
-        )
-      );
-
-      if (this.selectedPlaylist()?.id === playlist.id) {
-        this.selectedPlaylistTracks.update((tracks) => {
-          const alreadyExists = tracks.some((item) => item.id === track.id);
-
-          if (alreadyExists) {
-            return tracks;
-          }
-
-          return [track, ...tracks];
-        });
-      }
-
+      this.libraryState.updatePlaylistTrackCount(playlist.id, 1);
+      this.libraryState.addTrackToOpenedPlaylist(playlist.id, track);
       this.toast.success(`Added to ${playlist.title}.`);
       this.isAddToPlaylistOpen.set(false);
       this.closeTrackOptions();
@@ -409,70 +371,23 @@ export class PlayerStateService {
 
   /* library methods */
   updateLibraryTrackSearchQuery(query: string): void {
-    this.libraryTrackSearchQuery.set(query);
+    this.libraryState.updateLibraryTrackSearchQuery(query);
   }
 
   clearLibraryTrackSearch(): void {
-    this.libraryTrackSearchQuery.set('');
+    this.libraryState.clearLibraryTrackSearch();
   }
 
-  async loadLibraryPlaylists(): Promise<void> {
-    this.isLoadingLibrary.set(true);
-    this.libraryError.set(null);
-
-    try {
-      const currentUserId = this.spotifyAuth.profile()?.id;
-      const playlists = await this.spotifyApi.getUserPlaylists(currentUserId);
-
-      this.libraryPlaylists.set(playlists);
-
-      if (!playlists.length) {
-        this.libraryError.set('No Spotify playlists found.');
-      }
-    } catch (error) {
-      console.error('Could not load Spotify playlists:', error);
-      this.libraryError.set('Could not load your Spotify playlists.');
-    } finally {
-      this.isLoadingLibrary.set(false);
-    }
+  loadLibraryPlaylists(): Promise<void> {
+    return this.libraryState.loadLibraryPlaylists();
   }
 
-  async selectPlaylist(playlist: Playlist): Promise<void> {
-    if (playlist.isAccessible === false) {
-      this.toast.error('Spotify only allows opening playlists you own or collaborate on.');
-      return;
-    }
-
-    this.clearLibraryTrackSearch();
-    this.isLikedSongsOpen.set(false);
-    this.selectedPlaylist.set(playlist);
-    this.selectedPlaylistTracks.set([]);
-    this.isLoadingPlaylistTracks.set(true);
-    this.libraryError.set(null);
-
-    try {
-      const tracks = await this.spotifyApi.getPlaylistTracks(playlist.id);
-
-      this.selectedPlaylistTracks.set(tracks);
-
-      if (!tracks.length) {
-        this.libraryError.set(
-          'No playable tracks were returned by Spotify for this playlist.'
-        );
-      }
-    } catch (error) {
-      console.error('Could not load Spotify playlist tracks:', error);
-      this.libraryError.set('Could not load this playlist. Check the console error.');
-    } finally {
-      this.isLoadingPlaylistTracks.set(false);
-    }
+  selectPlaylist(playlist: Playlist): Promise<void> {
+    return this.libraryState.selectPlaylist(playlist);
   }
 
   closeSelectedPlaylist(): void {
-    this.clearLibraryTrackSearch();
-    this.selectedPlaylist.set(null);
-    this.selectedPlaylistTracks.set([]);
-    this.libraryError.set(null);
+    this.libraryState.closeSelectedPlaylist();
   }
 
   openCreatePlaylist(): void {
@@ -527,7 +442,7 @@ export class PlayerStateService {
         return;
       }
 
-      this.libraryPlaylists.update((playlists) => [playlist, ...playlists]);
+      this.libraryState.addPlaylistToLibrary(playlist);
       this.toast.success('Playlist created.');
       this.isCreatePlaylistOpen.set(false);
     } catch (error) {
@@ -538,48 +453,16 @@ export class PlayerStateService {
     }
   }
 
-  async openLikedSongs(): Promise<void> {
-    this.clearLibraryTrackSearch();
-    this.isLikedSongsOpen.set(true);
-    this.selectedPlaylist.set(null);
-    this.libraryError.set(null);
-
-    if (this.likedSongs().length) {
-      return;
-    }
-
-    await this.loadLikedSongs();
+  openLikedSongs(): Promise<void> {
+    return this.libraryState.openLikedSongs();
   }
 
-  async loadLikedSongs(): Promise<void> {
-    this.isLoadingLikedSongs.set(true);
-    this.libraryError.set(null);
-
-    try {
-      const tracks = await this.spotifyApi.getSavedTracks();
-
-      if (tracks === null) {
-        this.libraryError.set('Could not refresh Liked Songs right now.');
-        return;
-      }
-
-      this.likedSongs.set(tracks);
-      this.syncLikedTrackIds(tracks);
-
-      if (!tracks.length) {
-        this.libraryError.set('No liked songs found in your Spotify library.');
-      }
-    } catch (error) {
-      console.error('Could not load liked songs:', error);
-      this.libraryError.set('Could not load your liked songs. Try reconnecting Spotify.');
-    } finally {
-      this.isLoadingLikedSongs.set(false);
-    }
+  loadLikedSongs(): Promise<void> {
+    return this.libraryState.loadLikedSongs();
   }
 
   closeLikedSongs(): void {
-    this.clearLibraryTrackSearch();
-    this.isLikedSongsOpen.set(false);
+    this.libraryState.closeLikedSongs();
   }
 
   openTrackOptions(track: Track, event?: Event): void {
@@ -854,7 +737,7 @@ export class PlayerStateService {
     this.moveTrackToTop(track);
 
     if (this.shouldMirrorTrackIntoLikedSongs(track)) {
-      this.likedSongs.update((tracks) => [track, ...tracks]);
+      this.addTrackToLikedState(track);
     }
 
     if (this.currentTrack().id !== track.id) {
@@ -863,55 +746,16 @@ export class PlayerStateService {
   }
 
   private async syncCurrentTrackLikeState(track: Track): Promise<void> {
-    if (!track.spotifyUri) {
-      this.isLiked.set(false);
-      return;
-    }
-
-    if (this.likedTrackIds().has(track.id)) {
-      this.isLiked.set(true);
-      return;
-    }
-
-    try {
-      const isSaved = await this.spotifyApi.checkLibraryItem(track.spotifyUri);
-
-      this.isLiked.set(isSaved);
-
-      if (isSaved) {
-        this.addTrackToLikedState(track);
-      }
-    } catch (error) {
-      console.error('Could not check liked state:', error);
-    }
+    const isSaved = await this.libraryState.checkTrackLikeState(track);
+    this.isLiked.set(isSaved);
   }
 
   private addTrackToLikedState(track: Track): void {
-    this.likedTrackIds.update((ids) => {
-      const nextIds = new Set(ids);
-      nextIds.add(track.id);
-      return nextIds;
-    });
-
-    this.likedSongs.update((tracks) => {
-      const filteredTracks = tracks.filter((item) => item.id !== track.id);
-      return [track, ...filteredTracks];
-    });
+    this.libraryState.addTrackToLikedState(track);
   }
 
   private removeTrackFromLikedState(track: Track): void {
-    this.likedTrackIds.update((ids) => {
-      const nextIds = new Set(ids);
-      nextIds.delete(track.id);
-      return nextIds;
-    });
-
-    this.likedSongs.update((tracks) => tracks.filter((item) => item.id !== track.id));
-  }
-
-  private syncLikedTrackIds(tracks: Track[]): void {
-    this.likedTrackIds.set(new Set(tracks.map((track) => track.id)));
-    this.isLiked.set(tracks.some((track) => track.id === this.currentTrack().id));
+    this.libraryState.removeTrackFromLikedState(track);
   }
 
   private shouldMirrorTrackIntoLikedSongs(track: Track): boolean {
