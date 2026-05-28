@@ -28,14 +28,14 @@ interface SpotifyTrack {
   id: string | null;
   name: string;
   uri: string;
-  duration_ms: number;
+  duration_ms?: number;
   type?: string;
   is_local?: boolean;
   external_urls?: {
     spotify?: string;
   };
-  artists: SpotifyArtist[];
-  album: SpotifyAlbum;
+  artists?: SpotifyArtist[];
+  album?: SpotifyAlbum;
 }
 
 interface SpotifyPlaylist {
@@ -43,12 +43,35 @@ interface SpotifyPlaylist {
   name: string;
   description?: string | null;
   images?: SpotifyImage[];
+  uri?: string;
+  collaborative?: boolean;
+  external_urls?: {
+    spotify?: string;
+  };
   owner?: {
+    id?: string;
     display_name?: string | null;
   };
-  tracks?: {
+  items?: {
+    href?: string;
     total?: number;
   };
+  tracks?: {
+    href?: string;
+    total?: number;
+  };
+}
+
+interface PlaylistItem {
+  track?: SpotifyTrack | null;
+  item?: SpotifyTrack | null;
+  is_local?: boolean;
+}
+
+interface PlaylistTracksResponse {
+  items: PlaylistItem[];
+  next?: string | null;
+  total?: number;
 }
 
 interface RecentlyPlayedResponse {
@@ -144,7 +167,7 @@ export class SpotifyApiService {
       return null;
     }
 
-    return this.mapSpotifyPlaylist(response);
+    return this.mapSpotifyPlaylist(response, this.auth.profile()?.id);
   }
 
   async getTopTracks(): Promise<Track[]> {
@@ -238,17 +261,77 @@ export class SpotifyApiService {
     return this.mapSpotifyTracks(response?.tracks?.items ?? []);
   }
 
-  async getUserPlaylists(): Promise<Playlist[]> {
+  async getUserPlaylists(currentUserId?: string): Promise<Playlist[]> {
     const params = new URLSearchParams();
 
     params.set('limit', '50');
-    params.set('fields', 'items(id,name,description,images(url),owner(display_name),tracks(total)),next');
+    params.set(
+      'fields',
+      'items(id,name,description,images(url),uri,collaborative,external_urls(spotify),owner(id,display_name),items(total),tracks(total)),next'
+    );
 
     const response = await this.request<UserPlaylistsResponse>(`/me/playlists?${params.toString()}`);
 
-    return (response?.items ?? [])
+    if (!response?.items?.length) {
+      return [];
+    }
+
+    return response.items
       .filter((playlist) => Boolean(playlist?.id))
-      .map((playlist) => this.mapSpotifyPlaylist(playlist));
+      .map((playlist) => this.mapSpotifyPlaylist(playlist, currentUserId));
+  }
+
+  async getPlaylistTracks(playlistId: string): Promise<Track[]> {
+    if (!playlistId) {
+      return [];
+    }
+
+    const limit = 50;
+    let offset = 0;
+    let hasNextPage = true;
+
+    const playlistItems: PlaylistItem[] = [];
+
+    while (hasNextPage) {
+      const params = new URLSearchParams();
+
+      params.set('limit', String(limit));
+      params.set('offset', String(offset));
+      params.set('locale', 'pt-BR');
+
+      const response = await this.request<PlaylistTracksResponse>(
+        `/playlists/${encodeURIComponent(playlistId)}/items?${params.toString()}`
+      );
+
+      if (!response?.items?.length) {
+        break;
+      }
+
+      playlistItems.push(...response.items);
+
+      offset += limit;
+      hasNextPage = Boolean(response.next);
+    }
+
+    return playlistItems
+      .map((playlistItem) => {
+        const track = playlistItem.track ?? playlistItem.item ?? null;
+
+        if (!track || playlistItem.is_local || track.is_local) {
+          return null;
+        }
+
+        return track;
+      })
+      .filter((track): track is SpotifyTrack => {
+        return Boolean(
+          track &&
+          track.name &&
+          track.uri &&
+          track.uri.startsWith('spotify:track:')
+        );
+      })
+      .map((track) => this.mapSpotifyTrack(track));
   }
 
   private createUriParams(uri: string): string {
@@ -326,24 +409,43 @@ export class SpotifyApiService {
     return {
       id: track.id ?? track.uri,
       title: track.name,
-      artist: track.artists.map((artist) => artist.name).join(', '),
-      album: track.album.name,
-      cover: track.album.images[0]?.url ?? '',
-      duration: this.formatDuration(track.duration_ms),
-      durationMs: track.duration_ms,
+      artist:
+        track.artists?.map((artist) => artist.name).join(', ') ||
+        'Unknown artist',
+      album: track.album?.name || 'Unknown album',
+      cover: track.album?.images?.[0]?.url ?? '',
+      duration: this.formatDuration(track.duration_ms ?? 0),
+      durationMs: track.duration_ms ?? 0,
       spotifyUri: track.uri,
       spotifyUrl: track.external_urls?.spotify,
     };
   }
 
-  private mapSpotifyPlaylist(playlist: SpotifyPlaylist): Playlist {
+  private mapSpotifyPlaylist(playlist: SpotifyPlaylist, currentUserId?: string): Playlist {
+    const ownerId = playlist.owner?.id;
+    const collaborative = Boolean(playlist.collaborative);
+
+    const isOwnedByCurrentUser = Boolean(
+      currentUserId && ownerId === currentUserId
+    );
+
+    const isAccessible = currentUserId
+      ? isOwnedByCurrentUser || collaborative
+      : true;
+
     return {
       id: playlist.id,
       title: playlist.name || 'Untitled playlist',
       description: playlist.description || 'Spotify playlist',
       image: playlist.images?.[0]?.url ?? '',
       owner: playlist.owner?.display_name ?? 'Spotify',
-      totalTracks: playlist.tracks?.total ?? 0,
+      ownerId,
+      totalTracks: playlist.items?.total ?? playlist.tracks?.total ?? 0,
+      collaborative,
+      isOwnedByCurrentUser,
+      isAccessible,
+      spotifyUri: playlist.uri,
+      spotifyUrl: playlist.external_urls?.spotify,
     };
   }
 

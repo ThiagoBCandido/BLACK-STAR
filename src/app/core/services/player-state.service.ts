@@ -2,6 +2,7 @@ import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { PLAYLISTS, TRACKS } from '../data/mock-music.data';
 import { Playlist, Track } from '../models/music.model';
 import { SpotifyApiService } from './spotify-api.service';
+import { SpotifyAuthService } from './spotify-auth.service';
 import { SpotifyPlayerService } from './spotify-player.service';
 import { ToastService } from './toast.service';
 
@@ -25,6 +26,7 @@ type AppScreen = 'home' | 'search' | 'library' | 'profile' | 'recentlyPlayed' | 
 export class PlayerStateService {
   /*signals*/
   private readonly spotifyApi = inject(SpotifyApiService);
+  private readonly spotifyAuth = inject(SpotifyAuthService);
   private readonly spotifyPlayer = inject(SpotifyPlayerService);
   private readonly toast = inject(ToastService);
   
@@ -35,7 +37,10 @@ export class PlayerStateService {
   readonly tracks = signal<Track[]>(TRACKS);
   readonly playlists = signal(PLAYLISTS);
   readonly libraryPlaylists = signal<Playlist[]>([]);
+  readonly selectedPlaylist = signal<Playlist | null>(null);
+  readonly selectedPlaylistTracks = signal<Track[]>([]);
   readonly isLoadingLibrary = signal(false);
+  readonly isLoadingPlaylistTracks = signal(false);
   readonly libraryError = signal<string | null>(null);
   readonly isCreatePlaylistOpen = signal(false);
   readonly createPlaylistName = signal('');
@@ -58,7 +63,6 @@ export class PlayerStateService {
   readonly topTracks = signal<Track[]>([]);
   readonly isLoadingTopTracks = signal(false);
   readonly selectedOptionsTrack = signal<Track | null>(null);
-  readonly trackOptionsMessage = signal<string | null>(null);
   readonly isTrackOptionsOpen = computed(() => Boolean(this.selectedOptionsTrack()));
   readonly activeSpotifyDeviceName = signal<string | null>(null);
   readonly isExternalPlaybackActive = signal(false);
@@ -256,7 +260,19 @@ export class PlayerStateService {
         )
       );
 
-      this.toast.success('Added to playlist.');
+      if (this.selectedPlaylist()?.id === playlist.id) {
+        this.selectedPlaylistTracks.update((tracks) => {
+          const alreadyExists = tracks.some((item) => item.id === track.id);
+
+          if (alreadyExists) {
+            return tracks;
+          }
+
+          return [track, ...tracks];
+        });
+      }
+
+      this.toast.success(`Added to ${playlist.title}.`);
       this.isAddToPlaylistOpen.set(false);
       this.closeTrackOptions();
     } catch (error) {
@@ -357,7 +373,8 @@ export class PlayerStateService {
     this.libraryError.set(null);
 
     try {
-      const playlists = await this.spotifyApi.getUserPlaylists();
+      const currentUserId = this.spotifyAuth.profile()?.id;
+      const playlists = await this.spotifyApi.getUserPlaylists(currentUserId);
 
       this.libraryPlaylists.set(playlists);
 
@@ -370,6 +387,42 @@ export class PlayerStateService {
     } finally {
       this.isLoadingLibrary.set(false);
     }
+  }
+
+  async selectPlaylist(playlist: Playlist): Promise<void> {
+    if (playlist.isAccessible === false) {
+      this.toast.error('Spotify only allows opening playlists you own or collaborate on.');
+      return;
+    }
+
+    this.isLikedSongsOpen.set(false);
+    this.selectedPlaylist.set(playlist);
+    this.selectedPlaylistTracks.set([]);
+    this.isLoadingPlaylistTracks.set(true);
+    this.libraryError.set(null);
+
+    try {
+      const tracks = await this.spotifyApi.getPlaylistTracks(playlist.id);
+
+      this.selectedPlaylistTracks.set(tracks);
+
+      if (!tracks.length) {
+        this.libraryError.set(
+          'No playable tracks were returned by Spotify for this playlist.'
+        );
+      }
+    } catch (error) {
+      console.error('Could not load Spotify playlist tracks:', error);
+      this.libraryError.set('Could not load this playlist. Check the console error.');
+    } finally {
+      this.isLoadingPlaylistTracks.set(false);
+    }
+  }
+
+  closeSelectedPlaylist(): void {
+    this.selectedPlaylist.set(null);
+    this.selectedPlaylistTracks.set([]);
+    this.libraryError.set(null);
   }
 
   openCreatePlaylist(): void {
@@ -476,19 +529,13 @@ export class PlayerStateService {
     this.isLikedSongsOpen.set(false);
   }
 
-  showPlaylistUnavailable(): void {
-    this.toast.info('Playlist track loading is disabled for now.');
-  }
-
   openTrackOptions(track: Track, event?: Event): void {
     event?.stopPropagation();
-    this.trackOptionsMessage.set(null);
     this.selectedOptionsTrack.set(track);
   }
 
   closeTrackOptions(): void {
     this.selectedOptionsTrack.set(null);
-    this.trackOptionsMessage.set(null);
   }
 
   async playOptionsTrack(): Promise<void> {

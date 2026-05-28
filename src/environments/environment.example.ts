@@ -2,7 +2,7 @@ export const environment = {
   production: false,
   spotify: {
     clientId: 'your_spotify_client_id_here',
-    redirectUri: 'http://127.0.0.1:4200/callback',
+    redirectUri: 'http://127.0.0.1:4200',
     scopes: [
       'user-read-private',
       'user-read-email',

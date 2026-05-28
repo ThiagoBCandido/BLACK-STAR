@@ -1,111 +1,145 @@
 <section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
-<app-screen-header title="LIBRARY" eyebrow="Spotify" [heading]="player.isLikedSongsOpen() ? 'Liked Songs' : 'Your Library'" actionLabel="Playlist" actionIcon="assets/icons/add.svg" actionTitle="Create playlist" (action)="player.openCreatePlaylist()"></app-screen-header>  
+  <app-screen-header title="LIBRARY" eyebrow="Spotify" [heading]=" player.selectedPlaylist() ? player.selectedPlaylist()?.title || 'Playlist' : player.isLikedSongsOpen() ? 'Liked Songs' : 'Your Library'" actionLabel="Playlist" actionIcon="assets/icons/add.svg" actionTitle="Create playlist" (action)="player.openCreatePlaylist()"></app-screen-header>
   <section class="flex-1 overflow-y-auto px-5 py-5">
     <div *ngIf="player.libraryError()" class="mb-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/60">
       {{ player.libraryError() }}
     </div>
-    <ng-container *ngIf="!player.isLikedSongsOpen(); else likedSongsView">
-      <button type="button" (click)="player.openLikedSongs()" class="mb-5 flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-left transition hover:border-white/20 hover:bg-white/[0.07]">
-        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-white/20 to-white/5">
-          <img src="assets/icons/star_filled.svg" alt="" class="icon-active h-7 w-7 object-contain"/>
-        </div>
-        <div class="min-w-0 flex-1">
-          <h3 class="truncate text-sm font-light text-white">
-            Liked Songs
-          </h3>
-          <p class="truncate text-xs text-white/45">
-            Your saved Spotify tracks
-          </p>
-          <p class="mt-1 line-clamp-1 text-xs text-white/30">
-            Play your favorite songs directly through BLACK STAR.
-          </p>
-        </div>
-        <img src="assets/icons/next.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
-      </button>
-      <div>
-        <div class="mb-3 flex items-center justify-between">
-          <div>
-            <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
-              Playlists
-            </p>
-            <h3 class="mt-1 text-base font-light text-white">
-              Your Playlists
-            </h3>
-          </div>
-        </div>
-        <div *ngIf="player.isLoadingLibrary()" class="space-y-3">
-          <div *ngFor="let item of [].constructor(4)" class="flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-            <div class="skeleton-box h-16 w-16 shrink-0 rounded-xl"></div>
-            <div class="min-w-0 flex-1 space-y-2">
-              <div class="skeleton-box h-3 w-3/4 rounded-full"></div>
-              <div class="skeleton-box h-2.5 w-1/2 rounded-full"></div>
-              <div class="skeleton-box h-2.5 w-2/3 rounded-full"></div>
-            </div>
-          </div>
-        </div>
-        <div *ngIf="!player.isLoadingLibrary() && !player.libraryPlaylists().length" class="empty-state">
-          <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
-            No playlists
-          </p>
-          <h2 class="mt-3 text-2xl font-light text-white">
-            Nothing here yet
-          </h2>
-          <p class="mt-3 max-w-[260px] text-sm leading-6 text-white/45">
-            Connect Spotify to load your playlists.
-          </p>
-        </div>
-        <div *ngIf="!player.isLoadingLibrary() && player.libraryPlaylists().length" class="space-y-3">
-          <button type="button" *ngFor="let playlist of player.libraryPlaylists()" (click)="player.showPlaylistUnavailable()" class="flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-left transition hover:border-white/20 hover:bg-white/[0.06]">
-            <div class="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white/10">
-              <img *ngIf="playlist.image" [src]="playlist.image" [alt]="playlist.title" class="h-full w-full object-cover grayscale"/>
-            </div>
-            <div class="min-w-0 flex-1">
-              <h3 class="truncate text-sm font-light text-white">
-                {{ playlist.title }}
-              </h3>
-              <p class="truncate text-xs text-white/45">
-                {{ playlist.owner }} &middot; {{ playlist.totalTracks || 0 }} tracks
-              </p>
-              <p class="mt-1 line-clamp-1 text-xs text-white/30">
-                Playlist track loading disabled for now
-              </p>
-            </div>
-            <img src="assets/icons/dots.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
-          </button>
-        </div>
-      </div>
-    </ng-container>
-    <ng-template #likedSongsView>
+    <ng-container *ngIf="player.selectedPlaylist(); else libraryRoot">
       <div class="mb-5 flex items-center gap-3">
-        <button type="button" (click)="player.closeLikedSongs()" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]" aria-label="Back to library">
+        <button type="button" (click)="player.closeSelectedPlaylist()" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]" aria-label="Back to playlists">
           <img src="assets/icons/return.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
         </button>
         <div class="min-w-0">
           <h2 class="truncate text-xl font-light text-white">
-            Liked Songs
+            {{ player.selectedPlaylist()?.title }}
           </h2>
           <p class="truncate text-xs text-white/45">
-            {{ player.likedSongs().length }} saved tracks
+            {{ player.selectedPlaylistTracks().length }} loaded tracks
           </p>
         </div>
       </div>
-      <div *ngIf="player.isLoadingLikedSongs()" class="py-2">
+      <div *ngIf="player.isLoadingPlaylistTracks()" class="py-2">
         <app-track-list-skeleton [items]="7"></app-track-list-skeleton>
       </div>
-      <div *ngIf="!player.isLoadingLikedSongs() && !player.likedSongs().length" class="empty-state">
+      <div *ngIf="!player.isLoadingPlaylistTracks() && !player.selectedPlaylistTracks().length" class="empty-state">
         <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
           Empty
         </p>
         <h2 class="mt-3 text-2xl font-light text-white">
-          No liked songs
+          No tracks found
         </h2>
         <p class="mt-3 max-w-[260px] text-sm leading-6 text-white/45">
-          Songs saved in your Spotify library will appear here.
+          Add songs to this playlist from the track options menu.
         </p>
       </div>
-      <div *ngIf="!player.isLoadingLikedSongs() && player.likedSongs().length" class="space-y-2">
-        <app-track-list-item *ngFor="let track of player.likedSongs()" [track]="track" [showAlbum]="true"></app-track-list-item>
+      <div *ngIf="!player.isLoadingPlaylistTracks() && player.selectedPlaylistTracks().length" class="space-y-2">
+        <app-track-list-item *ngFor="let track of player.selectedPlaylistTracks()" [track]="track" [showAlbum]="true"></app-track-list-item>
       </div>
+    </ng-container>
+    <ng-template #libraryRoot>
+      <ng-container *ngIf="!player.isLikedSongsOpen(); else likedSongsView">
+        <button type="button" (click)="player.openLikedSongs()" class="mb-5 flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-left transition hover:border-white/20 hover:bg-white/[0.07]">
+          <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-white/20 to-white/5">
+            <img src="assets/icons/star_filled.svg" alt="" class="icon-active h-7 w-7 object-contain"/>
+          </div>
+          <div class="min-w-0 flex-1">
+            <h3 class="truncate text-sm font-light text-white">
+              Liked Songs
+            </h3>
+            <p class="truncate text-xs text-white/45">
+              Your saved Spotify tracks
+            </p>
+            <p class="mt-1 line-clamp-1 text-xs text-white/30">
+              Play your favorite songs directly through BLACK STAR.
+            </p>
+          </div>
+          <img src="assets/icons/next.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
+        </button>
+        <div>
+          <div class="mb-3 flex items-center justify-between">
+            <div>
+              <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+                Playlists
+              </p>
+              <h3 class="mt-1 text-base font-light text-white">
+                Your Playlists
+              </h3>
+            </div>
+          </div>
+          <div *ngIf="player.isLoadingLibrary()" class="space-y-3">
+            <div *ngFor="let item of [].constructor(4)" class="flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+              <div class="skeleton-box h-16 w-16 shrink-0 rounded-xl"></div>
+              <div class="min-w-0 flex-1 space-y-2">
+                <div class="skeleton-box h-3 w-3/4 rounded-full"></div>
+                <div class="skeleton-box h-2.5 w-1/2 rounded-full"></div>
+                <div class="skeleton-box h-2.5 w-2/3 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!player.isLoadingLibrary() && !player.libraryPlaylists().length" class="empty-state">
+            <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+              No playlists
+            </p>
+            <h2 class="mt-3 text-2xl font-light text-white">
+              Nothing here yet
+            </h2>
+            <p class="mt-3 max-w-[260px] text-sm leading-6 text-white/45">
+              Connect Spotify to load your playlists.
+            </p>
+          </div>
+          <div *ngIf="!player.isLoadingLibrary() && player.libraryPlaylists().length" class="space-y-3">
+            <button type="button" *ngFor="let playlist of player.libraryPlaylists()" (click)="player.selectPlaylist(playlist)" class="flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-left transition hover:border-white/20 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-45" [disabled]="playlist.isAccessible === false">
+              <div class="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white/10">
+                <img *ngIf="playlist.image" [src]="playlist.image" [alt]="playlist.title" class="h-full w-full object-cover grayscale"/>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="truncate text-sm font-light text-white">
+                  {{ playlist.title }}
+                </h3>
+                <p class="truncate text-xs text-white/45">
+                  {{ playlist.owner }} · {{ playlist.totalTracks || 0 }} tracks
+                </p>
+                <p class="mt-1 line-clamp-1 text-xs text-white/30">
+                  {{ playlist.isAccessible === false ? 'Restricted by Spotify' : playlist.description }}
+                </p>
+              </div>
+              <img [src]="playlist.isAccessible === false ? 'assets/icons/dots.svg' : 'assets/icons/next.svg'" alt="" class="icon-soft h-5 w-5 object-contain"/>
+            </button>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #likedSongsView>
+        <div class="mb-5 flex items-center gap-3">
+          <button type="button" (click)="player.closeLikedSongs()" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]" aria-label="Back to library">
+            <img src="assets/icons/return.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
+          </button>
+          <div class="min-w-0">
+            <h2 class="truncate text-xl font-light text-white">
+              Liked Songs
+            </h2>
+            <p class="truncate text-xs text-white/45">
+              {{ player.likedSongs().length }} saved tracks
+            </p>
+          </div>
+        </div>
+        <div *ngIf="player.isLoadingLikedSongs()" class="py-2">
+          <app-track-list-skeleton [items]="7"></app-track-list-skeleton>
+        </div>
+        <div *ngIf="!player.isLoadingLikedSongs() && !player.likedSongs().length" class="empty-state">
+          <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+            Empty
+          </p>
+          <h2 class="mt-3 text-2xl font-light text-white">
+            No liked songs
+          </h2>
+          <p class="mt-3 max-w-[260px] text-sm leading-6 text-white/45">
+            Songs saved in your Spotify library will appear here.
+          </p>
+        </div>
+        <div *ngIf="!player.isLoadingLikedSongs() && player.likedSongs().length" class="space-y-2">
+          <app-track-list-item *ngFor="let track of player.likedSongs()" [track]="track" [showAlbum]="true"></app-track-list-item>
+        </div>
+      </ng-template>
     </ng-template>
   </section>
 </section>

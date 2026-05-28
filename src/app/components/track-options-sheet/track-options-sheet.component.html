@@ -17,9 +17,6 @@
         </p>
       </div>
     </div>
-    <div *ngIf="player.trackOptionsMessage()" class="mb-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-sm text-white/60">
-      {{ player.trackOptionsMessage() }}
-    </div>
     <div class="space-y-2">
       <button type="button" (click)="player.playOptionsTrack()" class="flex w-full items-center gap-4 rounded-2xl bg-white/[0.04] px-4 py-4 text-left transition hover:bg-white/[0.08]">
         <span class="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black">
