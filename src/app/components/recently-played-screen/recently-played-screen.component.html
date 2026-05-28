@@ -1,5 +1,5 @@
 <section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
-  <app-screen-header title="RECENT" eyebrow="Spotify" heading="Recently Played" description="Your latest unique tracks. Repeated songs move back to the top." [showBackButton]="true" (back)="player.setActiveScreen('home')" actionIcon="assets/icons/return.svg" actionTitle="Refresh recently played" (action)="player.loadSpotifyTracks()"></app-screen-header>
+  <app-screen-header title="RECENT" eyebrow="Spotify" heading="Recently Played" description="Your latest unique tracks. Repeated songs move back to the top." [showBackButton]="true" (back)="player.setActiveScreen('home')" actionIcon="assets/icons/reload.svg" actionTitle="Refresh recently played" (action)="player.loadSpotifyTracks()"></app-screen-header>
   <section class="flex-1 overflow-y-auto px-5 py-5">
     <app-track-list-skeleton *ngIf="player.isLoadingSpotifyTracks()" [items]="8"></app-track-list-skeleton>
     <div *ngIf="!player.isLoadingSpotifyTracks() && !player.tracks().length" class="empty-state">

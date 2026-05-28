@@ -1,20 +1,13 @@
 <section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
-  <header class="border-b border-white/10 px-5 pb-5 pt-5">
-    <div class="mb-7 grid grid-cols-[42px_1fr_42px] items-center">
-      <img src="assets/icons/blackstar_logo.svg" alt="Black Star" class="main-logo"/>
-      <h1 class="text-center text-[22px] font-light tracking-[0.48em] text-white/90">
-        SEARCH
-      </h1>
-      <div></div>
-    </div>
-    <form (submit)="onSubmit($event)" class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+  <app-screen-header title="SEARCH" eyebrow="Spotify" heading="Search Music" description="Find songs, artists or albums and play them through BLACK STAR.">
+    <form (submit)="onSubmit($event)" class="mt-5 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
       <img src="assets/icons/search.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
       <input type="text" [value]="player.searchQuery()" (input)="onSearchInput($event)" placeholder="Search songs, artists or albums" class="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/35"/>
       <button *ngIf="player.searchQuery()" type="button" (click)="clearSearch()" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] transition hover:bg-white/[0.1]" aria-label="Clear search">
         <img src="assets/icons/x.svg" alt="" class="icon-soft h-3.5 w-3.5 object-contain"/>
       </button>
     </form>
-  </header>
+  </app-screen-header>
   <section class="flex-1 overflow-y-auto px-5 py-5">
     <div *ngIf="!player.hasSearched() && !player.searchQuery()" class="empty-state">
       <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">

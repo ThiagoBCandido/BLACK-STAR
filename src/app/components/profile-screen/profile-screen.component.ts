@@ -3,11 +3,12 @@ import { Component, inject } from '@angular/core';
 import { PlayerStateService } from '../../core/services/player-state.service';
 import { SpotifyAuthService } from '../../core/services/spotify-auth.service';
 import { SpotifyPlayerService } from '../../core/services/spotify-player.service';
+import { ScreenHeaderComponent } from '../screen-header/screen-header.component';
 
 @Component({
   selector: 'app-profile-screen',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ScreenHeaderComponent],
   templateUrl: './profile-screen.component.html',
   styleUrl: './profile-screen.component.scss',
 })
