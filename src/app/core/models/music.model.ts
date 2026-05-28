@@ -16,5 +16,11 @@ export interface Playlist {
   description: string;
   image: string;
   owner?: string;
+  ownerId?: string;
   totalTracks?: number;
+  collaborative?: boolean;
+  isOwnedByCurrentUser?: boolean;
+  isAccessible?: boolean;
+  spotifyUri?: string;
+  spotifyUrl?: string;
 }

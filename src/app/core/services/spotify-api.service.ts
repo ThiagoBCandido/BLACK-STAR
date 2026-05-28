@@ -112,6 +112,27 @@ export class SpotifyApiService {
     return this.mapSpotifyTracks(response?.items.map((item) => item.track) ?? []);
   }
 
+  async addTrackToPlaylist(playlistId: string, trackUri: string): Promise<boolean> {
+    if (!playlistId || !trackUri) {
+      return false;
+    }
+
+    const response = await this.request<{ snapshot_id: string }>(
+      `/playlists/${encodeURIComponent(playlistId)}/items`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uris: [trackUri],
+        }),
+      }
+    );
+
+    return Boolean(response?.snapshot_id);
+  }
+
   async createPlaylist(data: CreatePlaylistRequest): Promise<Playlist | null> {
     const response = await this.request<SpotifyPlaylist>('/me/playlists', {
       method: 'POST',
@@ -286,7 +307,7 @@ export class SpotifyApiService {
       });
 
       if (response.status === 401 || response.status === 403) {
-        throw new Error('Spotify access denied. Reconnect your Spotify account.');
+        throw new Error(`Spotify access denied: ${errorBody}`);
       }
 
       return null;

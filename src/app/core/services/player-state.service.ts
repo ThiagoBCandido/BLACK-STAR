@@ -23,9 +23,11 @@ type AppScreen = 'home' | 'search' | 'library' | 'profile' | 'recentlyPlayed' | 
   providedIn: 'root',
 })
 export class PlayerStateService {
+  /*signals*/
   private readonly spotifyApi = inject(SpotifyApiService);
   private readonly spotifyPlayer = inject(SpotifyPlayerService);
   private readonly toast = inject(ToastService);
+  
   readonly likedSongs = signal<Track[]>([]);
   readonly likedTrackIds = signal<Set<string>>(new Set());
   readonly isLikedSongsOpen = signal(false);
@@ -51,6 +53,8 @@ export class PlayerStateService {
   readonly searchResults = signal<Track[]>([]);
   readonly isSearching = signal(false);
   readonly hasSearched = signal(false);
+  readonly isAddToPlaylistOpen = signal(false);
+  readonly isAddingTrackToPlaylist = signal(false);
   readonly topTracks = signal<Track[]>([]);
   readonly isLoadingTopTracks = signal(false);
   readonly selectedOptionsTrack = signal<Track | null>(null);
@@ -59,9 +63,9 @@ export class PlayerStateService {
   readonly activeSpotifyDeviceName = signal<string | null>(null);
   readonly isExternalPlaybackActive = signal(false);
   readonly featuredTrack = computed(() => {
+  
     const currentTrack = this.currentTrack();
     const firstTrack = this.tracks()[0];
-
     return currentTrack ?? firstTrack;
   });
 
@@ -139,15 +143,12 @@ export class PlayerStateService {
       { allowSignalWrites: true }
     );
 
-    effect(
-      () => {
+    effect(() => {
         const track = this.currentTrack();
-
         if (!track.spotifyUri) {
           this.isLiked.set(false);
           return;
         }
-
         void this.syncCurrentTrackLikeState(track);
       },
       { allowSignalWrites: true }
@@ -190,6 +191,80 @@ export class PlayerStateService {
     this.playbackSyncIntervalId = setInterval(() => {
       void this.syncCurrentPlayback();
     }, 3000);
+  }
+
+  openAddToPlaylist(): void {
+    const track = this.selectedOptionsTrack();
+
+    if (!track?.spotifyUri) {
+      this.toast.error('This track cannot be added to a playlist.');
+      return;
+    }
+
+    this.isAddToPlaylistOpen.set(true);
+
+    if (!this.libraryPlaylists().length) {
+      void this.loadLibraryPlaylists();
+    }
+  }
+
+  closeAddToPlaylist(): void {
+    if (this.isAddingTrackToPlaylist()) {
+      return;
+    }
+
+    this.isAddToPlaylistOpen.set(false);
+  }
+
+  async addSelectedTrackToPlaylist(playlistId: string): Promise<void> {
+    const track = this.selectedOptionsTrack();
+    const playlist = this.libraryPlaylists().find((item) => item.id === playlistId);
+
+    if (!track?.spotifyUri) {
+      this.toast.error('This track cannot be added to a playlist.');
+      return;
+    }
+
+    if (!playlist) {
+      this.toast.error('Playlist not found.');
+      return;
+    }
+
+    if (playlist.isAccessible === false) {
+      this.toast.error('Spotify does not allow editing this playlist.');
+      return;
+    }
+
+    this.isAddingTrackToPlaylist.set(true);
+
+    try {
+      const success = await this.spotifyApi.addTrackToPlaylist(
+        playlist.id,
+        track.spotifyUri
+      );
+
+      if (!success) {
+        this.toast.error('Could not add track to playlist.');
+        return;
+      }
+
+      this.libraryPlaylists.update((playlists) =>
+        playlists.map((item) =>
+          item.id === playlist.id
+            ? { ...item, totalTracks: (item.totalTracks ?? 0) + 1 }
+            : item
+        )
+      );
+
+      this.toast.success('Added to playlist.');
+      this.isAddToPlaylistOpen.set(false);
+      this.closeTrackOptions();
+    } catch (error) {
+      console.error('Could not add track to playlist:', error);
+      this.toast.error('Could not add track to playlist.');
+    } finally {
+      this.isAddingTrackToPlaylist.set(false);
+    }
   }
 
   stopPlaybackSync(): void {

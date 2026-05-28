@@ -1,0 +1,44 @@
+<section class="add-playlist-overlay" (click)="player.closeAddToPlaylist()">
+  <div class="add-playlist-sheet" (click)="$event.stopPropagation()">
+    <div class="mx-auto mb-5 h-1 w-12 rounded-full bg-white/20"></div>
+    <div class="mb-5">
+      <p class="mb-2 text-[10px] uppercase tracking-[0.35em] text-white/30">
+        Spotify
+      </p>
+      <h2 class="text-2xl font-light text-white">
+        Add to playlist
+      </h2>
+      <p class="mt-2 truncate text-sm text-white/45">
+        {{ player.selectedOptionsTrack()?.title }}
+      </p>
+    </div>
+    <div *ngIf="player.isLoadingLibrary()" class="py-8 text-center text-sm text-white/45">
+      Loading playlists...
+    </div>
+    <div *ngIf="!player.isLoadingLibrary() && !player.libraryPlaylists().length" class="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/55">
+      No playlists found. Create a playlist first.
+    </div>
+    <div *ngIf="!player.isLoadingLibrary() && player.libraryPlaylists().length" class="max-h-[360px] space-y-2 overflow-y-auto pr-1">
+      <button type="button" *ngFor="let playlist of player.libraryPlaylists()" (click)="player.addSelectedTrackToPlaylist(playlist.id)" class="flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-left transition hover:border-white/20 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-45" [disabled]="player.isAddingTrackToPlaylist() || playlist.isAccessible === false">
+        <div class="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-white/10">
+          <img *ngIf="playlist.image" [src]="playlist.image" [alt]="playlist.title" class="h-full w-full object-cover grayscale"/>
+        </div>
+        <div class="min-w-0 flex-1">
+          <h3 class="truncate text-sm font-light text-white">
+            {{ playlist.title }}
+          </h3>
+          <p class="truncate text-xs text-white/45">
+            {{ playlist.owner }} · {{ playlist.totalTracks || 0 }} tracks
+          </p>
+          <p *ngIf="playlist.isAccessible === false" class="mt-1 truncate text-xs text-white/30">
+            Restricted by Spotify
+          </p>
+        </div>
+        <img src="assets/icons/add.svg" alt="" class="icon-soft h-4 w-4 object-contain"/>
+      </button>
+    </div>
+    <button type="button" (click)="player.closeAddToPlaylist()" class="mt-5 flex h-12 w-full items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-sm text-white/55 transition hover:bg-white/[0.07] hover:text-white">
+      Cancel
+    </button>
+  </div>
+</section>
