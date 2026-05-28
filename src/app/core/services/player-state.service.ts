@@ -17,7 +17,7 @@ interface PlaybackTrack {
   };
 }
 
-type AppScreen = 'home' | 'search' | 'library' | 'profile' | 'recentlyPlayed'| 'topTracks';
+type AppScreen = 'home' | 'search' | 'library' | 'profile' | 'recentlyPlayed' | 'topTracks';
 
 @Injectable({
   providedIn: 'root',
@@ -35,6 +35,11 @@ export class PlayerStateService {
   readonly libraryPlaylists = signal<Playlist[]>([]);
   readonly isLoadingLibrary = signal(false);
   readonly libraryError = signal<string | null>(null);
+  readonly isCreatePlaylistOpen = signal(false);
+  readonly createPlaylistName = signal('');
+  readonly createPlaylistDescription = signal('');
+  readonly createPlaylistIsPublic = signal(false);
+  readonly isCreatingPlaylist = signal(false);
   readonly currentTrack = signal<Track>(TRACKS[2]);
   readonly isPlaying = signal(false);
   readonly isPlayerOpen = signal(false);
@@ -292,6 +297,69 @@ export class PlayerStateService {
     }
   }
 
+  openCreatePlaylist(): void {
+    this.createPlaylistName.set('');
+    this.createPlaylistDescription.set('');
+    this.createPlaylistIsPublic.set(false);
+    this.isCreatePlaylistOpen.set(true);
+  }
+
+  closeCreatePlaylist(): void {
+    if (this.isCreatingPlaylist()) {
+      return;
+    }
+
+    this.isCreatePlaylistOpen.set(false);
+  }
+
+  updateCreatePlaylistName(name: string): void {
+    this.createPlaylistName.set(name);
+  }
+
+  updateCreatePlaylistDescription(description: string): void {
+    this.createPlaylistDescription.set(description);
+  }
+
+  toggleCreatePlaylistVisibility(): void {
+    this.createPlaylistIsPublic.update((value) => !value);
+  }
+
+  async createSpotifyPlaylist(): Promise<void> {
+    const name = this.createPlaylistName().trim();
+    const description = this.createPlaylistDescription().trim();
+    const isPublic = this.createPlaylistIsPublic();
+
+    if (!name) {
+      this.toast.warning('Playlist name is required.');
+      return;
+    }
+
+    this.isCreatingPlaylist.set(true);
+
+    try {
+      const playlist = await this.spotifyApi.createPlaylist({
+        name,
+        description,
+        public: isPublic,
+        collaborative: false,
+      });
+
+      if (!playlist) {
+        this.toast.error('Could not create playlist.');
+        return;
+      }
+
+      this.libraryPlaylists.update((playlists) => [playlist, ...playlists]);
+      this.toast.success('Playlist created.');
+      this.isCreatePlaylistOpen.set(false);
+    } catch (error) {
+      console.error('Could not create Spotify playlist:', error);
+      this.toast.error('Could not create playlist. Reconnect Spotify and try again.');
+    } finally {
+      this.isCreatingPlaylist.set(false);
+    }
+  }
+
   async openLikedSongs(): Promise<void> {
     this.isLikedSongsOpen.set(true);
     this.libraryError.set(null);
@@ -316,10 +384,7 @@ export class PlayerStateService {
       }
 
       this.likedSongs.set(tracks);
-      this.likedTrackIds.set(new Set(tracks.map((track) => track.id)));
-
-      const currentTrack = this.currentTrack();
-      this.isLiked.set(tracks.some((track) => track.id === currentTrack.id));
+      this.syncLikedTrackIds(tracks);
 
       if (!tracks.length) {
         this.libraryError.set('No liked songs found in your Spotify library.');
@@ -471,17 +536,13 @@ export class PlayerStateService {
   }
 
   async selectTrack(track: Track): Promise<void> {
-    this.currentTrack.set(track);
-    this.isPlaying.set(true);
-    this.moveTrackToTop(track);
+    this.setCurrentTrackForPlayback(track);
 
     await this.playCurrentTrackOnSpotify();
   }
 
   async selectTrackAndOpenPlayer(track: Track): Promise<void> {
-    this.currentTrack.set(track);
-    this.isPlaying.set(true);
-    this.moveTrackToTop(track);
+    this.setCurrentTrackForPlayback(track);
     this.openPlayer();
 
     await this.playCurrentTrackOnSpotify();
@@ -497,9 +558,7 @@ export class PlayerStateService {
       return;
     }
 
-    this.currentTrack.set(track);
-    this.isPlaying.set(true);
-    this.moveTrackToTop(track);
+    this.setCurrentTrackForPlayback(track);
 
     await this.playCurrentTrackOnSpotify();
   }
@@ -579,9 +638,7 @@ export class PlayerStateService {
     const currentIndex = tracks.findIndex((track) => track.id === this.currentTrack().id);
     const nextIndex = (currentIndex + 1) % tracks.length;
 
-    this.currentTrack.set(tracks[nextIndex]);
-    this.isPlaying.set(true);
-    this.moveTrackToTop(tracks[nextIndex]);
+    this.setCurrentTrackForPlayback(tracks[nextIndex]);
 
     await this.playCurrentTrackOnSpotify();
   }
@@ -593,9 +650,7 @@ export class PlayerStateService {
     const currentIndex = tracks.findIndex((track) => track.id === this.currentTrack().id);
     const previousIndex = currentIndex === 0 ? tracks.length - 1 : currentIndex - 1;
 
-    this.currentTrack.set(tracks[previousIndex]);
-    this.isPlaying.set(true);
-    this.moveTrackToTop(tracks[previousIndex]);
+    this.setCurrentTrackForPlayback(tracks[previousIndex]);
 
     await this.playCurrentTrackOnSpotify();
   }
@@ -670,9 +725,7 @@ export class PlayerStateService {
   private syncCurrentTrackFromSpotify(track: Track): void {
     this.moveTrackToTop(track);
 
-    const existsInLikedSongs = this.likedSongs().some((item) => item.id === track.id);
-
-    if (this.likedSongs().length && !existsInLikedSongs) {
+    if (this.shouldMirrorTrackIntoLikedSongs(track)) {
       this.likedSongs.update((tracks) => [track, ...tracks]);
     }
 
@@ -726,6 +779,24 @@ export class PlayerStateService {
     });
 
     this.likedSongs.update((tracks) => tracks.filter((item) => item.id !== track.id));
+  }
+
+  private syncLikedTrackIds(tracks: Track[]): void {
+    this.likedTrackIds.set(new Set(tracks.map((track) => track.id)));
+    this.isLiked.set(tracks.some((track) => track.id === this.currentTrack().id));
+  }
+
+  private shouldMirrorTrackIntoLikedSongs(track: Track): boolean {
+    return Boolean(
+      this.likedSongs().length &&
+      !this.likedSongs().some((item) => item.id === track.id)
+    );
+  }
+
+  private setCurrentTrackForPlayback(track: Track): void {
+    this.currentTrack.set(track);
+    this.isPlaying.set(true);
+    this.moveTrackToTop(track);
   }
 
   private moveTrackToTop(track: Track): void {

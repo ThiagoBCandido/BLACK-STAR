@@ -15,6 +15,8 @@ export const environment = {
       'user-library-modify',
       'playlist-read-private',
       'playlist-read-collaborative',
+      'playlist-modify-public',
+      'playlist-modify-private',
       'streaming',
     ],
   },

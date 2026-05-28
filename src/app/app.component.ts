@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { BottomNavComponent } from './components/bottom-nav/bottom-nav.component';
+import { CreatePlaylistSheetComponent } from './components/create-playlist-sheet/create-playlist-sheet.component';
 import { FullPlayerComponent } from './components/full-player/full-player.component';
 import { HomeScreenComponent } from './components/home-screen/home-screen.component';
 import { LibraryScreenComponent } from './components/library-screen/library-screen.component';
@@ -31,6 +32,7 @@ import { SpotifyPlayerService } from './core/services/spotify-player.service';
     FullPlayerComponent,
     BottomNavComponent,
     TrackOptionsSheetComponent,
+    CreatePlaylistSheetComponent,
     ToastComponent,
   ],
   templateUrl: './app.component.html',

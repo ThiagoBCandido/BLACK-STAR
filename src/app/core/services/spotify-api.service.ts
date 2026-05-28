@@ -8,6 +8,13 @@ interface SpotifyImage {
   width: number | null;
 }
 
+interface CreatePlaylistRequest {
+  name: string;
+  description: string;
+  public: boolean;
+  collaborative: boolean;
+}
+
 interface SpotifyArtist {
   name: string;
 }
@@ -102,44 +109,42 @@ export class SpotifyApiService {
   async getRecentlyPlayedTracks(): Promise<Track[]> {
     const response = await this.request<RecentlyPlayedResponse>('/me/player/recently-played?limit=10');
 
-    if (!response?.items?.length) {
-      return [];
+    return this.mapSpotifyTracks(response?.items.map((item) => item.track) ?? []);
+  }
+
+  async createPlaylist(data: CreatePlaylistRequest): Promise<Playlist | null> {
+    const response = await this.request<SpotifyPlaylist>('/me/playlists', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    if (!response) {
+      return null;
     }
 
-    return response.items.map((item) => this.mapSpotifyTrack(item.track));
+    return this.mapSpotifyPlaylist(response);
   }
 
   async getTopTracks(): Promise<Track[]> {
     const response = await this.request<TopTracksResponse>('/me/top/tracks?limit=10&time_range=short_term');
 
-    if (!response?.items?.length) {
-      return [];
-    }
-
-    return response.items.map((track) => this.mapSpotifyTrack(track));
+    return this.mapSpotifyTracks(response?.items ?? []);
   }
-  
+
   async getSavedTracks(): Promise<Track[] | null> {
     const params = new URLSearchParams();
 
     params.set('limit', '50');
     params.set('market', 'from_token');
 
-    const response = await this.request<SavedTracksResponse>(
-      `/me/tracks?${params.toString()}`
-    );
+    const response = await this.request<SavedTracksResponse>(`/me/tracks?${params.toString()}`);
 
     if (!response) {
       return null;
     }
 
-    if (!response.items?.length) {
-      return [];
-    }
-
-    return response.items.map((item) => item.track).filter((track): track is SpotifyTrack => {
-      return Boolean(track && track.id && track.uri && !track.is_local);
-    }).map((track) => this.mapSpotifyTrack(track));
+    return this.mapSavedTrackItems(response.items ?? []);
   }
 
   async checkLibraryItem(uri: string): Promise<boolean> {
@@ -147,11 +152,8 @@ export class SpotifyApiService {
       return false;
     }
 
-    const params = new URLSearchParams();
-    params.set('uris', uri);
-
     const response = await this.request<boolean[]>(
-      `/me/library/contains?${params.toString()}`
+      `/me/library/contains?${this.createUriParams(uri)}`
     );
 
     return Boolean(response?.[0]);
@@ -162,10 +164,7 @@ export class SpotifyApiService {
       throw new Error('Missing Spotify URI.');
     }
 
-    const params = new URLSearchParams();
-    params.set('uris', uri);
-
-    await this.request<void>(`/me/library?${params.toString()}`, {
+    await this.request<void>(`/me/library?${this.createUriParams(uri)}`, {
       method: 'PUT',
     });
   }
@@ -175,10 +174,7 @@ export class SpotifyApiService {
       throw new Error('Missing Spotify URI.');
     }
 
-    const params = new URLSearchParams();
-    params.set('uris', uri);
-
-    await this.request<void>(`/me/library?${params.toString()}`, {
+    await this.request<void>(`/me/library?${this.createUriParams(uri)}`, {
       method: 'DELETE',
     });
   }
@@ -190,10 +186,9 @@ export class SpotifyApiService {
       return null;
     }
 
-    const item = response.item;
-    const isPlayableTrack = Boolean(item && item.id && item.uri && item.type === 'track' && !item.is_local);
-
-    const track = isPlayableTrack && item ? this.mapSpotifyTrack(item) : null;
+    const track = this.isPlayableSpotifyTrack(response.item)
+      ? this.mapSpotifyTrack(response.item)
+      : null;
 
     return {
       isPlaying: response.is_playing,
@@ -219,11 +214,7 @@ export class SpotifyApiService {
 
     const response = await this.request<SearchTracksResponse>(`/search?${params.toString()}`);
 
-    if (!response?.tracks?.items?.length) {
-      return [];
-    }
-
-    return response.tracks.items.map((track) => this.mapSpotifyTrack(track));
+    return this.mapSpotifyTracks(response?.tracks?.items ?? []);
   }
 
   async getUserPlaylists(): Promise<Playlist[]> {
@@ -233,11 +224,33 @@ export class SpotifyApiService {
     params.set('fields', 'items(id,name,description,images(url),owner(display_name),tracks(total)),next');
 
     const response = await this.request<UserPlaylistsResponse>(`/me/playlists?${params.toString()}`);
-    if (!response?.items?.length) {
-      return [];
-    }
 
-    return response.items.filter((playlist) => Boolean(playlist?.id)).map((playlist) => this.mapSpotifyPlaylist(playlist));
+    return (response?.items ?? [])
+      .filter((playlist) => Boolean(playlist?.id))
+      .map((playlist) => this.mapSpotifyPlaylist(playlist));
+  }
+
+  private createUriParams(uri: string): string {
+    const params = new URLSearchParams();
+
+    params.set('uris', uri);
+
+    return params.toString();
+  }
+
+  private mapSavedTrackItems(items: SavedTracksResponse['items']): Track[] {
+    return items
+      .map((item) => item.track)
+      .filter((track): track is SpotifyTrack => this.isPlayableSpotifyTrack(track))
+      .map((track) => this.mapSpotifyTrack(track));
+  }
+
+  private mapSpotifyTracks(tracks: SpotifyTrack[]): Track[] {
+    return tracks.map((track) => this.mapSpotifyTrack(track));
+  }
+
+  private isPlayableSpotifyTrack(track: SpotifyTrack | null): track is SpotifyTrack {
+    return Boolean(track && track.id && track.uri && !track.is_local);
   }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T | null> {
