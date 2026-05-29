@@ -1,24 +1,27 @@
-<section class="track-options-overlay" (click)="player.closeTrackOptions()">
+<section class="track-options-overlay" (click)="options.closeTrackOptions()">
   <div class="track-options-sheet" (click)="$event.stopPropagation()">
     <div class="mx-auto mb-5 h-1 w-12 rounded-full bg-white/20"></div>
     <div class="mb-6 flex items-center gap-4">
       <div class="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white/10">
-        <img *ngIf="player.selectedOptionsTrack()?.cover" [src]="player.selectedOptionsTrack()?.cover" [alt]="player.selectedOptionsTrack()?.title" class="h-full w-full object-cover grayscale"/>
+        <img *ngIf="options.selectedOptionsTrack()?.cover" [src]="options.selectedOptionsTrack()?.cover" [alt]="options.selectedOptionsTrack()?.title" class="h-full w-full object-cover grayscale"/>
       </div>
       <div class="min-w-0 flex-1">
         <h2 class="truncate text-lg font-light text-white">
-          {{ player.selectedOptionsTrack()?.title }}
+          {{ options.selectedOptionsTrack()?.title }}
         </h2>
         <p class="truncate text-sm text-white/45">
-          {{ player.selectedOptionsTrack()?.artist }}
+          {{ options.selectedOptionsTrack()?.artist }}
         </p>
         <p class="mt-1 truncate text-xs text-white/30">
-          {{ player.selectedOptionsTrack()?.album }}
+          {{ options.selectedOptionsTrack()?.album }}
         </p>
       </div>
     </div>
+    <div *ngIf="options.trackOptionsMessage()" class="mb-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-sm text-white/60">
+      {{ options.trackOptionsMessage() }}
+    </div>
     <div class="space-y-2">
-      <button type="button" (click)="player.playOptionsTrack()" class="flex w-full items-center gap-4 rounded-2xl bg-white/[0.04] px-4 py-4 text-left transition hover:bg-white/[0.08]">
+      <button type="button" (click)="playNow()" class="flex w-full items-center gap-4 rounded-2xl bg-white/[0.04] px-4 py-4 text-left transition hover:bg-white/[0.08]">
         <span class="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black">
           <img src="assets/icons/play-button.svg" alt="" class="h-4 w-4 object-contain"/>
         </span>
@@ -27,7 +30,7 @@
           <p class="text-xs text-white/40">Start this track in BLACK STAR</p>
         </div>
       </button>
-      <button type="button" (click)="player.addSelectedTrackToQueue()" class="flex w-full items-center gap-4 rounded-2xl bg-white/[0.04] px-4 py-4 text-left transition hover:bg-white/[0.08]">
+      <button type="button" (click)="options.addSelectedTrackToQueue()" class="flex w-full items-center gap-4 rounded-2xl bg-white/[0.04] px-4 py-4 text-left transition hover:bg-white/[0.08]">
         <span class="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.05]">
           <img src="assets/icons/add.svg" alt="" class="icon-soft h-4 w-4 object-contain"/>
         </span>
@@ -36,7 +39,7 @@
           <p class="text-xs text-white/40">Play this track next</p>
         </div>
       </button>
-      <button type="button" (click)="player.openAddToPlaylist()" class="flex w-full items-center gap-4 rounded-2xl bg-white/[0.04] px-4 py-4 text-left transition hover:bg-white/[0.08]">
+      <button type="button" (click)="options.openAddToPlaylist()" class="flex w-full items-center gap-4 rounded-2xl bg-white/[0.04] px-4 py-4 text-left transition hover:bg-white/[0.08]">
         <span class="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.05]">
           <img src="assets/icons/library.svg" alt="" class="icon-soft h-4 w-4 object-contain"/>
         </span>
@@ -45,7 +48,7 @@
           <p class="text-xs text-white/40">Save this track in one of your playlists</p>
         </div>
       </button>
-      <button type="button" (click)="player.openSelectedTrackOnSpotify()" class="flex w-full items-center gap-4 rounded-2xl bg-white/[0.04] px-4 py-4 text-left transition hover:bg-white/[0.08]">
+      <button type="button" (click)="options.openSelectedTrackOnSpotify()" class="flex w-full items-center gap-4 rounded-2xl bg-white/[0.04] px-4 py-4 text-left transition hover:bg-white/[0.08]">
         <span class="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.05]">
           <img src="assets/icons/blackstar_logo.svg" alt="" class="h-5 w-5 object-contain [filter:none]"/>
         </span>
@@ -54,7 +57,7 @@
           <p class="text-xs text-white/40">Open the original Spotify page</p>
         </div>
       </button>
-      <button type="button" (click)="player.copySelectedTrackLink()" class="flex w-full items-center gap-4 rounded-2xl bg-white/[0.04] px-4 py-4 text-left transition hover:bg-white/[0.08]">
+      <button type="button" (click)="options.copySelectedTrackLink()" class="flex w-full items-center gap-4 rounded-2xl bg-white/[0.04] px-4 py-4 text-left transition hover:bg-white/[0.08]">
         <span class="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.05]">
           <img src="assets/icons/dots.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
         </span>
@@ -64,7 +67,7 @@
         </div>
       </button>
     </div>
-    <button type="button" (click)="player.closeTrackOptions()" class="mt-5 flex h-12 w-full items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-sm text-white/55 transition hover:bg-white/[0.07] hover:text-white">
+    <button type="button" (click)="options.closeTrackOptions()" class="mt-5 flex h-12 w-full items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-sm text-white/55 transition hover:bg-white/[0.07] hover:text-white">
       Cancel
     </button>
   </div>

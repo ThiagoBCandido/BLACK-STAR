@@ -8,8 +8,8 @@
   <app-mini-player></app-mini-player>
   <app-bottom-nav></app-bottom-nav>
   <app-full-player *ngIf="player.isPlayerOpen()"></app-full-player>
-  <app-track-options-sheet *ngIf="player.isTrackOptionsOpen()"></app-track-options-sheet>
-  <app-create-playlist-sheet *ngIf="player.isCreatePlaylistOpen()"></app-create-playlist-sheet>
-  <app-add-to-playlist-sheet *ngIf="player.isAddToPlaylistOpen()"></app-add-to-playlist-sheet>
+  <app-track-options-sheet *ngIf="trackOptions.isTrackOptionsOpen()"></app-track-options-sheet>
+  <app-create-playlist-sheet *ngIf="create.isCreatePlaylistOpen()"></app-create-playlist-sheet>
+  <app-add-to-playlist-sheet *ngIf="trackOptions.isAddToPlaylistOpen()"></app-add-to-playlist-sheet>
   <app-toast></app-toast>
 </main>

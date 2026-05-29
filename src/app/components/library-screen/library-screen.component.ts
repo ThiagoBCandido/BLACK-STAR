@@ -4,6 +4,7 @@ import { ScreenHeaderComponent } from '../screen-header/screen-header.component'
 import { TrackListItemComponent } from '../track-list-item/track-list-item.component';
 import { TrackListSkeletonComponent } from '../track-list-skeleton/track-list-skeleton.component';
 import { PlayerStateService } from '../../core/services/player-state.service';
+import { CreatePlaylistStateService } from '../../core/state/create-playlist-state.service';
 
 @Component({
   selector: 'app-library-screen',
@@ -19,6 +20,7 @@ import { PlayerStateService } from '../../core/services/player-state.service';
 })
 export class LibraryScreenComponent {
   readonly player = inject(PlayerStateService);
+  readonly create = inject(CreatePlaylistStateService);
 
   onLibrarySearchInput(event: Event): void {
     const input = event.target as HTMLInputElement;

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, inject } from '@angular/core';
 import { Track } from '../../core/models/music.model';
 import { PlayerStateService } from '../../core/services/player-state.service';
+import { TrackOptionsStateService } from '../../core/state/track-options-state.service';
 
 type TrackListItemSize = 'compact' | 'regular';
 type TrackListItemVariant = 'default' | 'queue';
@@ -22,6 +23,7 @@ export class TrackListItemComponent {
   @Input() showOptions = true;
 
   readonly player = inject(PlayerStateService);
+  readonly options = inject(TrackOptionsStateService);
 
   get isCurrentTrack(): boolean {
     return this.track.id === this.player.currentTrack().id;
@@ -56,7 +58,7 @@ export class TrackListItemComponent {
   }
 
   openOptions(event: Event): void {
-    this.player.openTrackOptions(this.track, event);
+    this.options.openTrackOptions(this.track, event);
   }
 
   handleKeyboardSelect(event: Event): void {

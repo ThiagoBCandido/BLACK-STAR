@@ -1,6 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, inject } from "@angular/core";
-import { PlayerStateService } from "../../core/services/player-state.service";
+import { LibraryStateService } from "../../core/state/library-state.service";
+import { TrackOptionsStateService } from "../../core/state/track-options-state.service";
 
 @Component({
   selector: 'app-add-to-playlist-sheet',
@@ -10,5 +11,6 @@ import { PlayerStateService } from "../../core/services/player-state.service";
   styleUrl: './add-to-playlist-sheet.component.css'
 })
 export class AddToPlaylistSheetComponent {
-  readonly player = inject(PlayerStateService);
+  readonly library = inject(LibraryStateService);
+  readonly options = inject(TrackOptionsStateService);
 }

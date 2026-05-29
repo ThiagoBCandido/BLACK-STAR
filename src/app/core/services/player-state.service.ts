@@ -5,8 +5,6 @@ import { SpotifyApiService } from './spotify-api.service';
 import { SpotifyPlayerService } from './spotify-player.service';
 import { ToastService } from './toast.service';
 import { LibraryStateService } from '../state/library-state.service';
-import { TrackOptionsStateService } from '../state/track-options-state.service';
-import { CreatePlaylistStateService } from '../state/create-playlist-state.service';
 
 interface PlaybackTrack {
   id: string;
@@ -31,8 +29,6 @@ export class PlayerStateService {
   private readonly spotifyPlayer = inject(SpotifyPlayerService);
   private readonly toast = inject(ToastService);
   private readonly libraryState = inject(LibraryStateService);
-  private readonly trackOptionsState = inject(TrackOptionsStateService);
-  private readonly createPlaylistState = inject(CreatePlaylistStateService);
 
   /* library signals */
   readonly libraryPlaylists = this.libraryState.libraryPlaylists;
@@ -58,13 +54,6 @@ export class PlayerStateService {
   readonly tracks = signal<Track[]>(TRACKS);
   readonly playlists = signal(PLAYLISTS);
 
-  /* playlist creation signals */
-  readonly isCreatePlaylistOpen = this.createPlaylistState.isCreatePlaylistOpen;
-  readonly createPlaylistName = this.createPlaylistState.createPlaylistName;
-  readonly createPlaylistDescription = this.createPlaylistState.createPlaylistDescription;
-  readonly createPlaylistIsPublic = this.createPlaylistState.createPlaylistIsPublic;
-  readonly isCreatingPlaylist = this.createPlaylistState.isCreatingPlaylist;
-
   /* playback signals */
   readonly currentTrack = signal<Track>(TRACKS[2]);
   readonly isPlaying = signal(false);
@@ -79,12 +68,6 @@ export class PlayerStateService {
   /* track action signals */
   readonly topTracks = signal<Track[]>([]);
   readonly isLoadingTopTracks = signal(false);
-  readonly selectedOptionsTrack = this.trackOptionsState.selectedOptionsTrack;
-  readonly trackOptionsMessage = this.trackOptionsState.trackOptionsMessage;
-  readonly isTrackOptionsOpen = this.trackOptionsState.isTrackOptionsOpen;
-
-  readonly isAddToPlaylistOpen = this.trackOptionsState.isAddToPlaylistOpen;
-  readonly isAddingTrackToPlaylist = this.trackOptionsState.isAddingTrackToPlaylist;
 
   /* Spotify sync signals */
   readonly activeSpotifyDeviceName = signal<string | null>(null);
@@ -222,18 +205,6 @@ export class PlayerStateService {
     }, 3000);
   }
 
-  openAddToPlaylist(): void {
-    this.trackOptionsState.openAddToPlaylist();
-  }
-
-  closeAddToPlaylist(): void {
-    this.trackOptionsState.closeAddToPlaylist();
-  }
-
-  addSelectedTrackToPlaylist(playlistId: string): Promise<void> {
-    return this.trackOptionsState.addSelectedTrackToPlaylist(playlistId);
-  }
-
   stopPlaybackSync(): void {
     if (this.playbackSyncIntervalId) {
       clearInterval(this.playbackSyncIntervalId);
@@ -340,30 +311,6 @@ export class PlayerStateService {
     this.libraryState.closeSelectedPlaylist();
   }
 
-  openCreatePlaylist(): void {
-  this.createPlaylistState.openCreatePlaylist();
-  }
-
-  closeCreatePlaylist(): void {
-    this.createPlaylistState.closeCreatePlaylist();
-  }
-
-  updateCreatePlaylistName(name: string): void {
-    this.createPlaylistState.updateCreatePlaylistName(name);
-  }
-
-  updateCreatePlaylistDescription(description: string): void {
-    this.createPlaylistState.updateCreatePlaylistDescription(description);
-  }
-
-  toggleCreatePlaylistVisibility(): void {
-    this.createPlaylistState.toggleCreatePlaylistVisibility();
-  }
-
-  createSpotifyPlaylist(): Promise<void> {
-    return this.createPlaylistState.createSpotifyPlaylist();
-  }
-
   openLikedSongs(): Promise<void> {
     return this.libraryState.openLikedSongs();
   }
@@ -374,25 +321,6 @@ export class PlayerStateService {
 
   closeLikedSongs(): void {
     this.libraryState.closeLikedSongs();
-  }
-
-  openTrackOptions(track: Track, event?: Event): void {
-    this.trackOptionsState.openTrackOptions(track, event);
-  }
-
-  closeTrackOptions(): void {
-    this.trackOptionsState.closeTrackOptions();
-  }
-
-  async playOptionsTrack(): Promise<void> {
-    const track = this.trackOptionsState.selectedOptionsTrack();
-
-    if (!track) {
-      return;
-    }
-
-    await this.selectTrack(track);
-    this.trackOptionsState.closeTrackOptions();
   }
 
   async loadTopTracks(): Promise<void> {
@@ -408,18 +336,6 @@ export class PlayerStateService {
     } finally {
       this.isLoadingTopTracks.set(false);
     }
-  }
-
-  addSelectedTrackToQueue(): Promise<void> {
-    return this.trackOptionsState.addSelectedTrackToQueue();
-  }
-
-  openSelectedTrackOnSpotify(): void {
-    this.trackOptionsState.openSelectedTrackOnSpotify();
-  }
-
-  copySelectedTrackLink(): Promise<void> {
-    return this.trackOptionsState.copySelectedTrackLink();
   }
 
   async selectTrack(track: Track): Promise<void> {

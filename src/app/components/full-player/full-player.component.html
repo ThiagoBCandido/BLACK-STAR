@@ -49,7 +49,7 @@
             <button type="button" (click)="player.toggleLike()" class="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.04] transition hover:bg-white/[0.08]" aria-label="Like track">
               <img [src]="player.isLiked() ? 'assets/icons/star_filled.svg' : 'assets/icons/star.svg'" alt="" class="player-like-icon"/>
             </button>
-            <button type="button" (click)="player.openTrackOptions(player.currentTrack(), $event)" class="flex h-10 w-10 items-center justify-center">
+            <button type="button" (click)="options.openTrackOptions(player.currentTrack(), $event)" class="flex h-10 w-10 items-center justify-center">
               <img src="assets/icons/dots.svg" alt="Menu" class="icon-soft h-6 w-6 object-contain"/>
             </button>
           </div>
