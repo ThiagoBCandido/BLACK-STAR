@@ -221,6 +221,10 @@ export class SpotifyPlayerService {
     }
   }
 
+  async setVolume(volume: number): Promise<void> {
+    await this.setVolumePercent(volume * 100);
+  }
+
   async toggleMute(): Promise<void> {
     const shouldMute = this.volumePercent() > 0;
     const nextVolume = shouldMute ? 0 : this.lastVolumeBeforeMute || 80;
@@ -258,6 +262,14 @@ export class SpotifyPlayerService {
     this.isShuffleEnabled.set(nextState);
   }
 
+  async setShuffle(state: boolean): Promise<void> {
+    await this.request(`/me/player/shuffle?state=${state}`, {
+      method: 'PUT',
+    });
+
+    this.isShuffleEnabled.set(state);
+  }
+
   async cycleRepeatMode(): Promise<void> {
     const currentMode = this.repeatMode();
 
@@ -273,6 +285,14 @@ export class SpotifyPlayerService {
     });
 
     this.repeatMode.set(nextMode);
+  }
+
+  async setRepeat(mode: 'off' | 'context' | 'track'): Promise<void> {
+    await this.request(`/me/player/repeat?state=${mode}`, {
+      method: 'PUT',
+    });
+
+    this.repeatMode.set(mode);
   }
 
   async refreshCurrentState(): Promise<void> {

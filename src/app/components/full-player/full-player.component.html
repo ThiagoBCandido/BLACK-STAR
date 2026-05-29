@@ -69,7 +69,7 @@
           </span>
         </div>
         <section class="volume-control mb-8">
-          <button type="button" class="volume-mute-btn" (click)="player.toggleMute($event)">
+          <button type="button" class="volume-mute-btn" (click)="player.toggleMute()">
             {{ player.isMuted() ? 'MUTED' : 'VOL' }}
           </button>
           <input type="range" min="0" max="100" step="1" [value]="player.volumePercent()" [style.--volume-percent]="player.volumePercent() + '%'" (input)="player.setVolumeFromInput($event)" class="volume-slider" aria-label="Volume"/>

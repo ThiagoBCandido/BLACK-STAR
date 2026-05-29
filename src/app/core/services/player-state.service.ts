@@ -138,7 +138,7 @@ export class PlayerStateService {
       return;
     }
 
-    this.isPlaybackSyncEnabled.set(true);
+    this.playbackState.setPlaybackSyncEnabled(true);
 
     void this.syncCurrentPlayback();
 
@@ -153,10 +153,8 @@ export class PlayerStateService {
       this.playbackSyncIntervalId = null;
     }
 
-    this.activeSpotifyDeviceName.set(null);
-    this.activeSpotifyDeviceType.set(null);
-    this.isExternalPlaybackActive.set(false);
-    this.isPlaybackSyncEnabled.set(false);
+    this.playbackState.setPlaybackSyncEnabled(false);
+    this.playbackState.clearSpotifyDevice();
   }
 
   async syncCurrentPlayback(): Promise<void> {
@@ -170,10 +168,8 @@ export class PlayerStateService {
       const playback = await this.spotifyApi.getCurrentPlayback();
 
       if (!playback) {
-        this.isPlaying.set(false);
-        this.activeSpotifyDeviceName.set(null);
-        this.activeSpotifyDeviceType.set(null);
-        this.isExternalPlaybackActive.set(false);
+        this.playbackState.setPlaying(false);
+        this.playbackState.clearSpotifyDevice();
         this.playbackState.setPlaybackProgress(0, this.durationMs());
 
         this.spotifyPlayer.applyExternalPlaybackState({
@@ -186,9 +182,6 @@ export class PlayerStateService {
         return;
       }
 
-      this.activeSpotifyDeviceName.set(playback.deviceName);
-      this.activeSpotifyDeviceType.set(playback.deviceType);
-
       const blackStarDeviceId = this.spotifyPlayer.deviceId();
       const isExternalDevice = Boolean(
         playback.deviceId &&
@@ -196,8 +189,12 @@ export class PlayerStateService {
         playback.deviceId !== blackStarDeviceId
       );
 
-      this.isExternalPlaybackActive.set(isExternalDevice);
-      this.isPlaying.set(playback.isPlaying);
+      this.playbackState.setSpotifyDevice({
+        name: playback.deviceName,
+        type: playback.deviceType,
+        isExternal: isExternalDevice,
+      });
+      this.playbackState.setPlaying(playback.isPlaying);
 
       if (playback.track) {
         this.syncCurrentTrackFromSpotify(playback.track);
@@ -221,69 +218,28 @@ export class PlayerStateService {
     }
   }
 
-  async selectTrack(track: Track): Promise<void> {
-    this.setCurrentTrackForPlayback(track);
-
-    await this.playCurrentTrackOnSpotify();
+  selectTrack(track: Track): Promise<void> {
+    return this.playbackState.selectTrack(track);
   }
 
-  async selectTrackAndOpenPlayer(track: Track): Promise<void> {
-    this.setCurrentTrackForPlayback(track);
-    this.openPlayer();
-
-    await this.playCurrentTrackOnSpotify();
+  selectTrackAndOpenPlayer(track: Track): Promise<void> {
+    return this.playbackState.selectTrackAndOpenPlayer(track);
   }
 
-  async toggleTrackPlayback(track: Track, event: Event): Promise<void> {
-    event.stopPropagation();
-
-    const isCurrentTrack = track.id === this.currentTrack().id;
-
-    if (isCurrentTrack) {
-      await this.togglePlay();
-      return;
-    }
-
-    this.setCurrentTrackForPlayback(track);
-
-    await this.playCurrentTrackOnSpotify();
+  toggleTrackPlayback(track: Track, event?: Event): Promise<void> {
+    return this.playbackState.toggleTrackPlayback(track, event);
   }
 
   openPlayer(): void {
-    if (this.closeTimeoutId) {
-      clearTimeout(this.closeTimeoutId);
-      this.closeTimeoutId = null;
-    }
-
-    this.isPlayerClosing.set(false);
-    this.isPlayerOpen.set(true);
+    this.playbackState.openPlayer();
   }
 
   closePlayer(): void {
-    this.isPlayerClosing.set(true);
-
-    this.closeTimeoutId = setTimeout(() => {
-      this.isPlayerOpen.set(false);
-      this.isPlayerClosing.set(false);
-      this.closeTimeoutId = null;
-    }, 320);
+    this.playbackState.closePlayer();
   }
 
-  async togglePlay(event?: Event): Promise<void> {
-    event?.stopPropagation();
-
-    const hasSpotifyUri = Boolean(this.currentTrack().spotifyUri);
-
-    if (!hasSpotifyUri) {
-      this.isPlaying.update((value) => !value);
-      return;
-    }
-
-    try {
-      await this.spotifyPlayer.togglePlayback();
-    } catch (error) {
-      console.error('Could not toggle Spotify playback:', error);
-    }
+  togglePlay(event?: Event): Promise<void> {
+    return this.playbackState.togglePlay(event);
   }
 
   async toggleLike(): Promise<void> {
@@ -317,75 +273,36 @@ export class PlayerStateService {
     }
   }
 
-  async nextTrack(event?: Event): Promise<void> {
-    event?.stopPropagation();
-
-    const tracks = this.browseState.recentlyPlayedTracks();
-
-    if (!tracks.length) {
-      return;
-    }
-
-    const currentIndex = tracks.findIndex((track) => track.id === this.currentTrack().id);
-    const nextIndex = (currentIndex + 1) % tracks.length;
-
-    this.setCurrentTrackForPlayback(tracks[nextIndex]);
-
-    await this.playCurrentTrackOnSpotify();
+  nextTrack(event?: Event): Promise<void> {
+    return this.playbackState.nextTrack(event);
   }
 
-  async previousTrack(event?: Event): Promise<void> {
-    event?.stopPropagation();
-
-    const tracks = this.browseState.recentlyPlayedTracks();
-
-    if (!tracks.length) {
-      return;
-    }
-
-    const currentIndex = tracks.findIndex((track) => track.id === this.currentTrack().id);
-    const previousIndex = currentIndex === 0 ? tracks.length - 1 : currentIndex - 1;
-
-    this.setCurrentTrackForPlayback(tracks[previousIndex]);
-
-    await this.playCurrentTrackOnSpotify();
+  previousTrack(event?: Event): Promise<void> {
+    return this.playbackState.previousTrack(event);
   }
 
   async toggleShuffle(): Promise<void> {
-    try {
-      await this.spotifyPlayer.toggleShuffle();
-    } catch (error) {
-      console.error('Could not toggle Spotify shuffle:', error);
-    }
+    return this.playbackState.toggleSpotifyShuffle();
   }
 
   async cycleRepeatMode(): Promise<void> {
-    try {
-      await this.spotifyPlayer.cycleRepeatMode();
-    } catch (error) {
-      console.error('Could not change Spotify repeat mode:', error);
-    }
+    return this.playbackState.cycleSpotifyRepeatMode();
   }
 
-  async setVolumeFromInput(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    const value = Number(input.value);
-
-    try {
-      await this.spotifyPlayer.setVolumePercent(value);
-    } catch (error) {
-      console.error('Could not change Spotify volume:', error);
-    }
+  setVolume(event: Event): Promise<void> {
+    return this.playbackState.setSpotifyVolumeFromEvent(event);
   }
 
-  async toggleMute(event?: Event): Promise<void> {
-    event?.stopPropagation();
+  setVolumeFromInput(event: Event): Promise<void> {
+    return this.setVolume(event);
+  }
 
-    try {
-      await this.spotifyPlayer.toggleMute();
-    } catch (error) {
-      console.error('Could not toggle Spotify mute:', error);
-    }
+  toggleMute(): Promise<void> {
+    return this.playbackState.toggleSpotifyMute();
+  }
+
+  toggleRepeat(): Promise<void> {
+    return this.playbackState.cycleSpotifyRepeatMode();
   }
 
   async seekFromProgressClick(event: MouseEvent): Promise<void> {
@@ -402,24 +319,8 @@ export class PlayerStateService {
     }
   }
 
-  private async playCurrentTrackOnSpotify(): Promise<void> {
-    const uri = this.currentTrack().spotifyUri;
-
-    if (!uri) {
-      return;
-    }
-
-    try {
-      await this.spotifyPlayer.playTrack(uri);
-      this.isPlaying.set(true);
-    } catch (error) {
-      this.isPlaying.set(false);
-      console.error('Could not play Spotify track:', error);
-    }
-  }
-
   private syncCurrentTrackFromSpotify(track: Track): void {
-    this.moveTrackToTop(track);
+    this.browseState.moveTrackToTop(track);
 
     if (this.shouldMirrorTrackIntoLikedSongs(track)) {
       this.addTrackToLikedState(track);
@@ -450,16 +351,6 @@ export class PlayerStateService {
       likedSongs.length &&
       !likedSongs.some((item) => item.id === track.id)
     );
-  }
-
-  private setCurrentTrackForPlayback(track: Track): void {
-    this.playbackState.setCurrentTrack(track);
-    this.isPlaying.set(true);
-    this.moveTrackToTop(track);
-  }
-
-  private moveTrackToTop(track: Track): void {
-    this.browseState.moveTrackToTop(track);
   }
 
   private mapPlaybackTrack(track: PlaybackTrack, durationMs: number): Track {
