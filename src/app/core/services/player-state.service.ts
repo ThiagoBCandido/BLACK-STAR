@@ -5,6 +5,8 @@ import { SpotifyApiService } from './spotify-api.service';
 import { SpotifyPlayerService } from './spotify-player.service';
 import { ToastService } from './toast.service';
 import { LibraryStateService } from '../state/library-state.service';
+import { TrackOptionsStateService } from '../state/track-options-state.service';
+import { CreatePlaylistStateService } from '../state/create-playlist-state.service';
 
 interface PlaybackTrack {
   id: string;
@@ -29,6 +31,8 @@ export class PlayerStateService {
   private readonly spotifyPlayer = inject(SpotifyPlayerService);
   private readonly toast = inject(ToastService);
   private readonly libraryState = inject(LibraryStateService);
+  private readonly trackOptionsState = inject(TrackOptionsStateService);
+  private readonly createPlaylistState = inject(CreatePlaylistStateService);
 
   /* library signals */
   readonly libraryPlaylists = this.libraryState.libraryPlaylists;
@@ -55,11 +59,11 @@ export class PlayerStateService {
   readonly playlists = signal(PLAYLISTS);
 
   /* playlist creation signals */
-  readonly isCreatePlaylistOpen = signal(false);
-  readonly createPlaylistName = signal('');
-  readonly createPlaylistDescription = signal('');
-  readonly createPlaylistIsPublic = signal(false);
-  readonly isCreatingPlaylist = signal(false);
+  readonly isCreatePlaylistOpen = this.createPlaylistState.isCreatePlaylistOpen;
+  readonly createPlaylistName = this.createPlaylistState.createPlaylistName;
+  readonly createPlaylistDescription = this.createPlaylistState.createPlaylistDescription;
+  readonly createPlaylistIsPublic = this.createPlaylistState.createPlaylistIsPublic;
+  readonly isCreatingPlaylist = this.createPlaylistState.isCreatingPlaylist;
 
   /* playback signals */
   readonly currentTrack = signal<Track>(TRACKS[2]);
@@ -73,12 +77,14 @@ export class PlayerStateService {
   readonly activeScreen = signal<AppScreen>('home');
 
   /* track action signals */
-  readonly isAddToPlaylistOpen = signal(false);
-  readonly isAddingTrackToPlaylist = signal(false);
   readonly topTracks = signal<Track[]>([]);
   readonly isLoadingTopTracks = signal(false);
-  readonly selectedOptionsTrack = signal<Track | null>(null);
-  readonly isTrackOptionsOpen = computed(() => Boolean(this.selectedOptionsTrack()));
+  readonly selectedOptionsTrack = this.trackOptionsState.selectedOptionsTrack;
+  readonly trackOptionsMessage = this.trackOptionsState.trackOptionsMessage;
+  readonly isTrackOptionsOpen = this.trackOptionsState.isTrackOptionsOpen;
+
+  readonly isAddToPlaylistOpen = this.trackOptionsState.isAddToPlaylistOpen;
+  readonly isAddingTrackToPlaylist = this.trackOptionsState.isAddingTrackToPlaylist;
 
   /* Spotify sync signals */
   readonly activeSpotifyDeviceName = signal<string | null>(null);
@@ -217,71 +223,15 @@ export class PlayerStateService {
   }
 
   openAddToPlaylist(): void {
-    const track = this.selectedOptionsTrack();
-
-    if (!track?.spotifyUri) {
-      this.toast.error('This track cannot be added to a playlist.');
-      return;
-    }
-
-    this.isAddToPlaylistOpen.set(true);
-
-    if (!this.libraryPlaylists().length) {
-      void this.loadLibraryPlaylists();
-    }
+    this.trackOptionsState.openAddToPlaylist();
   }
 
   closeAddToPlaylist(): void {
-    if (this.isAddingTrackToPlaylist()) {
-      return;
-    }
-
-    this.isAddToPlaylistOpen.set(false);
+    this.trackOptionsState.closeAddToPlaylist();
   }
 
-  async addSelectedTrackToPlaylist(playlistId: string): Promise<void> {
-    const track = this.selectedOptionsTrack();
-    const playlist = this.libraryPlaylists().find((item) => item.id === playlistId);
-
-    if (!track?.spotifyUri) {
-      this.toast.error('This track cannot be added to a playlist.');
-      return;
-    }
-
-    if (!playlist) {
-      this.toast.error('Playlist not found.');
-      return;
-    }
-
-    if (playlist.isAccessible === false) {
-      this.toast.error('Spotify does not allow editing this playlist.');
-      return;
-    }
-
-    this.isAddingTrackToPlaylist.set(true);
-
-    try {
-      const success = await this.spotifyApi.addTrackToPlaylist(
-        playlist.id,
-        track.spotifyUri
-      );
-
-      if (!success) {
-        this.toast.error('Could not add track to playlist.');
-        return;
-      }
-
-      this.libraryState.updatePlaylistTrackCount(playlist.id, 1);
-      this.libraryState.addTrackToOpenedPlaylist(playlist.id, track);
-      this.toast.success(`Added to ${playlist.title}.`);
-      this.isAddToPlaylistOpen.set(false);
-      this.closeTrackOptions();
-    } catch (error) {
-      console.error('Could not add track to playlist:', error);
-      this.toast.error('Could not add track to playlist.');
-    } finally {
-      this.isAddingTrackToPlaylist.set(false);
-    }
+  addSelectedTrackToPlaylist(playlistId: string): Promise<void> {
+    return this.trackOptionsState.addSelectedTrackToPlaylist(playlistId);
   }
 
   stopPlaybackSync(): void {
@@ -391,66 +341,27 @@ export class PlayerStateService {
   }
 
   openCreatePlaylist(): void {
-    this.createPlaylistName.set('');
-    this.createPlaylistDescription.set('');
-    this.createPlaylistIsPublic.set(false);
-    this.isCreatePlaylistOpen.set(true);
+  this.createPlaylistState.openCreatePlaylist();
   }
 
   closeCreatePlaylist(): void {
-    if (this.isCreatingPlaylist()) {
-      return;
-    }
-
-    this.isCreatePlaylistOpen.set(false);
+    this.createPlaylistState.closeCreatePlaylist();
   }
 
   updateCreatePlaylistName(name: string): void {
-    this.createPlaylistName.set(name);
+    this.createPlaylistState.updateCreatePlaylistName(name);
   }
 
   updateCreatePlaylistDescription(description: string): void {
-    this.createPlaylistDescription.set(description);
+    this.createPlaylistState.updateCreatePlaylistDescription(description);
   }
 
   toggleCreatePlaylistVisibility(): void {
-    this.createPlaylistIsPublic.update((value) => !value);
+    this.createPlaylistState.toggleCreatePlaylistVisibility();
   }
 
-  async createSpotifyPlaylist(): Promise<void> {
-    const name = this.createPlaylistName().trim();
-    const description = this.createPlaylistDescription().trim();
-    const isPublic = this.createPlaylistIsPublic();
-
-    if (!name) {
-      this.toast.warning('Playlist name is required.');
-      return;
-    }
-
-    this.isCreatingPlaylist.set(true);
-
-    try {
-      const playlist = await this.spotifyApi.createPlaylist({
-        name,
-        description,
-        public: isPublic,
-        collaborative: false,
-      });
-
-      if (!playlist) {
-        this.toast.error('Could not create playlist.');
-        return;
-      }
-
-      this.libraryState.addPlaylistToLibrary(playlist);
-      this.toast.success('Playlist created.');
-      this.isCreatePlaylistOpen.set(false);
-    } catch (error) {
-      console.error('Could not create Spotify playlist:', error);
-      this.toast.error('Could not create playlist. Reconnect Spotify and try again.');
-    } finally {
-      this.isCreatingPlaylist.set(false);
-    }
+  createSpotifyPlaylist(): Promise<void> {
+    return this.createPlaylistState.createSpotifyPlaylist();
   }
 
   openLikedSongs(): Promise<void> {
@@ -466,23 +377,22 @@ export class PlayerStateService {
   }
 
   openTrackOptions(track: Track, event?: Event): void {
-    event?.stopPropagation();
-    this.selectedOptionsTrack.set(track);
+    this.trackOptionsState.openTrackOptions(track, event);
   }
 
   closeTrackOptions(): void {
-    this.selectedOptionsTrack.set(null);
+    this.trackOptionsState.closeTrackOptions();
   }
 
   async playOptionsTrack(): Promise<void> {
-    const track = this.selectedOptionsTrack();
+    const track = this.trackOptionsState.selectedOptionsTrack();
 
     if (!track) {
       return;
     }
 
     await this.selectTrack(track);
-    this.closeTrackOptions();
+    this.trackOptionsState.closeTrackOptions();
   }
 
   async loadTopTracks(): Promise<void> {
@@ -500,50 +410,16 @@ export class PlayerStateService {
     }
   }
 
-  async addSelectedTrackToQueue(): Promise<void> {
-    const track = this.selectedOptionsTrack();
-
-    if (!track?.spotifyUri) {
-      this.toast.error('This track cannot be added to queue.');
-      return;
-    }
-
-    try {
-      await this.spotifyPlayer.addTrackToQueue(track.spotifyUri);
-      this.toast.success('Added to queue.');
-      this.closeTrackOptions();
-    } catch (error) {
-      console.error('Could not add track to Spotify queue:', error);
-      this.toast.error('Could not add this track to queue.');
-    }
+  addSelectedTrackToQueue(): Promise<void> {
+    return this.trackOptionsState.addSelectedTrackToQueue();
   }
 
   openSelectedTrackOnSpotify(): void {
-    const track = this.selectedOptionsTrack();
-
-    if (!track?.spotifyUrl) {
-      this.toast.error('Spotify link is not available for this track.');
-      return;
-    }
-
-    window.open(track.spotifyUrl, '_blank', 'noopener,noreferrer');
-    this.toast.info('Opening Spotify.');
+    this.trackOptionsState.openSelectedTrackOnSpotify();
   }
 
-  async copySelectedTrackLink(): Promise<void> {
-    const track = this.selectedOptionsTrack();
-
-    if (!track?.spotifyUrl) {
-      this.toast.error('Spotify link is not available for this track.');
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(track.spotifyUrl);
-      this.toast.success('Spotify link copied.');
-    } catch {
-      this.toast.error('Could not copy the link.');
-    }
+  copySelectedTrackLink(): Promise<void> {
+    return this.trackOptionsState.copySelectedTrackLink();
   }
 
   async selectTrack(track: Track): Promise<void> {

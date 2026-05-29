@@ -1,6 +1,6 @@
 import { CommonModule } from "@angular/common";
 import { Component, inject } from "@angular/core";
-import { PlayerStateService } from "../../core/services/player-state.service";
+import { CreatePlaylistStateService } from "../../core/state/create-playlist-state.service";
 
 @Component({
   selector: 'app-create-playlist-sheet',
@@ -10,18 +10,20 @@ import { PlayerStateService } from "../../core/services/player-state.service";
   styleUrl: './create-playlist-sheet.component.css'
 })
 export class CreatePlaylistSheetComponent {
-  readonly player = inject(PlayerStateService);
+  readonly create = inject(CreatePlaylistStateService);
+
   onNameInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.player.updateCreatePlaylistName(input.value);
+    this.create.updateCreatePlaylistName(input.value);
   }
+
   onDescriptionInput(event: Event): void {
     const textarea = event.target as HTMLTextAreaElement;
-    this.player.updateCreatePlaylistDescription(textarea.value);
+    this.create.updateCreatePlaylistDescription(textarea.value);
   }
   
   async onSubmit(event: Event): Promise<void> {
     event.preventDefault();
-    await this.player.createSpotifyPlaylist();
+    await this.create.createSpotifyPlaylist();
   }
 }
