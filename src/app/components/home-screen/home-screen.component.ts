@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { TrackListItemComponent } from '../track-list-item/track-list-item.component';
 import { TrackListSkeletonComponent } from '../track-list-skeleton/track-list-skeleton.component';
+import { BrowseStateService } from '../../core/state/browse-state.service';
+import { NavigationStateService } from '../../core/state/navigation-state.service';
 import { PlayerStateService } from '../../core/services/player-state.service';
 import { SpotifyAuthService } from '../../core/services/spotify-auth.service';
-import { NavigationStateService } from '../../core/state/navigation-state.service';
-
 
 @Component({
   selector: 'app-home-screen',
@@ -18,16 +18,22 @@ export class HomeScreenComponent {
   readonly player = inject(PlayerStateService);
   readonly spotifyAuth = inject(SpotifyAuthService);
   readonly navigation = inject(NavigationStateService);
+  readonly browse = inject(BrowseStateService);
 
-  get featuredRelease() {
-    const track = this.player.tracks()[0] ?? this.player.currentTrack();
+  readonly featuredTrack = computed(() => {
+    const currentTrack = this.player.currentTrack();
+    if (currentTrack?.spotifyUri && !currentTrack.id.startsWith('mock')) {
+      return currentTrack;
+    }
+    return this.browse.recentlyPlayedTracks()[0] ?? currentTrack;
+  });
 
-    return {
-      title: track.album,
-      artist: track.artist,
-      description: 'A dark pop journey through the afterhours.',
-      cover: track.cover,
-      track,
-    };
-  }
+  readonly featuredDescription = computed(() => {
+    const track = this.featuredTrack();
+    if (!track) {
+      return 'A dark music experience through BLACK STAR.';
+    }
+
+    return `${track.album} · ${track.duration}`;
+  });
 }

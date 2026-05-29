@@ -19,6 +19,7 @@ import { SpotifyPlayerService } from './core/services/spotify-player.service';
 import { CreatePlaylistStateService } from './core/state/create-playlist-state.service';
 import { NavigationStateService } from './core/state/navigation-state.service';
 import { TrackOptionsStateService } from './core/state/track-options-state.service';
+import { BrowseStateService } from './core/state/browse-state.service';
 
 @Component({
   selector: 'app-root',
@@ -50,14 +51,19 @@ export class AppComponent implements OnInit {
 
   private readonly spotifyAuth = inject(SpotifyAuthService);
   private readonly spotifyPlayer = inject(SpotifyPlayerService);
+  private readonly browse = inject(BrowseStateService);
 
   async ngOnInit(): Promise<void> {
     await this.spotifyAuth.initialize();
 
     if (this.spotifyAuth.isAuthenticated()) {
-      await this.player.loadSpotifyTracks();
-      await this.player.loadTopTracks();
+      const recentlyPlayedTracks = await this.browse.loadRecentlyPlayedTracks();
+
+      this.player.setInitialTrack(recentlyPlayedTracks[0]);
+
+      await this.browse.loadTopTracks();
       await this.spotifyPlayer.initialize();
+
       this.player.startPlaybackSync();
     }
   }

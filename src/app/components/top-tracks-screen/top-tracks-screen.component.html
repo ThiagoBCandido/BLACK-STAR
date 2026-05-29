@@ -1,8 +1,8 @@
 <section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
-  <app-screen-header title="TOP TRACKS" eyebrow="Spotify" heading="Your Top Tracks" description="Tracks based on your recent Spotify listening history." [showBackButton]="true" (back)="navigation.goHome()" actionIcon="assets/icons/reload.svg" actionTitle="Refresh top tracks" (action)="player.loadTopTracks()"></app-screen-header>
+  <app-screen-header title="TOP TRACKS" eyebrow="Spotify" heading="Your Top Tracks" description="Tracks based on your recent Spotify listening history." [showBackButton]="true" (back)="navigation.goHome()" actionIcon="assets/icons/return.svg" actionTitle="Refresh top tracks" (action)="browse.loadTopTracks()"></app-screen-header>
   <section class="flex-1 overflow-y-auto px-5 py-5">
-    <app-track-list-skeleton *ngIf="player.isLoadingTopTracks()" [items]="8"></app-track-list-skeleton>
-    <div *ngIf="!player.isLoadingTopTracks() && !player.topTracks().length" class="empty-state">
+    <app-track-list-skeleton *ngIf="browse.isLoadingTopTracks()" [items]="8"></app-track-list-skeleton>
+    <div *ngIf="!browse.isLoadingTopTracks() && !browse.topTracks().length" class="empty-state">
       <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
         Empty
       </p>
@@ -13,8 +13,8 @@
         Listen to more music on Spotify and refresh this screen.
       </p>
     </div>
-    <div *ngIf="!player.isLoadingTopTracks() && player.topTracks().length" class="space-y-2">
-      <app-track-list-item *ngFor="let track of player.topTracks()" [track]="track" [showAlbum]="true"></app-track-list-item>
+    <div *ngIf="!browse.isLoadingTopTracks() && browse.topTracks().length" class="space-y-2">
+      <app-track-list-item *ngFor="let track of browse.topTracks()" [track]="track" [showAlbum]="true"></app-track-list-item>
     </div>
   </section>
 </section>

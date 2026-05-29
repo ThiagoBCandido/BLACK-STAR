@@ -109,7 +109,7 @@
             </button>
           </div>
           <div class="space-y-2">
-            <app-track-list-item *ngFor="let track of player.tracks()" [track]="track" variant="queue" [showOptions]="true"></app-track-list-item>
+            <app-track-list-item *ngFor="let track of browse.recentlyPlayedTracks()" [track]="track" variant="queue" [showOptions]="true"></app-track-list-item>
           </div>
         </section>
       </section>

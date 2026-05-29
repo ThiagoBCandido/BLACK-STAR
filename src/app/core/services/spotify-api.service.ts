@@ -106,6 +106,7 @@ interface UserPlaylistsResponse {
 interface SpotifyPlaybackDevice {
   id: string | null;
   name: string;
+  type?: string | null;
 }
 
 interface CurrentPlaybackResponse {
@@ -122,6 +123,7 @@ export interface CurrentPlaybackSnapshot {
   track: Track | null;
   deviceId: string | null;
   deviceName: string | null;
+  deviceType: string | null;
 }
 
 @Injectable({
@@ -251,6 +253,7 @@ export class SpotifyApiService {
       track,
       deviceId: response.device?.id ?? null,
       deviceName: response.device?.name ?? null,
+      deviceType: response.device?.type ?? null,
     };
   }
 

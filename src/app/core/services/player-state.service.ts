@@ -1,4 +1,4 @@
-import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { Injectable, effect, inject, signal } from '@angular/core';
 import { PLAYLISTS, TRACKS } from '../data/mock-music.data';
 import { Track } from '../models/music.model';
 import { SpotifyApiService } from './spotify-api.service';
@@ -6,6 +6,7 @@ import { SpotifyPlayerService } from './spotify-player.service';
 import { ToastService } from './toast.service';
 import { LibraryStateService } from '../state/library-state.service';
 import { BrowseStateService } from '../state/browse-state.service';
+import { PlaybackStateService } from '../state/playback-state.service';
 
 interface PlaybackTrack {
   id: string;
@@ -29,73 +30,42 @@ export class PlayerStateService {
   private readonly toast = inject(ToastService);
   private readonly libraryState = inject(LibraryStateService);
   private readonly browseState = inject(BrowseStateService);
+  private readonly playbackState = inject(PlaybackStateService);
 
   /* app data signals */
-  readonly tracks = this.browseState.recentlyPlayedTracks;
   readonly playlists = signal(PLAYLISTS);
 
   /* playback signals */
-  readonly currentTrack = signal<Track>(TRACKS[2]);
-  readonly isPlaying = signal(false);
-  readonly isPlayerOpen = signal(false);
+  readonly currentTrack = this.playbackState.currentTrack;
+  readonly isPlaying = this.playbackState.isPlaying;
+  readonly isPlayerOpen = this.playbackState.isPlayerOpen;
   readonly isPlayerClosing = signal(false);
   readonly isLiked = signal(false);
-  readonly isLoadingSpotifyTracks = this.browseState.isLoadingRecentlyPlayed;
-
-  /* track action signals */
-  readonly topTracks = this.browseState.topTracks;
-  readonly isLoadingTopTracks = this.browseState.isLoadingTopTracks;
 
   /* Spotify sync signals */
-  readonly activeSpotifyDeviceName = signal<string | null>(null);
-  readonly isExternalPlaybackActive = signal(false);
-
-  /* home computed values */
-  readonly featuredTrack = computed(() => {
-    const currentTrack = this.currentTrack();
-    const firstTrack = this.tracks()[0];
-
-    return currentTrack ?? firstTrack;
-  });
-
-  readonly featuredDescription = computed(() => {
-    const track = this.featuredTrack();
-
-    if (!track) {
-      return 'A dark music experience through BLACK STAR.';
-    }
-
-    return `${track.album} · ${track.duration}`;
-  });
+  readonly activeSpotifyDeviceName = this.playbackState.activeSpotifyDeviceName;
+  readonly activeSpotifyDeviceType = this.playbackState.activeSpotifyDeviceType;
+  readonly isExternalPlaybackActive = this.playbackState.isExternalPlaybackActive;
+  readonly isPlaybackSyncEnabled = this.playbackState.isPlaybackSyncEnabled;
 
   /* player computed values */
-  readonly positionMs = computed(() => this.spotifyPlayer.positionMs());
-  readonly durationMs = computed(() => {
-    const spotifyDuration = this.spotifyPlayer.durationMs();
+  readonly positionMs = this.playbackState.positionMs;
+  readonly progressMs = this.playbackState.progressMs;
+  readonly durationMs = this.playbackState.durationMs;
 
-    if (spotifyDuration > 0) {
-      return spotifyDuration;
-    }
+  readonly volumePercent = this.playbackState.volumePercent;
+  readonly previousVolumePercent = this.playbackState.previousVolumePercent;
+  readonly isMuted = this.playbackState.isMuted;
 
-    return this.currentTrack().durationMs ?? 0;
-  });
+  readonly isShuffleEnabled = this.playbackState.isShuffleEnabled;
+  readonly repeatMode = this.playbackState.repeatMode;
 
-  readonly progressPercent = computed(() => {
-    const duration = this.durationMs();
-
-    if (!duration) {
-      return 0;
-    }
-
-    return Math.min((this.positionMs() / duration) * 100, 100);
-  });
-
-  readonly positionLabel = computed(() => this.formatDuration(this.positionMs()));
-  readonly durationLabel = computed(() => this.formatDuration(this.durationMs()));
-  readonly isShuffleEnabled = computed(() => this.spotifyPlayer.isShuffleEnabled());
-  readonly repeatMode = computed(() => this.spotifyPlayer.repeatMode());
-  readonly volumePercent = computed(() => this.spotifyPlayer.volumePercent());
-  readonly isMuted = computed(() => this.spotifyPlayer.isMuted());
+  readonly progressPercent = this.playbackState.progressPercent;
+  readonly currentTime = this.playbackState.currentTime;
+  readonly durationTime = this.playbackState.durationTime;
+  readonly totalTime = this.playbackState.totalTime;
+  readonly positionLabel = this.playbackState.currentTime;
+  readonly durationLabel = this.playbackState.durationTime;
 
   private closeTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private playbackSyncIntervalId: ReturnType<typeof setInterval> | null = null;
@@ -118,15 +88,17 @@ export class PlayerStateService {
 
         this.isPlaying.set(!state.paused);
 
-        const existingTrack = this.tracks().find((track) => track.id === playbackTrack.id);
+        const existingTrack = this.browseState
+          .recentlyPlayedTracks()
+          .find((track) => track.id === playbackTrack.id);
         const mappedTrack = existingTrack ?? this.mapPlaybackTrack(playbackTrack, state.duration);
 
         if (!existingTrack) {
-          this.tracks.update((tracks) => [mappedTrack, ...tracks]);
+          this.browseState.moveTrackToTop(mappedTrack);
         }
 
         if (this.currentTrack().id !== mappedTrack.id) {
-          this.currentTrack.set(mappedTrack);
+          this.playbackState.setCurrentTrack(mappedTrack);
         }
       },
       { allowSignalWrites: true }
@@ -144,10 +116,8 @@ export class PlayerStateService {
     );
   }
 
-  async loadSpotifyTracks(): Promise<void> {
-    const tracks = await this.browseState.loadRecentlyPlayedTracks();
-
-    if (!tracks.length) {
+  setInitialTrack(track?: Track): void {
+    if (!track) {
       return;
     }
 
@@ -155,16 +125,20 @@ export class PlayerStateService {
     const shouldReplaceCurrentTrack =
       !currentTrack.spotifyUri || currentTrack.id.startsWith('mock');
 
-    if (shouldReplaceCurrentTrack) {
-      this.currentTrack.set(tracks[0]);
-      this.isPlaying.set(false);
+    if (!shouldReplaceCurrentTrack) {
+      return;
     }
+
+    this.playbackState.setCurrentTrack(track);
+    this.isPlaying.set(false);
   }
 
   startPlaybackSync(): void {
     if (this.playbackSyncIntervalId) {
       return;
     }
+
+    this.isPlaybackSyncEnabled.set(true);
 
     void this.syncCurrentPlayback();
 
@@ -180,7 +154,9 @@ export class PlayerStateService {
     }
 
     this.activeSpotifyDeviceName.set(null);
+    this.activeSpotifyDeviceType.set(null);
     this.isExternalPlaybackActive.set(false);
+    this.isPlaybackSyncEnabled.set(false);
   }
 
   async syncCurrentPlayback(): Promise<void> {
@@ -196,7 +172,9 @@ export class PlayerStateService {
       if (!playback) {
         this.isPlaying.set(false);
         this.activeSpotifyDeviceName.set(null);
+        this.activeSpotifyDeviceType.set(null);
         this.isExternalPlaybackActive.set(false);
+        this.playbackState.setPlaybackProgress(0, this.durationMs());
 
         this.spotifyPlayer.applyExternalPlaybackState({
           isPlaying: false,
@@ -209,6 +187,7 @@ export class PlayerStateService {
       }
 
       this.activeSpotifyDeviceName.set(playback.deviceName);
+      this.activeSpotifyDeviceType.set(playback.deviceType);
 
       const blackStarDeviceId = this.spotifyPlayer.deviceId();
       const isExternalDevice = Boolean(
@@ -224,6 +203,11 @@ export class PlayerStateService {
         this.syncCurrentTrackFromSpotify(playback.track);
       }
 
+      this.playbackState.setPlaybackProgress(
+        playback.progressMs,
+        playback.durationMs
+      );
+
       this.spotifyPlayer.applyExternalPlaybackState({
         isPlaying: playback.isPlaying,
         positionMs: playback.progressMs,
@@ -235,10 +219,6 @@ export class PlayerStateService {
     } finally {
       this.isSyncingCurrentPlayback = false;
     }
-  }
-
-  async loadTopTracks(): Promise<void> {
-    await this.browseState.loadTopTracks();
   }
 
   async selectTrack(track: Track): Promise<void> {
@@ -340,7 +320,12 @@ export class PlayerStateService {
   async nextTrack(event?: Event): Promise<void> {
     event?.stopPropagation();
 
-    const tracks = this.tracks();
+    const tracks = this.browseState.recentlyPlayedTracks();
+
+    if (!tracks.length) {
+      return;
+    }
+
     const currentIndex = tracks.findIndex((track) => track.id === this.currentTrack().id);
     const nextIndex = (currentIndex + 1) % tracks.length;
 
@@ -352,7 +337,12 @@ export class PlayerStateService {
   async previousTrack(event?: Event): Promise<void> {
     event?.stopPropagation();
 
-    const tracks = this.tracks();
+    const tracks = this.browseState.recentlyPlayedTracks();
+
+    if (!tracks.length) {
+      return;
+    }
+
     const currentIndex = tracks.findIndex((track) => track.id === this.currentTrack().id);
     const previousIndex = currentIndex === 0 ? tracks.length - 1 : currentIndex - 1;
 
@@ -436,7 +426,7 @@ export class PlayerStateService {
     }
 
     if (this.currentTrack().id !== track.id) {
-      this.currentTrack.set(track);
+      this.playbackState.setCurrentTrack(track);
     }
   }
 
@@ -463,7 +453,7 @@ export class PlayerStateService {
   }
 
   private setCurrentTrackForPlayback(track: Track): void {
-    this.currentTrack.set(track);
+    this.playbackState.setCurrentTrack(track);
     this.isPlaying.set(true);
     this.moveTrackToTop(track);
   }

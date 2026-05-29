@@ -25,7 +25,7 @@
   <section class="flex-1 overflow-y-auto">
     <section class="px-5 pt-4">
       <article class="relative overflow-hidden rounded-3xl border border-white/10">
-        <img [src]="player.featuredTrack().cover" [alt]="player.featuredTrack().title" class="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-2xl"/>
+        <img [src]="featuredTrack().cover" [alt]="featuredTrack().title" class="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-2xl"/>
         <div class="absolute inset-0 bg-black/65"></div>
         <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/25"></div>
         <div class="relative flex min-h-[150px] items-center justify-between gap-4 p-4">
@@ -34,21 +34,30 @@
               Featured Release
             </p>
             <h2 class="truncate text-[28px] font-light leading-none text-white">
-              {{ player.featuredTrack().title }}
+              {{ featuredTrack().title }}
             </h2>
             <p class="mt-2 truncate text-sm text-white/60">
-              {{ player.featuredTrack().artist }}
+              {{ featuredTrack().artist }}
             </p>
             <p class="mt-3 line-clamp-2 max-w-[190px] text-sm leading-5 text-white/70">
-              {{ player.featuredDescription() }}
+              {{ featuredDescription() }}
             </p>
-            <button type="button" (click)="player.selectTrack(player.featuredTrack())" class="mt-4 inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-sm font-medium text-black transition hover:scale-[1.02]">
-              <img src="assets/icons/play-button.svg" alt="" class="h-3.5 w-3.5 object-contain"/>
+            <button
+              type="button"
+              (click)="player.selectTrack(featuredTrack())"
+              class="mt-4 inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-sm font-medium text-black transition hover:scale-[1.02]"
+            >
+              <img
+                src="assets/icons/play-button.svg"
+                alt=""
+                class="h-3.5 w-3.5 object-contain"
+              />
+
               <span>Play Now</span>
             </button>
           </div>
           <div class="h-28 w-28 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/5 shadow-[0_12px_28px_rgba(0,0,0,0.35)]">
-            <img [src]="player.featuredTrack().cover" [alt]="player.featuredTrack().title" class="h-full w-full object-cover grayscale"/>
+            <img [src]="featuredTrack().cover" [alt]="featuredTrack().title" class="h-full w-full object-cover grayscale"/>
           </div>
         </div>
       </article>
@@ -69,7 +78,7 @@
         </button>
       </div>
       <div class="scrollbar-hide flex gap-3 overflow-x-auto pb-2">
-        <button type="button" *ngFor="let track of player.topTracks().length ? player.topTracks() : player.tracks()" (click)="player.selectTrack(track)" class="w-[132px] shrink-0 text-left">
+        <button type="button" *ngFor="let track of browse.topTracks().length ? browse.topTracks() : browse.recentlyPlayedTracks()" (click)="player.selectTrack(track)" class="w-[132px] shrink-0 text-left">
           <div class="mb-2 h-[132px] w-[132px] overflow-hidden rounded-md border border-white/10 bg-zinc-950">
             <img [src]="track.cover" [alt]="track.album" class="h-full w-full object-cover grayscale"/>
           </div>
@@ -115,9 +124,9 @@
         </button>
       </div>
       <div class="space-y-1 border-y border-white/10 py-1">
-        <app-track-list-skeleton *ngIf="player.isLoadingSpotifyTracks()" [items]="4"></app-track-list-skeleton>
-        <ng-container *ngIf="!player.isLoadingSpotifyTracks()">
-          <app-track-list-item *ngFor="let track of player.tracks()" [track]="track" size="compact"></app-track-list-item>
+        <app-track-list-skeleton *ngIf="browse.isLoadingRecentlyPlayed()" [items]="4"></app-track-list-skeleton>
+        <ng-container *ngIf="!browse.isLoadingRecentlyPlayed()">
+          <app-track-list-item *ngFor="let track of browse.recentlyPlayedTracks()" [track]="track" size="compact"></app-track-list-item>
         </ng-container>
       </div>
     </section>
