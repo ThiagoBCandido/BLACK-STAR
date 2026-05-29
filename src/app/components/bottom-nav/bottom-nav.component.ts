@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { PlayerStateService } from '../../core/services/player-state.service';
+import { NavigationStateService } from '../../core/state/navigation-state.service';
 
 @Component({
   selector: 'app-bottom-nav',
@@ -10,5 +10,5 @@ import { PlayerStateService } from '../../core/services/player-state.service';
   styleUrl: './bottom-nav.component.css',
 })
 export class BottomNavComponent {
-  readonly player = inject(PlayerStateService);
+  readonly navigation = inject(NavigationStateService);
 }

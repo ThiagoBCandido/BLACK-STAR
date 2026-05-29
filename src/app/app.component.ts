@@ -17,6 +17,7 @@ import { PlayerStateService } from './core/services/player-state.service';
 import { SpotifyAuthService } from './core/services/spotify-auth.service';
 import { SpotifyPlayerService } from './core/services/spotify-player.service';
 import { CreatePlaylistStateService } from './core/state/create-playlist-state.service';
+import { NavigationStateService } from './core/state/navigation-state.service';
 import { TrackOptionsStateService } from './core/state/track-options-state.service';
 
 @Component({
@@ -45,6 +46,7 @@ export class AppComponent implements OnInit {
   readonly player = inject(PlayerStateService);
   readonly trackOptions = inject(TrackOptionsStateService);
   readonly create = inject(CreatePlaylistStateService);
+  readonly navigation = inject(NavigationStateService);
 
   private readonly spotifyAuth = inject(SpotifyAuthService);
   private readonly spotifyPlayer = inject(SpotifyPlayerService);

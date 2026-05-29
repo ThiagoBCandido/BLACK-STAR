@@ -4,6 +4,7 @@ import { ScreenHeaderComponent } from '../screen-header/screen-header.component'
 import { TrackListItemComponent } from '../track-list-item/track-list-item.component';
 import { TrackListSkeletonComponent } from '../track-list-skeleton/track-list-skeleton.component';
 import { PlayerStateService } from '../../core/services/player-state.service';
+import { NavigationStateService } from '../../core/state/navigation-state.service';
 
 @Component({
   selector: 'app-recently-played-screen',
@@ -19,4 +20,5 @@ import { PlayerStateService } from '../../core/services/player-state.service';
 })
 export class RecentlyPlayedScreenComponent {
   readonly player = inject(PlayerStateService);
+  readonly navigation = inject(NavigationStateService);
 }

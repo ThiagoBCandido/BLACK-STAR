@@ -1,10 +1,10 @@
 <main class="min-h-screen bg-black text-white">
-  <app-home-screen *ngIf="player.activeScreen() === 'home'"></app-home-screen>
-  <app-search-screen *ngIf="player.activeScreen() === 'search'"></app-search-screen>
-  <app-library-screen *ngIf="player.activeScreen() === 'library'"></app-library-screen>
-  <app-profile-screen *ngIf="player.activeScreen() === 'profile'"></app-profile-screen>
-  <app-recently-played-screen *ngIf="player.activeScreen() === 'recentlyPlayed'"></app-recently-played-screen>
-  <app-top-tracks-screen *ngIf="player.activeScreen() === 'topTracks'"></app-top-tracks-screen>
+  <app-home-screen *ngIf="navigation.activeScreen() === 'home'"></app-home-screen>
+  <app-search-screen *ngIf="navigation.activeScreen() === 'search'"></app-search-screen>
+  <app-library-screen *ngIf="navigation.activeScreen() === 'library'"></app-library-screen>
+  <app-profile-screen *ngIf="navigation.activeScreen() === 'profile'"></app-profile-screen>
+  <app-recently-played-screen *ngIf="navigation.activeScreen() === 'recentlyPlayed'"></app-recently-played-screen>
+  <app-top-tracks-screen *ngIf="navigation.activeScreen() === 'topTracks'"></app-top-tracks-screen>
   <app-mini-player></app-mini-player>
   <app-bottom-nav></app-bottom-nav>
   <app-full-player *ngIf="player.isPlayerOpen()"></app-full-player>

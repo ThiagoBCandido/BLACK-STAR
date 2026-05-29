@@ -4,6 +4,7 @@ import { TrackListItemComponent } from "../track-list-item/track-list-item.compo
 import { TrackListSkeletonComponent } from "../track-list-skeleton/track-list-skeleton.component";
 import { PlayerStateService } from "../../core/services/player-state.service";
 import { ScreenHeaderComponent } from "../screen-header/screen-header.component";
+import { NavigationStateService } from "../../core/state/navigation-state.service";
 
 @Component({
   selector: 'app-top-tracks-screen',
@@ -14,4 +15,5 @@ import { ScreenHeaderComponent } from "../screen-header/screen-header.component"
 })
 export class TopTracksScreenComponent {
   readonly player = inject(PlayerStateService);
+  readonly navigation = inject(NavigationStateService);
 }

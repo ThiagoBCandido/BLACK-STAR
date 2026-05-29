@@ -1,22 +1,21 @@
 <header class="border-b border-white/10 px-5 pb-5 pt-5">
-  <div class="mb-7 grid grid-cols-[42px_1fr_auto] items-center gap-3">
+  <div class="mb-5 flex items-center justify-between">
     <button *ngIf="showBackButton; else logoTemplate" type="button" (click)="back.emit()" class="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.04] transition hover:bg-white/[0.08]" aria-label="Back">
       <img src="assets/icons/return.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
     </button>
     <ng-template #logoTemplate>
       <img *ngIf="showLogo" src="assets/icons/blackstar_logo.svg" alt="Black Star" class="main-logo"/>
-      <div *ngIf="!showLogo"></div>
+      <div *ngIf="!showLogo" class="h-10 w-10"></div>
     </ng-template>
-    <h1 class="text-center text-[20px] font-light tracking-[0.42em] text-white/90">
-      {{ title }}
-    </h1>
-    <button *ngIf="actionLabel || actionIcon" type="button" (click)="action.emit()" class="flex h-9 items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 text-[11px] font-light text-white/75 transition hover:bg-white/[0.08]" [attr.title]="actionTitle">
+    <button *ngIf="actionLabel || actionIcon; else emptyAction" type="button" (click)="action.emit()" class="flex h-9 items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 text-[11px] font-light text-white/75 transition hover:bg-white/[0.08]" [attr.title]="actionTitle">
       <img *ngIf="actionIcon" [src]="actionIcon" alt="" class="icon-soft h-3.5 w-3.5 object-contain"/>
       <span *ngIf="actionLabel">
         {{ actionLabel }}
       </span>
     </button>
-    <div *ngIf="!actionLabel && !actionIcon"></div>
+    <ng-template #emptyAction>
+      <div class="h-10 w-10"></div>
+    </ng-template>
   </div>
   <div>
     <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">

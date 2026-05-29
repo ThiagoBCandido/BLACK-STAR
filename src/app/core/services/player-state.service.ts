@@ -5,6 +5,7 @@ import { SpotifyApiService } from './spotify-api.service';
 import { SpotifyPlayerService } from './spotify-player.service';
 import { ToastService } from './toast.service';
 import { LibraryStateService } from '../state/library-state.service';
+import { BrowseStateService } from '../state/browse-state.service';
 
 interface PlaybackTrack {
   id: string;
@@ -18,8 +19,6 @@ interface PlaybackTrack {
   };
 }
 
-type AppScreen = 'home' | 'search' | 'library' | 'profile' | 'recentlyPlayed' | 'topTracks';
-
 @Injectable({
   providedIn: 'root',
 })
@@ -29,9 +28,10 @@ export class PlayerStateService {
   private readonly spotifyPlayer = inject(SpotifyPlayerService);
   private readonly toast = inject(ToastService);
   private readonly libraryState = inject(LibraryStateService);
+  private readonly browseState = inject(BrowseStateService);
 
   /* app data signals */
-  readonly tracks = signal<Track[]>(TRACKS);
+  readonly tracks = this.browseState.recentlyPlayedTracks;
   readonly playlists = signal(PLAYLISTS);
 
   /* playback signals */
@@ -40,14 +40,11 @@ export class PlayerStateService {
   readonly isPlayerOpen = signal(false);
   readonly isPlayerClosing = signal(false);
   readonly isLiked = signal(false);
-  readonly isLoadingSpotifyTracks = signal(false);
-
-  /* navigation signals */
-  readonly activeScreen = signal<AppScreen>('home');
+  readonly isLoadingSpotifyTracks = this.browseState.isLoadingRecentlyPlayed;
 
   /* track action signals */
-  readonly topTracks = signal<Track[]>([]);
-  readonly isLoadingTopTracks = signal(false);
+  readonly topTracks = this.browseState.topTracks;
+  readonly isLoadingTopTracks = this.browseState.isLoadingTopTracks;
 
   /* Spotify sync signals */
   readonly activeSpotifyDeviceName = signal<string | null>(null);
@@ -148,28 +145,19 @@ export class PlayerStateService {
   }
 
   async loadSpotifyTracks(): Promise<void> {
-    this.isLoadingSpotifyTracks.set(true);
+    const tracks = await this.browseState.loadRecentlyPlayedTracks();
 
-    try {
-      let spotifyTracks = await this.spotifyApi.getRecentlyPlayedTracks();
+    if (!tracks.length) {
+      return;
+    }
 
-      if (!spotifyTracks.length) {
-        spotifyTracks = await this.spotifyApi.getTopTracks();
-      }
+    const currentTrack = this.currentTrack();
+    const shouldReplaceCurrentTrack =
+      !currentTrack.spotifyUri || currentTrack.id.startsWith('mock');
 
-      if (!spotifyTracks.length) {
-        return;
-      }
-
-      const uniqueTracks = this.removeDuplicateTracks(spotifyTracks);
-
-      this.tracks.set(uniqueTracks);
-      this.currentTrack.set(uniqueTracks[0]);
+    if (shouldReplaceCurrentTrack) {
+      this.currentTrack.set(tracks[0]);
       this.isPlaying.set(false);
-    } catch (error) {
-      console.error('Could not load Spotify tracks:', error);
-    } finally {
-      this.isLoadingSpotifyTracks.set(false);
     }
   }
 
@@ -249,40 +237,8 @@ export class PlayerStateService {
     }
   }
 
-  setActiveScreen(screen: AppScreen): void {
-    this.activeScreen.set(screen);
-
-    switch (screen) {
-      case 'library':
-        if (!this.libraryState.libraryPlaylists().length) {
-          void this.libraryState.loadLibraryPlaylists();
-        }
-        break;
-
-      case 'topTracks':
-        if (!this.topTracks().length) {
-          void this.loadTopTracks();
-        }
-        break;
-
-      default:
-        break;
-    }
-  }
-
   async loadTopTracks(): Promise<void> {
-    this.isLoadingTopTracks.set(true);
-
-    try {
-      const tracks = await this.spotifyApi.getTopTracks();
-
-      this.topTracks.set(this.removeDuplicateTracks(tracks));
-    } catch (error) {
-      console.error('Could not load Spotify top tracks:', error);
-      this.toast.error('Could not load your top tracks.');
-    } finally {
-      this.isLoadingTopTracks.set(false);
-    }
+    await this.browseState.loadTopTracks();
   }
 
   async selectTrack(track: Track): Promise<void> {
@@ -513,23 +469,7 @@ export class PlayerStateService {
   }
 
   private moveTrackToTop(track: Track): void {
-    this.tracks.update((tracks) => {
-      const filteredTracks = tracks.filter((item) => item.id !== track.id);
-      return [track, ...filteredTracks];
-    });
-  }
-
-  private removeDuplicateTracks(tracks: Track[]): Track[] {
-    const seenTrackIds = new Set<string>();
-
-    return tracks.filter((track) => {
-      if (seenTrackIds.has(track.id)) {
-        return false;
-      }
-
-      seenTrackIds.add(track.id);
-      return true;
-    });
+    this.browseState.moveTrackToTop(track);
   }
 
   private mapPlaybackTrack(track: PlaybackTrack, durationMs: number): Track {
