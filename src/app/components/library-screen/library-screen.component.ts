@@ -3,8 +3,8 @@ import { Component, inject } from '@angular/core';
 import { ScreenHeaderComponent } from '../screen-header/screen-header.component';
 import { TrackListItemComponent } from '../track-list-item/track-list-item.component';
 import { TrackListSkeletonComponent } from '../track-list-skeleton/track-list-skeleton.component';
-import { PlayerStateService } from '../../core/services/player-state.service';
 import { CreatePlaylistStateService } from '../../core/state/create-playlist-state.service';
+import { LibraryStateService } from '../../core/state/library-state.service';
 
 @Component({
   selector: 'app-library-screen',
@@ -19,11 +19,11 @@ import { CreatePlaylistStateService } from '../../core/state/create-playlist-sta
   styleUrl: './library-screen.component.css',
 })
 export class LibraryScreenComponent {
-  readonly player = inject(PlayerStateService);
+  readonly library = inject(LibraryStateService);
   readonly create = inject(CreatePlaylistStateService);
 
   onLibrarySearchInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.player.updateLibraryTrackSearchQuery(input.value);
+    this.library.updateLibraryTrackSearchQuery(input.value);
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { PLAYLISTS, TRACKS } from '../data/mock-music.data';
-import { Playlist, Track } from '../models/music.model';
+import { Track } from '../models/music.model';
 import { SpotifyApiService } from './spotify-api.service';
 import { SpotifyPlayerService } from './spotify-player.service';
 import { ToastService } from './toast.service';
@@ -29,26 +29,6 @@ export class PlayerStateService {
   private readonly spotifyPlayer = inject(SpotifyPlayerService);
   private readonly toast = inject(ToastService);
   private readonly libraryState = inject(LibraryStateService);
-
-  /* library signals */
-  readonly libraryPlaylists = this.libraryState.libraryPlaylists;
-  readonly selectedPlaylist = this.libraryState.selectedPlaylist;
-  readonly selectedPlaylistTracks = this.libraryState.selectedPlaylistTracks;
-
-  readonly likedSongs = this.libraryState.likedSongs;
-  readonly likedTrackIds = this.libraryState.likedTrackIds;
-  readonly isLikedSongsOpen = this.libraryState.isLikedSongsOpen;
-
-  readonly isLoadingLibrary = this.libraryState.isLoadingLibrary;
-  readonly isLoadingPlaylistTracks = this.libraryState.isLoadingPlaylistTracks;
-  readonly isLoadingLikedSongs = this.libraryState.isLoadingLikedSongs;
-
-  readonly libraryError = this.libraryState.libraryError;
-  readonly libraryTrackSearchQuery = this.libraryState.libraryTrackSearchQuery;
-
-  readonly editablePlaylists = this.libraryState.editablePlaylists;
-  readonly filteredLikedSongs = this.libraryState.filteredLikedSongs;
-  readonly filteredSelectedPlaylistTracks = this.libraryState.filteredSelectedPlaylistTracks;
 
   /* app data signals */
   readonly tracks = signal<Track[]>(TRACKS);
@@ -274,8 +254,8 @@ export class PlayerStateService {
 
     switch (screen) {
       case 'library':
-        if (!this.libraryPlaylists().length) {
-          void this.loadLibraryPlaylists();
+        if (!this.libraryState.libraryPlaylists().length) {
+          void this.libraryState.loadLibraryPlaylists();
         }
         break;
 
@@ -288,39 +268,6 @@ export class PlayerStateService {
       default:
         break;
     }
-  }
-
-  /* library methods */
-  updateLibraryTrackSearchQuery(query: string): void {
-    this.libraryState.updateLibraryTrackSearchQuery(query);
-  }
-
-  clearLibraryTrackSearch(): void {
-    this.libraryState.clearLibraryTrackSearch();
-  }
-
-  loadLibraryPlaylists(): Promise<void> {
-    return this.libraryState.loadLibraryPlaylists();
-  }
-
-  selectPlaylist(playlist: Playlist): Promise<void> {
-    return this.libraryState.selectPlaylist(playlist);
-  }
-
-  closeSelectedPlaylist(): void {
-    this.libraryState.closeSelectedPlaylist();
-  }
-
-  openLikedSongs(): Promise<void> {
-    return this.libraryState.openLikedSongs();
-  }
-
-  loadLikedSongs(): Promise<void> {
-    return this.libraryState.loadLikedSongs();
-  }
-
-  closeLikedSongs(): void {
-    this.libraryState.closeLikedSongs();
   }
 
   async loadTopTracks(): Promise<void> {
@@ -551,9 +498,11 @@ export class PlayerStateService {
   }
 
   private shouldMirrorTrackIntoLikedSongs(track: Track): boolean {
+    const likedSongs = this.libraryState.likedSongs();
+
     return Boolean(
-      this.likedSongs().length &&
-      !this.likedSongs().some((item) => item.id === track.id)
+      likedSongs.length &&
+      !likedSongs.some((item) => item.id === track.id)
     );
   }
 
