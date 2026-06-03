@@ -86,7 +86,7 @@ export class PlayerStateService {
           return;
         }
 
-        this.isPlaying.set(!state.paused);
+        this.playbackState.setPlaying(!state.paused);
 
         const existingTrack = this.browseState
           .recentlyPlayedTracks()
@@ -130,7 +130,7 @@ export class PlayerStateService {
     }
 
     this.playbackState.setCurrentTrack(track);
-    this.isPlaying.set(false);
+    this.playbackState.setPlaying(false);
   }
 
   startPlaybackSync(): void {

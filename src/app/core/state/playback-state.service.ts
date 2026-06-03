@@ -35,6 +35,8 @@ export class PlaybackStateService {
   readonly isExternalPlaybackActive = signal(false);
   readonly isPlaybackSyncEnabled = signal(false);
 
+  private progressIntervalId: ReturnType<typeof setInterval> | null = null;
+
   readonly progressPercent = computed(() => {
     const duration = this.durationMs();
 
@@ -59,6 +61,13 @@ export class PlaybackStateService {
 
   setPlaying(isPlaying: boolean): void {
     this.isPlaying.set(isPlaying);
+
+    if (isPlaying) {
+      this.startProgressTimer();
+      return;
+    }
+
+    this.clearProgressTimer();
   }
 
   async selectTrack(track: Track): Promise<void> {
@@ -115,11 +124,17 @@ export class PlaybackStateService {
     this.setPlaying(true);
 
     try {
-      await this.playCurrentTrackOnSpotify();
+      await this.spotifyPlayer.togglePlayback();
     } catch (error) {
       console.error('Could not resume Spotify playback:', error);
-      this.setPlaying(false);
-      this.toast.error('Could not play this track.');
+
+      try {
+        await this.playCurrentTrackOnSpotify();
+      } catch (fallbackError) {
+        console.error('Could not start Spotify track:', fallbackError);
+        this.setPlaying(false);
+        this.toast.error('Could not play this track.');
+      }
     }
   }
 
@@ -352,6 +367,42 @@ export class PlaybackStateService {
     }
 
     await this.spotifyPlayer.playTrack(track.spotifyUri);
+  }
+
+  private startProgressTimer(): void {
+    if (this.progressIntervalId) {
+      return;
+    }
+
+    this.progressIntervalId = setInterval(() => {
+      if (!this.isPlaying()) {
+        this.clearProgressTimer();
+        return;
+      }
+
+      const duration = this.durationMs();
+
+      if (!duration) {
+        return;
+      }
+
+      const nextPosition = Math.min(this.positionMs() + 1000, duration);
+
+      this.positionMs.set(nextPosition);
+
+      if (nextPosition >= duration) {
+        this.clearProgressTimer();
+      }
+    }, 1000);
+  }
+
+  private clearProgressTimer(): void {
+    if (!this.progressIntervalId) {
+      return;
+    }
+
+    clearInterval(this.progressIntervalId);
+    this.progressIntervalId = null;
   }
 
   private getRandomTrackIndex(totalTracks: number, currentIndex: number): number {

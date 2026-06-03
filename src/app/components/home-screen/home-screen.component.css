@@ -5,3 +5,42 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+.playlist-card {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  gap: 10px;
+  border-radius: 10px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.03);
+  padding: 8px;
+  text-align: left;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.playlist-card:hover {
+  border-color: rgb(255 255 255 / 0.18);
+  background: rgb(255 255 255 / 0.06);
+}
+
+.playlist-card:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.playlist-cover {
+  height: 42px;
+  width: 42px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 0.06);
+}
+
+.playlist-cover img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  filter: grayscale(1);
+}
