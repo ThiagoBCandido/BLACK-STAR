@@ -641,21 +641,6 @@
   font-weight: 300;
 }
 
-@media (max-width: 380px) {
-  .details-card {
-    flex-direction: column;
-  }
-
-  .details-cover {
-    width: 100%;
-    height: 180px;
-  }
-
-  .details-row strong {
-    max-width: 150px;
-  }
-}
-
 @media (max-height: 760px) {
   .player-sheet header {
     padding-top: 14px;
@@ -682,5 +667,9 @@
     width: 100%;
     height: auto;
     aspect-ratio: 1;
+  }
+
+  .details-row strong {
+    max-width: 150px;
   }
 }

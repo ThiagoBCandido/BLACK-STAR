@@ -31,6 +31,10 @@ interface SpotifyTrack {
   duration_ms?: number;
   type?: string;
   is_local?: boolean;
+  is_playable?: boolean;
+  restrictions?: {
+    reason?: string;
+  };
   external_urls?: {
     spotify?: string;
   };
@@ -269,7 +273,9 @@ export class SpotifyApiService {
     params.set('q', trimmedQuery);
     params.set('type', 'track');
 
-    const response = await this.request<SearchTracksResponse>(`/search?${params.toString()}`);
+    const response = await this.request<SearchTracksResponse>(
+      `/search?${params.toString()}`
+    );
 
     if (!response?.tracks?.items?.length) {
       return [];

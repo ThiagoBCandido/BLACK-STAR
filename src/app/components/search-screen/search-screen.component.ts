@@ -28,9 +28,7 @@ export class SearchScreenComponent implements OnDestroy {
 
     this.search.updateSearchQuery(query);
 
-    if (this.searchDebounceId) {
-      clearTimeout(this.searchDebounceId);
-    }
+    this.clearSearchDebounce();
 
     this.searchDebounceId = setTimeout(() => {
       void this.search.searchTracks();
@@ -40,26 +38,29 @@ export class SearchScreenComponent implements OnDestroy {
   async onSubmit(event: Event): Promise<void> {
     event.preventDefault();
 
-    if (this.searchDebounceId) {
-      clearTimeout(this.searchDebounceId);
-      this.searchDebounceId = null;
-    }
+    this.clearSearchDebounce();
 
     await this.search.searchTracks();
   }
 
+  retrySearch(): void {
+    void this.search.searchTracks();
+  }
+
   clearSearch(): void {
-    if (this.searchDebounceId) {
-      clearTimeout(this.searchDebounceId);
-      this.searchDebounceId = null;
-    }
+    this.clearSearchDebounce();
 
     this.search.clearSearch();
   }
 
   ngOnDestroy(): void {
+    this.clearSearchDebounce();
+  }
+
+  private clearSearchDebounce(): void {
     if (this.searchDebounceId) {
       clearTimeout(this.searchDebounceId);
+      this.searchDebounceId = null;
     }
   }
 }

@@ -1,38 +1,70 @@
 <section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
-  <app-screen-header title="SEARCH" eyebrow="Spotify" heading="Search Music" description="Find songs, artists or albums and play them through BLACK STAR.">
+  <app-screen-header title="SEARCH" eyebrow="Spotify" heading="Search Music" description="Find tracks on Spotify and play them through BLACK STAR.">
     <form (submit)="onSubmit($event)" class="mt-5 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
       <img src="assets/icons/search.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
-      <input type="text" [value]="search.searchQuery()" (input)="onSearchInput($event)" placeholder="Search songs, artists or albums" class="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/35"/>
+      <input type="text" [value]="search.searchQuery()" (input)="onSearchInput($event)" placeholder="Search tracks, artists or albums" class="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/35"/>
       <button *ngIf="search.searchQuery()" type="button" (click)="clearSearch()" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] transition hover:bg-white/[0.1]" aria-label="Clear search">
         <img src="assets/icons/x.svg" alt="" class="icon-soft h-3.5 w-3.5 object-contain"/>
       </button>
     </form>
   </app-screen-header>
   <section class="flex-1 overflow-y-auto px-5 py-5">
-    <div *ngIf="!search.hasSearched() && !search.searchQuery()" class="empty-state">
+    <div *ngIf="!search.searchQuery() && !search.hasSearched()" class="empty-state">
       <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
         Find music
       </p>
       <h2 class="mt-3 text-2xl font-light text-white">
         Search Spotify
       </h2>
-      <p class="mt-3 max-w-[260px] text-sm leading-6 text-white/45">
-        Start typing a song, artist or album. BLACK STAR will suggest tracks automatically.
+      <p class="mt-3 max-w-[270px] text-sm leading-6 text-white/45">
+        Search for a track, artist or album. Results will appear here as you type.
       </p>
     </div>
-    <div *ngIf="search.searchQuery().length === 1" class="py-12 text-center text-sm text-white/45">
+    <div *ngIf="search.showMinimumCharsHint()" class="search-message">
       Type at least 2 characters to search.
     </div>
-    <div *ngIf="search.isSearching()" class="py-2">
-      <app-track-list-skeleton [items]="5"></app-track-list-skeleton>
+    <div *ngIf="search.errorMessage()" class="mb-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+      <h3 class="text-sm font-light text-white">
+        Could not search Spotify
+      </h3>
+      <p class="mt-2 text-xs leading-5 text-white/45">
+        {{ search.errorMessage() }}
+      </p>
+      <button type="button" (click)="retrySearch()" class="mt-4 rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/65 transition hover:bg-white/[0.06] hover:text-white">
+        Try again
+      </button>
     </div>
-    <div *ngIf="search.hasSearched() && !search.isSearching() && !search.searchResults().length" class="py-12 text-center">
-      <p class="text-sm text-white/50">
-        No tracks found.
+    <div *ngIf="search.isSearching()" class="py-2">
+      <app-track-list-skeleton [items]="6"></app-track-list-skeleton>
+    </div>
+    <div *ngIf="search.shouldShowNoResults()" class="empty-state">
+      <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+        No results
+      </p>
+      <h2 class="mt-3 text-2xl font-light text-white">
+        Nothing found
+      </h2>
+      <p class="mt-3 max-w-[270px] text-sm leading-6 text-white/45">
+        No playable tracks were found for "{{ search.lastSearchedQuery() }}".
       </p>
     </div>
-    <div *ngIf="search.searchResults().length" class="space-y-2">
-      <app-track-list-item *ngFor="let track of search.searchResults()" [track]="track" [showAlbum]="true"></app-track-list-item>
+    <div *ngIf="search.searchResults().length && !search.isSearching()" class="space-y-4">
+      <div class="flex items-end justify-between gap-4">
+        <div class="min-w-0">
+          <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+            Results
+          </p>
+          <h2 class="mt-1 truncate text-lg font-light text-white">
+            {{ search.lastSearchedQuery() }}
+          </h2>
+        </div>
+        <p class="shrink-0 text-xs text-white/35">
+          {{ search.searchResults().length }} tracks
+        </p>
+      </div>
+      <div class="space-y-2">
+        <app-track-list-item *ngFor="let track of search.searchResults()" [track]="track" [showAlbum]="true" [queueContext]="search.searchResults()" queueName="Search Results"></app-track-list-item>
+      </div>
     </div>
   </section>
 </section>
