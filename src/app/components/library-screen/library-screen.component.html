@@ -26,7 +26,7 @@
         </div>
         <div class="playlist-actions">
           <button type="button" (click)="playSelectedPlaylist()" [disabled]="!library.selectedPlaylistTracks().length" class="playlist-play-btn">
-            <img src="assets/icons/play-button.svg" alt="" />
+            <img src="assets/icons/play-button.svg" alt=""/>
             <span>Play</span>
           </button>
         </div>
@@ -69,16 +69,76 @@
             Songs you saved to your library.
           </p>
         </div>
-        <div class="space-y-2">
-          <app-track-list-item *ngFor="let track of library.filteredLikedSongs()" [track]="track" [showAlbum]="true"></app-track-list-item>
+        <form class="mb-5 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+          <img src="assets/icons/search.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
+          <input type="text" [value]="library.libraryTrackSearchQuery()" (input)="onLibrarySearchInput($event)" placeholder="Search in liked songs" class="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/35"/>
+          <button *ngIf="library.libraryTrackSearchQuery()" type="button" (click)="library.clearLibraryTrackSearch()" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] transition hover:bg-white/[0.1]" aria-label="Clear search">
+            <img src="assets/icons/x.svg" alt="" class="icon-soft h-3.5 w-3.5 object-contain"/>
+          </button>
+        </form>
+        <div *ngIf="library.isLoadingLikedSongs()" class="py-2">
+          <app-track-list-skeleton [items]="7"></app-track-list-skeleton>
+        </div>
+        <div *ngIf="!library.isLoadingLikedSongs() && !library.filteredLikedSongs().length" class="empty-state">
+          <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+            Empty
+          </p>
+          <h2 class="mt-3 text-2xl font-light text-white">
+            {{ library.libraryTrackSearchQuery() ? 'No results found' : 'No tracks found' }}
+          </h2>
+          <p class="mt-3 max-w-[260px] text-sm leading-6 text-white/45">
+            {{ library.libraryTrackSearchQuery() ? 'Try searching by another song, artist or album.' : 'Songs saved in your Spotify library will appear here.' }}
+          </p>
+        </div>
+        <div *ngIf="!library.isLoadingLikedSongs() && library.filteredLikedSongs().length" class="space-y-2">
+          <app-track-list-item *ngFor="let track of library.filteredLikedSongs()" [track]="track" [showAlbum]="true" [queueContext]="library.filteredLikedSongs()" queueName="Liked Songs"></app-track-list-item>
         </div>
       </section>
       <ng-template #playlistsView>
-        <div class="mb-5 flex items-center justify-between">
-          <h2 class="text-lg font-light text-white">Your Playlists</h2>
-          <button type="button" (click)="create.openCreatePlaylist()" class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white/70 transition hover:bg-white/[0.08]">
-            New playlist
-          </button>
+        <section class="mb-6">
+          <p class="mb-3 text-[10px] uppercase tracking-[0.35em] text-white/30">
+            Quick Access
+          </p>
+          <div class="library-shortcuts">
+            <button type="button" (click)="library.openLikedSongs()" class="library-shortcut-card">
+              <span class="library-shortcut-icon">
+                <img src="assets/icons/star_filled.svg" alt="" class="icon-active h-5 w-5 object-contain"/>
+              </span>
+              <span class="min-w-0 flex-1">
+                <strong>Liked Songs</strong>
+                <small>{{ library.likedSongs().length || 'Saved' }} tracks</small>
+              </span>
+            </button>
+            <button type="button" (click)="navigation.goRecentlyPlayed()" class="library-shortcut-card">
+              <span class="library-shortcut-icon">
+                <img src="assets/icons/loop.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
+              </span>
+              <span class="min-w-0 flex-1">
+                <strong>Recently Played</strong>
+                <small>{{ browse.recentlyPlayedTracks().length || 'History' }} tracks</small>
+              </span>
+            </button>
+            <button type="button" (click)="navigation.goTopTracks()" class="library-shortcut-card">
+              <span class="library-shortcut-icon">
+                <img src="assets/icons/mix.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
+              </span>
+              <span class="min-w-0 flex-1">
+                <strong>Top Tracks</strong>
+                <small>{{ browse.topTracks().length || 'Spotify' }} tracks</small>
+              </span>
+            </button>
+          </div>
+        </section>
+        <div class="mb-5 flex items-end justify-between">
+          <div>
+            <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+              Playlists
+            </p>
+            <h2 class="mt-1 text-lg font-light text-white">Your Playlists</h2>
+          </div>
+          <p class="text-xs text-white/35">
+            {{ library.libraryPlaylists().length }} total
+          </p>
         </div>
         <div *ngIf="library.isLoadingLibrary()" class="space-y-3">
           <app-track-list-skeleton [items]="4"></app-track-list-skeleton>
@@ -105,6 +165,9 @@
               </h3>
               <p class="mt-1 line-clamp-2 text-xs leading-5 text-white/45">
                 {{ playlist.description || playlist.owner || 'Spotify playlist' }}
+              </p>
+              <p class="mt-1 text-[10px] uppercase tracking-[0.14em] text-white/25">
+                {{ playlist.totalTracks || 0 }} tracks
               </p>
             </div>
           </button>

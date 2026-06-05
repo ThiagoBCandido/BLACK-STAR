@@ -138,7 +138,9 @@ export class SpotifyApiService {
   private readonly apiBaseUrl = 'https://api.spotify.com/v1';
 
   async getRecentlyPlayedTracks(): Promise<Track[]> {
-    const response = await this.request<RecentlyPlayedResponse>('/me/player/recently-played?limit=10');
+    const response = await this.request<RecentlyPlayedResponse>(
+      '/me/player/recently-played?limit=50'
+    );
 
     return this.mapSpotifyTracks(response?.items.map((item) => item.track) ?? []);
   }
@@ -174,7 +176,10 @@ export class SpotifyApiService {
   }
 
   async getTopTracks(): Promise<Track[]> {
-    const response = await this.request<TopTracksResponse>('/me/top/tracks?limit=10&time_range=short_term');
+    const response = await this.request<TopTracksResponse>(
+      '/me/top/tracks?limit=50&time_range=short_term'
+    );
+
     return this.mapSpotifyTracks(response?.items ?? []);
   }
 

@@ -173,3 +173,56 @@
     font-size: 26px;
   }
 }
+
+.library-shortcuts {
+  display: grid;
+  gap: 10px;
+}
+
+.library-shortcut-card {
+  display: flex;
+  min-height: 66px;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.03);
+  padding: 12px;
+  text-align: left;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.library-shortcut-card:hover {
+  border-color: rgb(255 255 255 / 0.18);
+  background: rgb(255 255 255 / 0.06);
+}
+
+.library-shortcut-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.06);
+}
+
+.library-shortcut-card strong,
+.library-shortcut-card small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.library-shortcut-card strong {
+  font-size: 14px;
+  font-weight: 300;
+  color: #ffffff;
+}
+
+.library-shortcut-card small {
+  margin-top: 3px;
+  font-size: 12px;
+  color: rgb(255 255 255 / 0.42);
+}
