@@ -2,7 +2,6 @@
   <div class="player-sheet">
     <img [src]="player.currentTrack().cover" [alt]="player.currentTrack().title" class="player-ambient-cover"/>
     <div class="player-ambient-shade"></div>
-
     <header class="flex items-center justify-between px-5 py-5">
       <button type="button" (click)="player.closePlayer()" class="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-white/5" aria-label="Close player">
         <img src="assets/icons/down-arrow.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
@@ -26,22 +25,29 @@
         </div>
         <div class="turntable-button button-two"></div>
       </div>
-      <section class="px-2 pt-8">
-        <div class="mb-6 flex min-w-0 items-start justify-between gap-4">
+      <section class="player-track-section">
+        <div class="player-track-card">
           <div class="min-w-0 flex-1">
-            <h2 class="truncate text-[28px] font-light leading-tight text-white">
+            <p class="player-track-eyebrow">
+              Now Playing
+            </p>
+
+            <h2>
               {{ player.currentTrack().title }}
             </h2>
-            <p class="mt-1 truncate text-base text-white/55">
+
+            <p>
               {{ player.currentTrack().artist }}
             </p>
           </div>
-          <div class="flex shrink-0 gap-3 pt-2">
-            <button type="button" (click)="player.toggleLike()" class="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.04] transition hover:bg-white/[0.08]" aria-label="Like track">
+
+          <div class="player-track-actions">
+            <button type="button" (click)="player.toggleLike()" class="player-action-btn" [class.is-active]="player.isLiked()" aria-label="Like track">
               <img [src]="player.isLiked() ? 'assets/icons/star_filled.svg' : 'assets/icons/star.svg'" alt="" class="player-like-icon"/>
             </button>
-            <button type="button" (click)="options.openTrackOptions(player.currentTrack(), $event)" class="flex h-10 w-10 items-center justify-center">
-              <img src="assets/icons/dots.svg" alt="Menu" class="icon-soft h-6 w-6 object-contain"/>
+
+            <button type="button" (click)="options.openTrackOptions(player.currentTrack(), $event)" class="player-action-btn" aria-label="Track options">
+              <img src="assets/icons/dots.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
             </button>
           </div>
         </div>
@@ -50,7 +56,7 @@
             <span class="progress-thumb"></span>
           </span>
         </button>
-        <div class="mb-3 flex justify-between text-xs text-white/45">
+        <div class="mb-6 flex justify-between text-xs text-white/45">
           <span>
             {{ player.positionLabel() }}
           </span>
@@ -58,15 +64,6 @@
             {{ player.durationLabel() }}
           </span>
         </div>
-        <section class="volume-control mb-8">
-          <button type="button" class="volume-mute-btn" (click)="player.toggleMute()">
-            {{ player.isMuted() ? 'MUTED' : 'VOL' }}
-          </button>
-          <input type="range" min="0" max="100" step="1" [value]="player.volumePercent()" [style.--volume-percent]="player.volumePercent() + '%'" (input)="player.setVolumeFromInput($event)" class="volume-slider" aria-label="Volume"/>
-          <span class="volume-value">
-            {{ player.volumePercent() }}%
-          </span>
-        </section>
         <div class="main-controls mb-8">
           <button type="button" class="main-side-btn" [class.is-active]="player.isShuffleEnabled()" (click)="player.toggleShuffle()" aria-label="Shuffle">
             <img src="assets/icons/mix.svg" alt="" class="h-5 w-5 object-contain" [class.icon-active]="player.isShuffleEnabled()" [class.icon-soft]="!player.isShuffleEnabled()"/>
@@ -87,87 +84,44 @@
             </span>
           </button>
         </div>
-        <section class="rounded-t-3xl border border-white/10 bg-white/[0.04] px-4 py-5">
+        <section class="player-panel">
           <div class="mb-5 grid grid-cols-2 text-center text-sm">
-            <button
-              type="button"
-              (click)="setPanel('queue')"
-              class="relative pb-3"
-              [ngClass]="activePanel() === 'queue' ? 'text-white' : 'text-white/40'"
-            >
+            <button type="button" (click)="setPanel('queue')" class="relative pb-3" [ngClass]="activePanel() === 'queue' ? 'text-white' : 'text-white/40'">
               Queue
-
-              <span
-                *ngIf="activePanel() === 'queue'"
-                class="absolute bottom-0 left-1/2 h-px w-10 -translate-x-1/2 bg-white"
-              ></span>
+              <span *ngIf="activePanel() === 'queue'" class="absolute bottom-0 left-1/2 h-px w-10 -translate-x-1/2 bg-white"></span>
             </button>
-
-            <button
-              type="button"
-              (click)="setPanel('details')"
-              class="relative pb-3"
-              [ngClass]="activePanel() === 'details' ? 'text-white' : 'text-white/40'"
-            >
+            <button type="button" (click)="setPanel('details')" class="relative pb-3" [ngClass]="activePanel() === 'details' ? 'text-white' : 'text-white/40'">
               Details
-
-              <span
-                *ngIf="activePanel() === 'details'"
-                class="absolute bottom-0 left-1/2 h-px w-10 -translate-x-1/2 bg-white"
-              ></span>
+              <span *ngIf="activePanel() === 'details'" class="absolute bottom-0 left-1/2 h-px w-10 -translate-x-1/2 bg-white"></span>
             </button>
           </div>
-
           <ng-container *ngIf="activePanel() === 'queue'; else detailsPanel">
             <div class="mb-5 flex items-end justify-between gap-4">
               <div class="min-w-0">
                 <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
                   Queue
                 </p>
-
                 <h3 class="mt-1 truncate text-base font-light text-white">
                   {{ queueTitle() }}
                 </h3>
               </div>
-
               <p class="shrink-0 text-xs text-white/35">
                 {{ currentQueue().length }} tracks
               </p>
             </div>
-
             <div class="mb-5">
               <p class="mb-2 text-[10px] uppercase tracking-[0.3em] text-white/25">
                 Now Playing
               </p>
-
-              <app-track-list-item
-                [track]="currentQueueTrack()"
-                variant="queue"
-                [showOptions]="true"
-                [queueContext]="currentQueue()"
-                [queueName]="queueTitle()"
-              ></app-track-list-item>
+              <app-track-list-item [track]="currentQueueTrack()" variant="queue" [showOptions]="true" [queueContext]="currentQueue()" [queueName]="queueTitle()"></app-track-list-item>
             </div>
-
             <div>
               <p class="mb-2 text-[10px] uppercase tracking-[0.3em] text-white/25">
                 Up Next
               </p>
-
-              <div
-                *ngIf="upNextTracks().length; else emptyQueue"
-                class="space-y-2"
-              >
-                <app-track-list-item
-                  *ngFor="let track of upNextTracks()"
-                  [track]="track"
-                  variant="queue"
-                  [showOptions]="true"
-                  [queueContext]="currentQueue()"
-                  [queueName]="queueTitle()"
-                ></app-track-list-item>
+              <div *ngIf="upNextTracks().length; else emptyQueue" class="space-y-2">
+                <app-track-list-item *ngFor="let track of upNextTracks()" [track]="track" variant="queue" [showOptions]="true" [queueContext]="currentQueue()" [queueName]="queueTitle()"></app-track-list-item>
               </div>
-
               <ng-template #emptyQueue>
                 <div class="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-white/40">
                   No upcoming tracks in this queue.
@@ -175,52 +129,36 @@
               </ng-template>
             </div>
           </ng-container>
-
           <ng-template #detailsPanel>
             <div class="details-card">
               <div class="details-cover">
-                <img
-                  [src]="player.currentTrack().cover"
-                  [alt]="player.currentTrack().title"
-                />
+                <img [src]="player.currentTrack().cover" [alt]="player.currentTrack().title"/>
               </div>
-
               <div class="min-w-0 flex-1">
                 <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
                   Now Playing
                 </p>
-
                 <h3 class="mt-2 line-clamp-2 text-xl font-light leading-tight text-white">
                   {{ player.currentTrack().title }}
                 </h3>
-
                 <p class="mt-2 text-sm text-white/55">
                   {{ player.currentTrack().artist }}
                 </p>
-
                 <div class="mt-5 space-y-3 text-sm">
                   <div class="details-row">
                     <span>Album</span>
                     <strong>{{ player.currentTrack().album }}</strong>
                   </div>
-
                   <div class="details-row">
                     <span>Duration</span>
                     <strong>{{ player.currentTrack().duration }}</strong>
                   </div>
-
                   <div class="details-row">
                     <span>Queue</span>
                     <strong>{{ queueTitle() }}</strong>
                   </div>
                 </div>
-
-                <button
-                  *ngIf="player.currentTrack().spotifyUrl"
-                  type="button"
-                  (click)="openSpotifyTrack()"
-                  class="mt-5 inline-flex h-10 items-center justify-center rounded-full border border-white/10 px-4 text-xs text-white/65 transition hover:bg-white/[0.06] hover:text-white"
-                >
+                <button *ngIf="player.currentTrack().spotifyUrl" type="button" (click)="openSpotifyTrack()" class="mt-5 inline-flex h-10 items-center justify-center rounded-full border border-white/10 px-4 text-xs text-white/65 transition hover:bg-white/[0.06] hover:text-white">
                   Open in Spotify
                 </button>
               </div>

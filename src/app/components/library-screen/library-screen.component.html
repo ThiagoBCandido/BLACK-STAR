@@ -1,7 +1,7 @@
-<section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
+<section class="app-screen-gradient mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden pb-36">
   <app-screen-header title="LIBRARY" eyebrow="Spotify" [heading]="library.selectedPlaylist() ? 'Playlist Details' : library.isLikedSongsOpen() ? 'Liked Songs' : 'Your Library'" [description]="library.selectedPlaylist() ? 'Listen and explore this playlist.' : ''" [showBackButton]="!!library.selectedPlaylist() || library.isLikedSongsOpen()" [actionLabel]="!library.selectedPlaylist() && !library.isLikedSongsOpen() ? 'Playlist' : ''" [actionIcon]="!library.selectedPlaylist() && !library.isLikedSongsOpen() ? 'assets/icons/add.svg' : ''" actionTitle="Create playlist" (back)="closeCurrentView()" (action)="create.openCreatePlaylist()"></app-screen-header>
   <section class="flex-1 overflow-y-auto px-5 py-5">
-    <div *ngIf="library.libraryError()" class="mb-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/60">
+    <div *ngIf="library.libraryError()" class="app-status-card mb-4 text-sm text-white/60">
       {{ library.libraryError() }}
     </div>
     <ng-container *ngIf="library.selectedPlaylist(); else libraryRoot">
@@ -40,7 +40,7 @@
         <div *ngIf="library.isLoadingPlaylistTracks()" class="py-2">
           <app-track-list-skeleton [items]="7"></app-track-list-skeleton>
         </div>
-        <div *ngIf="!library.isLoadingPlaylistTracks() && !library.filteredSelectedPlaylistTracks().length" class="empty-state">
+        <div *ngIf="!library.isLoadingPlaylistTracks() && !library.filteredSelectedPlaylistTracks().length" class="app-empty-state">
           <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
             Empty
           </p>
@@ -83,7 +83,7 @@
         <div *ngIf="library.isLoadingLikedSongs()" class="py-2">
           <app-track-list-skeleton [items]="7"></app-track-list-skeleton>
         </div>
-        <div *ngIf="!library.isLoadingLikedSongs() && !library.filteredLikedSongs().length" class="empty-state">
+        <div *ngIf="!library.isLoadingLikedSongs() && !library.filteredLikedSongs().length" class="app-empty-state">
           <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
             Empty
           </p>
@@ -147,7 +147,7 @@
         <div *ngIf="library.isLoadingLibrary()" class="space-y-3">
           <app-track-list-skeleton [items]="4"></app-track-list-skeleton>
         </div>
-        <div *ngIf="!library.isLoadingLibrary() && !library.libraryPlaylists().length" class="empty-state">
+        <div *ngIf="!library.isLoadingLibrary() && !library.libraryPlaylists().length" class="app-empty-state">
           <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
             Library
           </p>

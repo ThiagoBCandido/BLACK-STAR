@@ -1,4 +1,4 @@
-<section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
+<section class="app-screen-gradient mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden pb-36">
   <app-screen-header title="SEARCH" [eyebrow]="headerEyebrow()" [heading]="headerHeading()" [description]="headerDescription()">
     <form (submit)="onSubmit($event)" class="mt-5 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
       <img src="assets/icons/search.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
@@ -15,7 +15,7 @@
       <p>Search uses the local BLACK STAR demo catalog, not Spotify.</p>
     </div>
 
-    <div *ngIf="!search.searchQuery() && !search.hasSearched()" class="empty-state">
+    <div *ngIf="!search.searchQuery() && !search.hasSearched()" class="app-empty-state">
       <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
         Find music
       </p>
@@ -39,7 +39,7 @@
       Type at least 2 characters to search.
     </div>
 
-    <div *ngIf="!demo.isDemoMode() && search.errorMessage()" class="mb-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+    <div *ngIf="!demo.isDemoMode() && search.errorMessage()" class="app-status-card mb-5">
       <h3 class="text-sm font-light text-white">
         Could not search Spotify
       </h3>
@@ -57,7 +57,7 @@
       <app-track-list-skeleton [items]="6"></app-track-list-skeleton>
     </div>
 
-    <div *ngIf="search.shouldShowNoResults()" class="empty-state">
+    <div *ngIf="search.shouldShowNoResults()" class="app-empty-state">
       <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
         No results
       </p>

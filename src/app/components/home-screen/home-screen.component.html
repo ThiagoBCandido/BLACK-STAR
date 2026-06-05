@@ -1,26 +1,30 @@
-<section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
-  <header class="border-b border-white/10 px-5 pb-4 pt-5">
-    <div class="flex items-center justify-between gap-4">
-      <button type="button" (click)="navigation.goProfile()" class="flex min-w-0 items-center gap-3 text-left">
-        <span class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.04]">
-          <img *ngIf="profileImage(); else profileFallback" [src]="profileImage()" [alt]="profileName()" class="h-full w-full object-cover"/>
-          <ng-template #profileFallback>
-            <img src="assets/icons/icon-profile.svg" alt="" class="h-full w-full object-cover opacity-70"/>
-          </ng-template>
+<section class="app-screen-gradient mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden pb-36">
+  <header class="px-5 pb-4 pt-5">
+    <button type="button" (click)="navigation.goProfile()" class="flex min-w-0 items-center gap-3 text-left">
+      <span class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.04]">
+        <img *ngIf="profileImage(); else profileFallback" [src]="profileImage()" [alt]="profileName()" class="h-full w-full object-cover"/>
+        <ng-template #profileFallback>
+          <img src="assets/icons/icon-profile.svg" alt="" class="h-full w-full object-cover opacity-70"/>
+        </ng-template>
+      </span>
+
+      <span class="min-w-0">
+        <span class="block text-[10px] uppercase tracking-[0.32em] text-white/35">
+          BLACK STAR!
         </span>
-        <span class="min-w-0">
-          <span class="block text-[10px] uppercase tracking-[0.32em] text-white/35">
-            BLACK STAR!
-          </span>
-          <span class="mt-1 block max-w-[150px] truncate text-sm font-light text-white/75">
+
+        <span class="mt-1 flex items-center gap-2">
+          <span class="max-w-[170px] truncate text-sm font-light text-white/85">
             {{ profileName() }}
           </span>
+
+          <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white/45">
+            <span class="h-1.5 w-1.5 rounded-full bg-white/45"></span>
+            {{ connectionLabel() }}
+          </span>
         </span>
-      </button>
-      <button type="button" (click)="handleConnectionAction()" class="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] font-light text-white/70 transition hover:bg-white/[0.08]">
-        {{ connectionLabel() }}
-      </button>
-    </div>
+      </span>
+    </button>
   </header>
 
   <section class="flex-1 overflow-y-auto">
@@ -47,7 +51,7 @@
         Loading your playlists...
       </div>
 
-      <div *ngIf="isMusicSourceReady() && !library.isLoadingLibrary() && library.libraryError()" class="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+      <div *ngIf="isMusicSourceReady() && !library.isLoadingLibrary() && library.libraryError()" class="app-status-card">
         <h4 class="text-sm font-light text-white">
           Could not load your playlists
         </h4>
@@ -59,7 +63,7 @@
         </button>
       </div>
 
-      <div *ngIf="isMusicSourceReady() && hasRequestedPlaylists() && !library.isLoadingLibrary() && !library.libraryError() && !homePlaylists().length" class="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+      <div *ngIf="isMusicSourceReady() && hasRequestedPlaylists() && !library.isLoadingLibrary() && !library.libraryError() && !homePlaylists().length" class="app-status-card">
         <h4 class="text-sm font-light text-white">
           No playlists found
         </h4>

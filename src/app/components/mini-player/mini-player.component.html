@@ -1,23 +1,28 @@
-<section class="mini-player-shell" role="button" tabindex="0" (click)="player.openPlayer()" (keydown.enter)="player.openPlayer()" (keydown.space)="player.openPlayer()">
-  <div class="mini-progress">
-    <span [style.width.%]="player.progressPercent()"></span>
-  </div>
+<section *ngIf="player.isPlaying()" class="mini-player-shell" role="button" tabindex="0" (click)="player.openPlayer()" (keydown.enter)="player.openPlayer()" (keydown.space)="player.openPlayer()">
   <div class="mini-player-content">
     <img [src]="player.currentTrack().cover" [alt]="player.currentTrack().title" class="mini-cover"/>
+
     <div class="mini-track-info">
       <h4>{{ player.currentTrack().title }}</h4>
       <p>{{ player.currentTrack().artist }}</p>
     </div>
+
     <div class="mini-controls">
       <button type="button" (click)="player.previousTrack($event)" class="mini-control-btn" aria-label="Previous track">
         <img src="assets/icons/skip-previous.svg" alt="" class="icon-white mini-control-icon"/>
       </button>
+
       <button type="button" (click)="player.togglePlay($event)" class="mini-play-btn" aria-label="Play or pause">
         <img [src]="player.isPlaying() ? 'assets/icons/pause.svg' : 'assets/icons/play-button.svg'" alt="" class="icon-white mini-play-icon"/>
       </button>
+
       <button type="button" (click)="player.nextTrack($event)" class="mini-control-btn" aria-label="Next track">
         <img src="assets/icons/next.svg" alt="" class="icon-white mini-control-icon"/>
       </button>
     </div>
+  </div>
+
+  <div class="mini-progress">
+    <span [style.width.%]="player.progressPercent()"></span>
   </div>
 </section>

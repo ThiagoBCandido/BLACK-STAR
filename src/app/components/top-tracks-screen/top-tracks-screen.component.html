@@ -1,4 +1,4 @@
-<section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
+<section class="app-screen-gradient mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden pb-36">
   <app-screen-header title="TOP TRACKS" eyebrow="Spotify" heading="Your Top Tracks" description="Tracks based on your recent Spotify listening history." [showBackButton]="true" (back)="navigation.goLibrary()" actionIcon="assets/icons/loop.svg" actionTitle="Refresh top tracks" (action)="browse.loadTopTracks()"></app-screen-header>
   <section class="flex-1 overflow-y-auto px-5 py-5">
     <section *ngIf="!browse.isLoadingTopTracks() && browse.topTracks().length" class="collection-hero">
@@ -19,7 +19,7 @@
       </button>
     </section>
     <app-track-list-skeleton *ngIf="browse.isLoadingTopTracks()" [items]="8"></app-track-list-skeleton>
-    <div *ngIf="!browse.isLoadingTopTracks() && !browse.topTracks().length" class="empty-state">
+    <div *ngIf="!browse.isLoadingTopTracks() && !browse.topTracks().length" class="app-empty-state">
       <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
         Empty
       </p>

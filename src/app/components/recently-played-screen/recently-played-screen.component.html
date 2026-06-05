@@ -1,4 +1,4 @@
-<section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
+<section class="app-screen-gradient mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden pb-36">
   <app-screen-header title="RECENT" eyebrow="Spotify" heading="Recently Played" description="Your latest unique tracks. Repeated songs move back to the top." [showBackButton]="true" (back)="navigation.goLibrary()" actionIcon="assets/icons/loop.svg" actionTitle="Refresh recently played" (action)="browse.loadRecentlyPlayedTracks()"></app-screen-header>
   <section class="flex-1 overflow-y-auto px-5 py-5">
     <section *ngIf="!browse.isLoadingRecentlyPlayed() && browse.recentlyPlayedTracks().length" class="collection-hero">
@@ -19,7 +19,7 @@
       </button>
     </section>
     <app-track-list-skeleton *ngIf="browse.isLoadingRecentlyPlayed()" [items]="8"></app-track-list-skeleton>
-    <div *ngIf="!browse.isLoadingRecentlyPlayed() && !browse.recentlyPlayedTracks().length" class="empty-state">
+    <div *ngIf="!browse.isLoadingRecentlyPlayed() && !browse.recentlyPlayedTracks().length" class="app-empty-state">
       <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
         Empty
       </p>

@@ -1,7 +1,7 @@
-<section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
+<section class="app-screen-gradient mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden pb-36">
   <app-screen-header title="PROFILE" eyebrow="BLACK STAR" [heading]="demo.isDemoMode() ? 'Demo Profile' : 'Account'" [description]="demo.isDemoMode() ? 'You are exploring BLACK STAR with demo data.' : ''" [actionLabel]="spotifyAuth.isAuthenticated() && !demo.isDemoMode() ? 'Logout' : ''" actionTitle="Disconnect Spotify" (action)="disconnectSpotify()"></app-screen-header>
   <section class="flex-1 overflow-y-auto px-5 py-5">
-    <div *ngIf="!demo.isDemoMode() && spotifyAuth.authError()" class="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+    <div *ngIf="!demo.isDemoMode() && spotifyAuth.authError()" class="app-status-card mb-5">
       <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
         Spotify connection
       </p>
@@ -21,7 +21,7 @@
       </div>
     </div>
 
-    <div *ngIf="!demo.isDemoMode() && spotifyPlayer.errorMessage()" class="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+    <div *ngIf="!demo.isDemoMode() && spotifyPlayer.errorMessage()" class="app-status-card mb-5">
       <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
         Spotify player
       </p>
@@ -245,7 +245,7 @@
         </section>
       </ng-container>
       <ng-template #disconnectedState>
-        <section class="empty-state">
+        <section class="app-empty-state">
           <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
             Disconnected
           </p>
