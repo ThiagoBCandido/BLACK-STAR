@@ -5,6 +5,7 @@ import { SpotifyAuthService } from '../services/spotify-auth.service';
 import { ToastService } from '../services/toast.service';
 import { DEMO_PLAYLIST_TRACKS, PLAYLISTS, TRACKS } from '../data/mock-music.data';
 import { DemoModeService } from '../services/demo-mode.service';
+import { getSpotifyFriendlyErrorMessage } from '../utils/spotify-error-message';
 
 @Injectable({
   providedIn: 'root',
@@ -68,7 +69,9 @@ export class LibraryStateService {
       }
     } catch (error) {
       console.error('Could not load Spotify playlists:', error);
-      this.libraryError.set('Could not load your Spotify playlists.');
+      this.libraryError.set(
+        getSpotifyFriendlyErrorMessage(error, 'Could not load your Spotify playlists.')
+      );
     } finally {
       this.isLoadingLibrary.set(false);
     }
@@ -116,7 +119,9 @@ export class LibraryStateService {
       }
     } catch (error) {
       console.error('Could not load liked songs:', error);
-      this.libraryError.set('Could not load your liked songs. Try reconnecting Spotify.');
+      this.libraryError.set(
+        getSpotifyFriendlyErrorMessage(error, 'Could not load your liked songs. Try reconnecting Spotify.')
+      );
     } finally {
       this.isLoadingLikedSongs.set(false);
     }
@@ -130,7 +135,7 @@ export class LibraryStateService {
 
   async selectPlaylist(playlist: Playlist): Promise<void> {
     if (playlist.isAccessible === false) {
-      this.toast.error('Spotify only allows opening playlists you own or collaborate on.');
+      this.toast.error('This playlist cannot be opened because Spotify only allows access to playlists you own or collaborate on.');
       return;
     }
 
@@ -159,7 +164,9 @@ export class LibraryStateService {
       }
     } catch (error) {
       console.error('Could not load Spotify playlist tracks:', error);
-      this.libraryError.set('Could not load this playlist.');
+      this.libraryError.set(
+        getSpotifyFriendlyErrorMessage(error, 'Could not load this playlist.')
+      );
     } finally {
       this.isLoadingPlaylistTracks.set(false);
     }

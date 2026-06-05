@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
+import { getSpotifyFriendlyErrorMessage } from '../utils/spotify-error-message';
 
 interface SpotifyTokenResponse {
   access_token: string;
@@ -32,6 +33,7 @@ export class SpotifyAuthService {
   readonly isAuthenticated = signal(false);
   readonly profile = signal<SpotifyUserProfile | null>(null);
   readonly isLoading = signal(false);
+  readonly authError = signal<string | null>(null);
 
   private readonly accessTokenKey = 'blackstar_spotify_access_token';
   private readonly expiresAtKey = 'blackstar_spotify_expires_at';
@@ -57,6 +59,7 @@ export class SpotifyAuthService {
     const clientId = environment.spotify.clientId;
 
     if (!clientId || clientId === 'COLE_SEU_CLIENT_ID_AQUI') {
+      this.authError.set('Spotify Client ID is missing. Check your environment configuration.');
       console.error('Spotify Client ID is missing.');
       return;
     }
@@ -194,8 +197,14 @@ export class SpotifyAuthService {
 
       this.isAuthenticated.set(true);
     } catch (error) {
+      const message = getSpotifyFriendlyErrorMessage(
+        error,
+        'Could not connect Spotify. Try again.'
+      );
+
       console.error(error);
       this.logout();
+      this.authError.set(message);
     } finally {
       this.isLoading.set(false);
     }
@@ -233,8 +242,14 @@ export class SpotifyAuthService {
 
       return tokenData.access_token;
     } catch (error) {
+      const message = getSpotifyFriendlyErrorMessage(
+        error,
+        'Your Spotify session expired. Reconnect Spotify.'
+      );
+
       console.error(error);
       this.logout();
+      this.authError.set(message);
       return null;
     }
   }

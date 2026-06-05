@@ -4,6 +4,7 @@ import { SpotifyApiService } from '../services/spotify-api.service';
 import { ToastService } from '../services/toast.service';
 import { TRACKS } from '../data/mock-music.data';
 import { DemoModeService } from '../services/demo-mode.service';
+import { getSpotifyFriendlyErrorMessage } from '../utils/spotify-error-message';
 
 @Injectable({
   providedIn: 'root',
@@ -69,11 +70,14 @@ export class SearchStateService {
         return;
       }
 
-      this.searchResults.set([]);
-      this.errorMessage.set(
-        'Reconnect Spotify and try again. If the account is not authorized in the Spotify Dashboard, search will not work.'
+      const message = getSpotifyFriendlyErrorMessage(
+        error,
+        'Could not search Spotify tracks. Reconnect Spotify and try again.'
       );
-      this.toast.error('Could not search Spotify tracks.');
+
+      this.searchResults.set([]);
+      this.errorMessage.set(message);
+      this.toast.error(message);
     } finally {
       if (requestId === this.searchRequestId) {
         this.isSearching.set(false);

@@ -1,5 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { SpotifyAuthService } from './spotify-auth.service';
+import { getSpotifyFriendlyErrorMessage } from '../utils/spotify-error-message';
 
 interface SpotifyPlaybackTrack {
   id: string;
@@ -128,7 +129,11 @@ export class SpotifyPlayerService {
       await this.waitUntilReady();
       await this.loadVolumeFromPlayer();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown Spotify player error.';
+      const message = getSpotifyFriendlyErrorMessage(
+        error,
+        'Could not initialize the Spotify player.'
+      );
+
       this.errorMessage.set(message);
       console.error(error);
     } finally {
@@ -437,17 +442,32 @@ export class SpotifyPlayerService {
     });
 
     player.addListener('authentication_error', ({ message }: { message: string }) => {
-      this.errorMessage.set(message);
+      const friendlyMessage = getSpotifyFriendlyErrorMessage(
+        new Error(message),
+        'Your Spotify session expired. Reconnect Spotify and try again.'
+      );
+
+      this.errorMessage.set(friendlyMessage);
       console.error('Spotify authentication error:', message);
     });
 
     player.addListener('account_error', ({ message }: { message: string }) => {
-      this.errorMessage.set(message);
+      const friendlyMessage = getSpotifyFriendlyErrorMessage(
+        new Error(message),
+        'Spotify Premium may be required to use playback inside BLACK STAR.'
+      );
+
+      this.errorMessage.set(friendlyMessage);
       console.error('Spotify account error:', message);
     });
 
     player.addListener('playback_error', ({ message }: { message: string }) => {
-      this.errorMessage.set(message);
+      const friendlyMessage = getSpotifyFriendlyErrorMessage(
+        new Error(message),
+        'This track cannot be played through Spotify right now.'
+      );
+
+      this.errorMessage.set(friendlyMessage);
       console.error('Spotify playback error:', message);
     });
 

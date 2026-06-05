@@ -32,6 +32,12 @@ export class ProfileScreenComponent {
     this.spotifyAuth.logout();
   }
 
+  startDemoMode(): void {
+    this.demo.enableDemoMode();
+    this.navigation.goHome();
+    window.location.reload();
+  }
+
   exitDemoMode(): void {
     this.demo.disableDemoMode();
     this.navigation.goHome();

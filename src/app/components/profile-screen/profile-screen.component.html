@@ -1,6 +1,46 @@
 <section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
   <app-screen-header title="PROFILE" eyebrow="BLACK STAR" [heading]="demo.isDemoMode() ? 'Demo Profile' : 'Account'" [description]="demo.isDemoMode() ? 'You are exploring BLACK STAR with demo data.' : ''" [actionLabel]="spotifyAuth.isAuthenticated() && !demo.isDemoMode() ? 'Logout' : ''" actionTitle="Disconnect Spotify" (action)="disconnectSpotify()"></app-screen-header>
   <section class="flex-1 overflow-y-auto px-5 py-5">
+    <div *ngIf="!demo.isDemoMode() && spotifyAuth.authError()" class="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+      <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+        Spotify connection
+      </p>
+      <h3 class="mt-3 text-xl font-light text-white">
+        Could not connect Spotify
+      </h3>
+      <p class="mt-3 text-sm leading-6 text-white/50">
+        {{ spotifyAuth.authError() }}
+      </p>
+      <div class="mt-5 grid gap-3">
+        <button type="button" (click)="connectSpotify()" class="flex h-11 items-center justify-center rounded-full bg-white text-sm font-medium text-black transition hover:scale-[1.02]">
+          Reconnect Spotify
+        </button>
+        <button type="button" (click)="startDemoMode()" class="flex h-11 items-center justify-center rounded-full border border-white/10 text-sm text-white/70 transition hover:bg-white/[0.06] hover:text-white">
+          Try Demo Mode
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="!demo.isDemoMode() && spotifyPlayer.errorMessage()" class="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+      <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+        Spotify player
+      </p>
+      <h3 class="mt-3 text-xl font-light text-white">
+        Player needs attention
+      </h3>
+      <p class="mt-3 text-sm leading-6 text-white/50">
+        {{ spotifyPlayer.errorMessage() }}
+      </p>
+      <div class="mt-5 grid gap-3">
+        <button type="button" (click)="connectSpotify()" class="flex h-11 items-center justify-center rounded-full bg-white text-sm font-medium text-black transition hover:scale-[1.02]">
+          Reconnect Spotify
+        </button>
+        <button type="button" (click)="startDemoMode()" class="flex h-11 items-center justify-center rounded-full border border-white/10 text-sm text-white/70 transition hover:bg-white/[0.06] hover:text-white">
+          Continue in Demo Mode
+        </button>
+      </div>
+    </div>
+
     <ng-container *ngIf="demo.isDemoMode(); else spotifyProfileState">
       <section class="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
         <div class="flex items-center gap-4">

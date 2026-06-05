@@ -3,6 +3,7 @@ import { TRACKS } from '../data/mock-music.data';
 import { Track } from '../models/music.model';
 import { SpotifyPlayerService } from '../services/spotify-player.service';
 import { ToastService } from '../services/toast.service';
+import { getSpotifyFriendlyErrorMessage } from '../utils/spotify-error-message';
 import { BrowseStateService } from './browse-state.service';
 
 export type RepeatMode = 'off' | 'context' | 'track';
@@ -95,7 +96,9 @@ export class PlaybackStateService {
     } catch (error) {
       console.error('Could not play Spotify track:', error);
       this.setPlaying(false);
-      this.toast.error('Could not play this track.');
+      this.toast.error(
+        getSpotifyFriendlyErrorMessage(error, 'Could not play this track.')
+      );
     }
   }
 
@@ -171,7 +174,9 @@ export class PlaybackStateService {
       console.error('Could not toggle Spotify playback:', error);
 
       this.setPlaying(wasPlaying);
-      this.toast.error('Could not update playback.');
+      this.toast.error(
+        getSpotifyFriendlyErrorMessage(error, 'Could not update playback.')
+      );
     }
   }
 
@@ -333,7 +338,9 @@ export class PlaybackStateService {
       this.volumePercent.set(previousVolume);
       this.isMuted.set(previousMutedState);
 
-      this.toast.error('Could not update volume.');
+      this.toast.error(
+        getSpotifyFriendlyErrorMessage(error, 'Could not update volume.')
+      );
     }
   }
 
@@ -355,7 +362,9 @@ export class PlaybackStateService {
       this.volumePercent.set(previousVolume);
       this.isMuted.set(previousMutedState);
 
-      this.toast.error('Could not update volume.');
+      this.toast.error(
+        getSpotifyFriendlyErrorMessage(error, 'Could not update volume.')
+      );
     }
   }
 
@@ -373,7 +382,9 @@ export class PlaybackStateService {
 
       this.setShuffleState(!nextValue);
 
-      this.toast.error('Could not update shuffle.');
+      this.toast.error(
+        getSpotifyFriendlyErrorMessage(error, 'Could not update shuffle.')
+      );
     }
   }
 
@@ -392,7 +403,9 @@ export class PlaybackStateService {
 
       this.setRepeatMode(previousMode);
 
-      this.toast.error('Could not update repeat mode.');
+      this.toast.error(
+        getSpotifyFriendlyErrorMessage(error, 'Could not update repeat mode.')
+      );
     }
   }
 
