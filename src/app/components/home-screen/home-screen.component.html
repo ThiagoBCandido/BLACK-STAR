@@ -71,7 +71,7 @@
       <div *ngIf="isMusicSourceReady() && hasRequestedPlaylists() && !library.isLoadingLibrary() && !library.libraryError() && homePlaylists().length" class="grid grid-cols-2 gap-2">
         <button type="button" *ngFor="let playlist of homePlaylists()" (click)="openPlaylist(playlist)" [disabled]="playlist.isAccessible === false" class="playlist-card">
           <div class="playlist-cover">
-            <img [src]="playlist.image || 'assets/icons/blackstar_logo.svg'" [alt]="playlist.title"/>
+            <img [src]="playlist.image || 'assets/icons/blackstarpng.png'" [alt]="playlist.title"/>
           </div>
           <div class="min-w-0 flex-1">
             <h4 class="truncate text-xs font-light text-white">

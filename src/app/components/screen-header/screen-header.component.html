@@ -6,7 +6,7 @@
     <ng-template #emptyLeading>
       <div class="h-10 w-10"></div>
     </ng-template>
-    <img *ngIf="showLogo" src="assets/icons/blackstar_logo.svg" alt="Black Star" class="main-logo"/>
+    <img *ngIf="showLogo" src="assets/icons/blackstarpng.png" alt="Black Star" class="main-logo"/>
     <div *ngIf="!showLogo" class="h-10 w-10"></div>
     <button *ngIf="actionLabel || actionIcon; else emptyAction" type="button" (click)="action.emit()" class="flex h-9 items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 text-[11px] font-light text-white/75 transition hover:bg-white/[0.08]" [attr.title]="actionTitle">
       <img *ngIf="actionIcon" [src]="actionIcon" alt="" class="icon-soft h-3.5 w-3.5 object-contain"/>
