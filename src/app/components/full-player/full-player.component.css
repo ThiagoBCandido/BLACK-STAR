@@ -592,6 +592,70 @@
   box-shadow: 0 0 16px rgba(255, 255, 255, 0.45);
 }
 
+.details-card {
+  display: flex;
+  gap: 16px;
+  border-radius: 22px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: rgb(0 0 0 / 0.22);
+  padding: 14px;
+}
+
+.details-cover {
+  width: 108px;
+  height: 108px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.06);
+}
+
+.details-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.details-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid rgb(255 255 255 / 0.08);
+  padding-top: 10px;
+}
+
+.details-row span {
+  flex: 0 0 auto;
+  color: rgb(255 255 255 / 0.35);
+}
+
+.details-row strong {
+  min-width: 0;
+  max-width: 180px;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgb(255 255 255 / 0.78);
+  font-weight: 300;
+}
+
+@media (max-width: 380px) {
+  .details-card {
+    flex-direction: column;
+  }
+
+  .details-cover {
+    width: 100%;
+    height: 180px;
+  }
+
+  .details-row strong {
+    max-width: 150px;
+  }
+}
+
 @media (max-height: 760px) {
   .player-sheet header {
     padding-top: 14px;
@@ -606,5 +670,17 @@
 @media (max-height: 690px) {
   .turntable {
     width: min(100%, 335px);
+  }
+}
+
+@media (max-width: 380px) {
+  .details-card {
+    flex-direction: column;
+  }
+
+  .details-cover {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
   }
 }
