@@ -3,7 +3,8 @@
     <div class="mx-auto mb-5 h-1 w-12 rounded-full bg-white/20"></div>
     <div class="mb-6 flex items-center gap-4">
       <div class="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white/10">
-        <img *ngIf="options.selectedOptionsTrack()?.cover" [src]="options.selectedOptionsTrack()?.cover" [alt]="options.selectedOptionsTrack()?.title" class="h-full w-full object-cover grayscale"/>
+        <img
+          *ngIf="options.selectedOptionsTrack()?.cover" [src]="options.selectedOptionsTrack()?.cover" [alt]="options.selectedOptionsTrack()?.title" class="h-full w-full object-cover grayscale"/>
       </div>
       <div class="min-w-0 flex-1">
         <h2 class="truncate text-lg font-light text-white">

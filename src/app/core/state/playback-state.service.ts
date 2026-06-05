@@ -30,6 +30,10 @@ export class PlaybackStateService {
   readonly isShuffleEnabled = signal(false);
   readonly repeatMode = signal<RepeatMode>('off');
 
+  readonly queueTracks = signal<Track[]>([]);
+  readonly queueName = signal('');
+  readonly hasQueue = computed(() => this.queueTracks().length > 0);
+
   readonly activeSpotifyDeviceName = signal<string | null>(null);
   readonly activeSpotifyDeviceType = signal<string | null>(null);
   readonly isExternalPlaybackActive = signal(false);
@@ -70,7 +74,14 @@ export class PlaybackStateService {
     this.clearProgressTimer();
   }
 
-  async selectTrack(track: Track): Promise<void> {
+  async selectTrack(
+    track: Track,
+    options: { preserveQueue?: boolean } = {}
+  ): Promise<void> {
+    if (!options.preserveQueue) {
+      this.clearQueue();
+    }
+
     this.setCurrentTrack(track);
     this.setPlaying(true);
     this.browseState.moveTrackToTop(track);
@@ -82,6 +93,43 @@ export class PlaybackStateService {
       this.setPlaying(false);
       this.toast.error('Could not play this track.');
     }
+  }
+
+  async playQueue(tracks: Track[], queueName = 'Queue'): Promise<void> {
+    const queue = this.setQueue(tracks, queueName);
+
+    if (!queue.length) {
+      this.toast.error('No playable tracks found in this playlist.');
+      return;
+    }
+
+    await this.selectTrack(queue[0], { preserveQueue: true });
+  }
+
+  async selectTrackFromQueue(
+    track: Track,
+    tracks: Track[],
+    queueName = 'Queue'
+  ): Promise<void> {
+    const queue = this.setQueue(tracks, queueName);
+    const queuedTrack = queue.find((item) => item.id === track.id) ?? track;
+
+    await this.selectTrack(queuedTrack, { preserveQueue: true });
+  }
+
+  setQueue(tracks: Track[], queueName = 'Queue'): Track[] {
+    const playableTracks = tracks.filter((track) => Boolean(track.spotifyUri));
+    const uniqueTracks = this.removeDuplicateTracks(playableTracks);
+
+    this.queueTracks.set(uniqueTracks);
+    this.queueName.set(queueName);
+
+    return uniqueTracks;
+  }
+
+  clearQueue(): void {
+    this.queueTracks.set([]);
+    this.queueName.set('');
   }
 
   async selectTrackAndOpenPlayer(track: Track): Promise<void> {
@@ -105,43 +153,24 @@ export class PlaybackStateService {
   async togglePlay(event?: Event): Promise<void> {
     event?.stopPropagation();
 
-    const shouldPause = this.isPlaying();
+    const wasPlaying = this.isPlaying();
 
-    if (shouldPause) {
-      this.setPlaying(false);
-
-      try {
-        await this.spotifyPlayer.togglePlayback();
-      } catch (error) {
-        console.error('Could not pause Spotify playback:', error);
-        this.setPlaying(true);
-        this.toast.error('Could not pause playback.');
-      }
-
-      return;
-    }
-
-    this.setPlaying(true);
+    this.setPlaying(!wasPlaying);
 
     try {
       await this.spotifyPlayer.togglePlayback();
     } catch (error) {
-      console.error('Could not resume Spotify playback:', error);
+      console.error('Could not toggle Spotify playback:', error);
 
-      try {
-        await this.playCurrentTrackOnSpotify();
-      } catch (fallbackError) {
-        console.error('Could not start Spotify track:', fallbackError);
-        this.setPlaying(false);
-        this.toast.error('Could not play this track.');
-      }
+      this.setPlaying(wasPlaying);
+      this.toast.error('Could not update playback.');
     }
   }
 
   async nextTrack(event?: Event): Promise<void> {
     event?.stopPropagation();
 
-    const tracks = this.browseState.recentlyPlayedTracks();
+    const tracks = this.getPlaybackQueue();
 
     if (!tracks.length) {
       return;
@@ -157,13 +186,15 @@ export class PlaybackStateService {
         ? (currentIndex + 1) % tracks.length
         : 0;
 
-    await this.selectTrack(tracks[nextIndex]);
+    await this.selectTrack(tracks[nextIndex], {
+      preserveQueue: this.hasQueue(),
+    });
   }
 
   async previousTrack(event?: Event): Promise<void> {
     event?.stopPropagation();
 
-    const tracks = this.browseState.recentlyPlayedTracks();
+    const tracks = this.getPlaybackQueue();
 
     if (!tracks.length) {
       return;
@@ -178,7 +209,9 @@ export class PlaybackStateService {
         ? currentIndex - 1
         : tracks.length - 1;
 
-    await this.selectTrack(tracks[previousIndex]);
+    await this.selectTrack(tracks[previousIndex], {
+      preserveQueue: this.hasQueue(),
+    });
   }
 
   openPlayer(): void {
@@ -417,6 +450,29 @@ export class PlaybackStateService {
     }
 
     return nextIndex;
+  }
+
+  private getPlaybackQueue(): Track[] {
+    const queue = this.queueTracks();
+
+    if (queue.length) {
+      return queue;
+    }
+
+    return this.browseState.recentlyPlayedTracks();
+  }
+
+  private removeDuplicateTracks(tracks: Track[]): Track[] {
+    const seenTrackIds = new Set<string>();
+
+    return tracks.filter((track) => {
+      if (seenTrackIds.has(track.id)) {
+        return false;
+      }
+
+      seenTrackIds.add(track.id);
+      return true;
+    });
   }
 
   private formatTime(milliseconds: number): string {

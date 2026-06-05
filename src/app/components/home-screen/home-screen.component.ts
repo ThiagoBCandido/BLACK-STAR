@@ -25,6 +25,14 @@ export class HomeScreenComponent {
 
   readonly hasRequestedPlaylists = signal(false);
 
+  readonly profileImage = computed(() => {
+    return this.spotifyAuth.profile()?.images?.[0]?.url ?? null;
+  });
+
+  readonly profileName = computed(() => {
+    return this.spotifyAuth.profile()?.display_name || 'Profile';
+  });
+
   readonly featuredTrack = computed(() => {
     const currentTrack = this.player.currentTrack();
 

@@ -60,6 +60,10 @@ export class PlayerStateService {
   readonly isShuffleEnabled = this.playbackState.isShuffleEnabled;
   readonly repeatMode = this.playbackState.repeatMode;
 
+  readonly queueTracks = this.playbackState.queueTracks;
+  readonly queueName = this.playbackState.queueName;
+  readonly hasQueue = this.playbackState.hasQueue;
+
   readonly progressPercent = this.playbackState.progressPercent;
   readonly currentTime = this.playbackState.currentTime;
   readonly durationTime = this.playbackState.durationTime;
@@ -134,17 +138,7 @@ export class PlayerStateService {
   }
 
   startPlaybackSync(): void {
-    if (this.playbackSyncIntervalId) {
-      return;
-    }
-
-    this.playbackState.setPlaybackSyncEnabled(true);
-
-    void this.syncCurrentPlayback();
-
-    this.playbackSyncIntervalId = setInterval(() => {
-      void this.syncCurrentPlayback();
-    }, 3000);
+    return;
   }
 
   stopPlaybackSync(): void {
@@ -220,6 +214,18 @@ export class PlayerStateService {
 
   selectTrack(track: Track): Promise<void> {
     return this.playbackState.selectTrack(track);
+  }
+
+  playQueue(tracks: Track[], queueName = 'Queue'): Promise<void> {
+    return this.playbackState.playQueue(tracks, queueName);
+  }
+
+  selectTrackFromQueue(
+    track: Track,
+    tracks: Track[],
+    queueName = 'Queue'
+  ): Promise<void> {
+    return this.playbackState.selectTrackFromQueue(track, tracks, queueName);
   }
 
   selectTrackAndOpenPlayer(track: Track): Promise<void> {

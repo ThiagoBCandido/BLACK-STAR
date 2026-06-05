@@ -21,6 +21,8 @@ export class TrackListItemComponent {
   @Input() variant: TrackListItemVariant = 'default';
   @Input() showAlbum = false;
   @Input() showOptions = true;
+  @Input() queueContext: Track[] = [];
+  @Input() queueName = 'Queue';
 
   readonly player = inject(PlayerStateService);
   readonly options = inject(TrackOptionsStateService);
@@ -50,11 +52,38 @@ export class TrackListItemComponent {
   }
 
   selectTrack(): void {
+    if (this.queueContext.length) {
+      void this.player.selectTrackFromQueue(
+        this.track,
+        this.queueContext,
+        this.queueName
+      );
+
+      return;
+    }
+
     void this.player.selectTrack(this.track);
   }
 
   togglePlayback(event: Event): void {
-    void this.player.toggleTrackPlayback(this.track, event);
+    event.stopPropagation();
+
+    if (this.isCurrentTrack) {
+      void this.player.togglePlay(event);
+      return;
+    }
+
+    if (this.queueContext.length) {
+      void this.player.selectTrackFromQueue(
+        this.track,
+        this.queueContext,
+        this.queueName
+      );
+
+      return;
+    }
+
+    void this.player.selectTrack(this.track);
   }
 
   openOptions(event: Event): void {

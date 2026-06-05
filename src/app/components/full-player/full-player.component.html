@@ -12,28 +12,18 @@
     <section class="player-content px-4 pb-8">
       <div class="turntable mx-auto mt-2">
         <div class="record" [class.is-playing]="player.isPlaying()" [style.--cover-image]="'url(' + player.currentTrack().cover + ')'">
-          <div class="record-label">
-          </div>
-          <div class="record-hole">
-          </div>
+          <div class="record-label"></div>
+          <div class="record-hole"></div>
         </div>
         <div class="tonearm" [class.is-playing]="player.isPlaying()">
-          <div class="tonearm-base">
-          </div>
-          <div class="tonearm-line">
-          </div>
-          <div class="tonearm-head">
-          </div>
+          <div class="tonearm-base"></div>
+          <div class="tonearm-line"></div>
+          <div class="tonearm-head"></div>
         </div>
         <div class="turntable-button button-one">
-          <img
-            src="assets/icons/blackstarpng.png"
-            alt="Black Star"
-            class="turntable-logo-mark"
-          />
+          <img src="assets/icons/blackstarpng.png" alt="Black Star" class="turntable-logo-mark"/>
         </div>
-        <div class="turntable-button button-two">
-        </div>
+        <div class="turntable-button button-two"></div>
       </div>
       <section class="px-2 pt-8">
         <div class="mb-6 flex min-w-0 items-start justify-between gap-4">
@@ -56,8 +46,7 @@
         </div>
         <button type="button" class="progress-bar mb-2" (click)="player.seekFromProgressClick($event)" aria-label="Seek track">
           <span class="progress-fill" [style.width.%]="player.progressPercent()">
-            <span class="progress-thumb">
-            </span>
+            <span class="progress-thumb"></span>
           </span>
         </button>
         <div class="mb-3 flex justify-between text-xs text-white/45">
@@ -88,7 +77,7 @@
             <img [src]="player.isPlaying() ? 'assets/icons/pause.svg' : 'assets/icons/play-button.svg'" alt="" class="icon-white main-play-icon"/>
           </button>
           <button type="button" (click)="player.nextTrack($event)" class="main-skip-btn" aria-label="Next track">
-            <img src="assets/icons/next.svg" alt="" class="icon-white main-skip-icon"/>
+            <img src="assets/icons/next.svg" alt=" class="icon-white main-skip-icon"/>
           </button>
           <button type="button" class="main-side-btn relative" [class.is-active]="player.repeatMode() !== 'off'" (click)="player.cycleRepeatMode()" aria-label="Repeat">
             <img src="assets/icons/loop.svg" alt="" class="h-5 w-5 object-contain" [class.icon-active]="player.repeatMode() !== 'off'" [class.icon-soft]="player.repeatMode() === 'off'"/>
@@ -101,15 +90,14 @@
           <div class="mb-5 grid grid-cols-2 text-center text-sm">
             <button class="relative pb-3 text-white">
               Queue
-              <span class="absolute bottom-0 left-1/2 h-px w-10 -translate-x-1/2 bg-white">
-              </span>
+              <span class="absolute bottom-0 left-1/2 h-px w-10 -translate-x-1/2 bg-white"></span>
             </button>
             <button class="pb-3 text-white/40">
               Lyrics
             </button>
           </div>
           <div class="space-y-2">
-            <app-track-list-item *ngFor="let track of browse.recentlyPlayedTracks()" [track]="track" variant="queue" [showOptions]="true"></app-track-list-item>
+            <app-track-list-item *ngFor="let track of player.queueTracks().length ? player.queueTracks() : browse.recentlyPlayedTracks()" [track]="track" variant="queue" [showOptions]="true" [queueContext]="player.queueTracks().length ? player.queueTracks() : browse.recentlyPlayedTracks()" [queueName]="player.queueName() || 'Queue'"></app-track-list-item>
           </div>
         </section>
       </section>

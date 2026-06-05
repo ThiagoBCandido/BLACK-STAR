@@ -1,149 +1,46 @@
 <section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
-  <app-screen-header title="LIBRARY" eyebrow="Spotify" [heading]=" library.selectedPlaylist() ? library.selectedPlaylist()?.title || 'Playlist' : library.isLikedSongsOpen() ? 'Liked Songs' : 'Your Library'" actionLabel="Playlist" actionIcon="assets/icons/add.svg" actionTitle="Create playlist" (action)="create.openCreatePlaylist()"></app-screen-header>
+  <app-screen-header title="LIBRARY" eyebrow="Spotify" [heading]="library.selectedPlaylist() ? 'Playlist Details' : library.isLikedSongsOpen() ? 'Liked Songs' : 'Your Library'" [description]="library.selectedPlaylist() ? 'Listen and explore this playlist.' : ''" [showBackButton]="!!library.selectedPlaylist() || library.isLikedSongsOpen()" [actionLabel]="!library.selectedPlaylist() && !library.isLikedSongsOpen() ? 'Playlist' : ''" [actionIcon]="!library.selectedPlaylist() && !library.isLikedSongsOpen() ? 'assets/icons/add.svg' : ''" actionTitle="Create playlist" (back)="closeCurrentView()" (action)="create.openCreatePlaylist()"></app-screen-header>
   <section class="flex-1 overflow-y-auto px-5 py-5">
     <div *ngIf="library.libraryError()" class="mb-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/60">
       {{ library.libraryError() }}
     </div>
     <ng-container *ngIf="library.selectedPlaylist(); else libraryRoot">
-      <div class="mb-5 flex items-center gap-3">
-        <button type="button" (click)="library.closeSelectedPlaylist()" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]" aria-label="Back to playlists">
-          <img src="assets/icons/return.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
-        </button>
-        <div class="min-w-0">
-          <h2 class="truncate text-xl font-light text-white">
+      <section class="playlist-detail">
+        <div class="playlist-hero">
+          <div class="playlist-cover-large">
+            <img *ngIf="library.selectedPlaylist()?.image" [src]="library.selectedPlaylist()?.image" [alt]="library.selectedPlaylist()?.title"/>
+            <img *ngIf="!library.selectedPlaylist()?.image" src="assets/icons/blackstar_logo.svg" alt="Black Star" class="fallback-logo"/>
+          </div>
+          <p class="playlist-eyebrow">PLAYLIST</p>
+          <h2 class="playlist-title">
             {{ library.selectedPlaylist()?.title }}
           </h2>
-          <p class="truncate text-xs text-white/45">
-            {{ library.selectedPlaylistTracks().length }} loaded tracks
+          <p class="playlist-subtitle">
+            {{ library.selectedPlaylist()?.owner || 'Spotify' }}
+            ·
+            {{ library.selectedPlaylist()?.totalTracks || library.selectedPlaylistTracks().length }} tracks
+          </p>
+          <p *ngIf="library.selectedPlaylist()?.description" class="playlist-description">
+            {{ library.selectedPlaylist()?.description }}
           </p>
         </div>
-      </div>
-      <form class="mb-5 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-        <img src="assets/icons/search.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
-        <input type="text" [value]="library.libraryTrackSearchQuery()" (input)="onLibrarySearchInput($event)" placeholder="Search in this playlist" class="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/35"/>
-        <button *ngIf="library.libraryTrackSearchQuery()" type="button" (click)="library.clearLibraryTrackSearch()" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] transition hover:bg-white/[0.1]" aria-label="Clear search">
-          <img src="assets/icons/x.svg" alt="" class="icon-soft h-3.5 w-3.5 object-contain"/>
-        </button>
-      </form>
-      <div *ngIf="library.isLoadingPlaylistTracks()" class="py-2">
-        <app-track-list-skeleton [items]="7"></app-track-list-skeleton>
-      </div>
-      <div *ngIf="!library.isLoadingPlaylistTracks() && !library.filteredSelectedPlaylistTracks().length" class="empty-state">
-        <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
-          Empty
-        </p>
-        <h2 class="mt-3 text-2xl font-light text-white">
-          {{ library.libraryTrackSearchQuery() ? 'No results found' : 'No tracks found' }}
-        </h2>
-        <p class="mt-3 max-w-[260px] text-sm leading-6 text-white/45">
-          {{
-            library.libraryTrackSearchQuery()
-              ? 'Try searching by another song, artist or album.'
-              : 'Add songs from the track options menu.'
-          }}
-        </p>
-      </div>
-      <div *ngIf="!library.isLoadingPlaylistTracks() && library.filteredSelectedPlaylistTracks().length" class="space-y-2">
-        <app-track-list-item *ngFor="let track of library.filteredSelectedPlaylistTracks()" [track]="track" [showAlbum]="true"></app-track-list-item>
-      </div>
-    </ng-container>
-    <ng-template #libraryRoot>
-      <ng-container *ngIf="!library.isLikedSongsOpen(); else likedSongsView">
-        <button type="button" (click)="library.openLikedSongs()" class="mb-5 flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-left transition hover:border-white/20 hover:bg-white/[0.07]">
-          <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-white/20 to-white/5">
-            <img src="assets/icons/star_filled.svg" alt="" class="icon-active h-7 w-7 object-contain"/>
-          </div>
-          <div class="min-w-0 flex-1">
-            <h3 class="truncate text-sm font-light text-white">
-              Liked Songs
-            </h3>
-            <p class="truncate text-xs text-white/45">
-              Your saved Spotify tracks
-            </p>
-            <p class="mt-1 line-clamp-1 text-xs text-white/30">
-              Play your favorite songs directly through BLACK STAR.
-            </p>
-          </div>
-          <img src="assets/icons/next.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
-        </button>
-        <div>
-          <div class="mb-3 flex items-center justify-between">
-            <div>
-              <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
-                Playlists
-              </p>
-              <h3 class="mt-1 text-base font-light text-white">
-                Your Playlists
-              </h3>
-            </div>
-          </div>
-          <div *ngIf="library.isLoadingLibrary()" class="space-y-3">
-            <div *ngFor="let item of [].constructor(4)" class="flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-              <div class="skeleton-box h-16 w-16 shrink-0 rounded-xl"></div>
-              <div class="min-w-0 flex-1 space-y-2">
-                <div class="skeleton-box h-3 w-3/4 rounded-full"></div>
-                <div class="skeleton-box h-2.5 w-1/2 rounded-full"></div>
-                <div class="skeleton-box h-2.5 w-2/3 rounded-full"></div>
-              </div>
-            </div>
-          </div>
-          <div *ngIf="!library.isLoadingLibrary() && !library.libraryPlaylists().length" class="empty-state">
-            <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
-              No playlists
-            </p>
-            <h2 class="mt-3 text-2xl font-light text-white">
-              Nothing here yet
-            </h2>
-            <p class="mt-3 max-w-[260px] text-sm leading-6 text-white/45">
-              Connect Spotify to load your playlists.
-            </p>
-          </div>
-          <div *ngIf="!library.isLoadingLibrary() && library.libraryPlaylists().length" class="space-y-3">
-            <button type="button" *ngFor="let playlist of library.libraryPlaylists()" (click)="library.selectPlaylist(playlist)" class="flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-left transition hover:border-white/20 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-45" [disabled]="playlist.isAccessible === false">
-              <div class="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white/10">
-                <img *ngIf="playlist.image" [src]="playlist.image" [alt]="playlist.title" class="h-full w-full object-cover grayscale"/>
-              </div>
-              <div class="min-w-0 flex-1">
-                <h3 class="truncate text-sm font-light text-white">
-                  {{ playlist.title }}
-                </h3>
-                <p class="truncate text-xs text-white/45">
-                  {{ playlist.owner }} · {{ playlist.totalTracks || 0 }} tracks
-                </p>
-                <p class="mt-1 line-clamp-1 text-xs text-white/30">
-                  {{ playlist.isAccessible === false ? 'Restricted by Spotify' : playlist.description }}
-                </p>
-              </div>
-              <img [src]="playlist.isAccessible === false ? 'assets/icons/dots.svg' : 'assets/icons/next.svg'" alt="" class="icon-soft h-5 w-5 object-contain"/>
-            </button>
-          </div>
-        </div>
-      </ng-container>
-      <ng-template #likedSongsView>
-        <div class="mb-5 flex items-center gap-3">
-          <button type="button" (click)="library.closeLikedSongs()" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]" aria-label="Back to library">
-            <img src="assets/icons/return.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
+        <div class="playlist-actions">
+          <button type="button" (click)="playSelectedPlaylist()" [disabled]="!library.selectedPlaylistTracks().length" class="playlist-play-btn">
+            <img src="assets/icons/play-button.svg" alt="" />
+            <span>Play</span>
           </button>
-          <div class="min-w-0">
-            <h2 class="truncate text-xl font-light text-white">
-              Liked Songs
-            </h2>
-            <p class="truncate text-xs text-white/45">
-              {{ library.likedSongs().length }} saved tracks
-            </p>
-          </div>
         </div>
-        <form class="mb-5 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+        <form class="playlist-search">
           <img src="assets/icons/search.svg" alt="" class="icon-soft h-5 w-5 object-contain"/>
-          <input type="text" [value]="library.libraryTrackSearchQuery()" (input)="onLibrarySearchInput($event)" placeholder="Search in liked songs" class="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/35"/>
-          <button *ngIf="library.libraryTrackSearchQuery()" type="button" (click)="library.clearLibraryTrackSearch()" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] transition hover:bg-white/[0.1]" aria-label="Clear search">
+          <input type="text" [value]="library.libraryTrackSearchQuery()" (input)="onLibrarySearchInput($event)" placeholder="Search in this playlist"/>
+          <button *ngIf="library.libraryTrackSearchQuery()" type="button" (click)="library.clearLibraryTrackSearch()" aria-label="Clear search">
             <img src="assets/icons/x.svg" alt="" class="icon-soft h-3.5 w-3.5 object-contain"/>
           </button>
         </form>
-        <div *ngIf="library.isLoadingLikedSongs()" class="py-2">
+        <div *ngIf="library.isLoadingPlaylistTracks()" class="py-2">
           <app-track-list-skeleton [items]="7"></app-track-list-skeleton>
         </div>
-        <div *ngIf="!library.isLoadingLikedSongs() && !library.filteredLikedSongs().length" class="empty-state">
+        <div *ngIf="!library.isLoadingPlaylistTracks() && !library.filteredSelectedPlaylistTracks().length" class="empty-state">
           <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
             Empty
           </p>
@@ -151,15 +48,66 @@
             {{ library.libraryTrackSearchQuery() ? 'No results found' : 'No tracks found' }}
           </h2>
           <p class="mt-3 max-w-[260px] text-sm leading-6 text-white/45">
-            {{
-              library.libraryTrackSearchQuery()
-                ? 'Try searching by another song, artist or album.'
-                : 'Songs saved in your Spotify library will appear here.'
-            }}
+            {{ library.libraryTrackSearchQuery() ? 'Try searching by another song, artist or album.' : 'No playable tracks were returned for this playlist.' }}
           </p>
         </div>
-        <div *ngIf="!library.isLoadingLikedSongs() && library.filteredLikedSongs().length" class="space-y-2">
+        <div *ngIf="!library.isLoadingPlaylistTracks() && library.filteredSelectedPlaylistTracks().length" class="playlist-track-list">
+          <app-track-list-item *ngFor="let track of library.filteredSelectedPlaylistTracks()" [track]="track" [showAlbum]="true" [queueContext]="library.filteredSelectedPlaylistTracks()" [queueName]="library.selectedPlaylist()?.title || 'Playlist'"></app-track-list-item>
+        </div>
+      </section>
+    </ng-container>
+    <ng-template #libraryRoot>
+      <section *ngIf="library.isLikedSongsOpen(); else playlistsView">
+        <div class="mb-5 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+            Collection
+          </p>
+          <h2 class="mt-3 text-2xl font-light text-white">
+            Liked Songs
+          </h2>
+          <p class="mt-3 text-sm leading-6 text-white/45">
+            Songs you saved to your library.
+          </p>
+        </div>
+        <div class="space-y-2">
           <app-track-list-item *ngFor="let track of library.filteredLikedSongs()" [track]="track" [showAlbum]="true"></app-track-list-item>
+        </div>
+      </section>
+      <ng-template #playlistsView>
+        <div class="mb-5 flex items-center justify-between">
+          <h2 class="text-lg font-light text-white">Your Playlists</h2>
+          <button type="button" (click)="create.openCreatePlaylist()" class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white/70 transition hover:bg-white/[0.08]">
+            New playlist
+          </button>
+        </div>
+        <div *ngIf="library.isLoadingLibrary()" class="space-y-3">
+          <app-track-list-skeleton [items]="4"></app-track-list-skeleton>
+        </div>
+        <div *ngIf="!library.isLoadingLibrary() && !library.libraryPlaylists().length" class="empty-state">
+          <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+            Library
+          </p>
+          <h2 class="mt-3 text-2xl font-light text-white">
+            Nothing here yet
+          </h2>
+          <p class="mt-3 max-w-[260px] text-sm leading-6 text-white/45">
+            Connect Spotify to load your playlists.
+          </p>
+        </div>
+        <div *ngIf="!library.isLoadingLibrary() && library.libraryPlaylists().length" class="space-y-3">
+          <button type="button" *ngFor="let playlist of library.libraryPlaylists()" (click)="library.selectPlaylist(playlist)" class="flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-left transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-45" [disabled]="playlist.isAccessible === false">
+            <div class="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white/10">
+              <img *ngIf="playlist.image" [src]="playlist.image" [alt]="playlist.title" class="h-full w-full object-cover"/>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="truncate text-sm font-light text-white">
+                {{ playlist.title }}
+              </h3>
+              <p class="mt-1 line-clamp-2 text-xs leading-5 text-white/45">
+                {{ playlist.description || playlist.owner || 'Spotify playlist' }}
+              </p>
+            </div>
+          </button>
         </div>
       </ng-template>
     </ng-template>

@@ -63,8 +63,6 @@ export class AppComponent implements OnInit {
 
       await this.browse.loadTopTracks();
       await this.spotifyPlayer.initialize();
-
-      this.player.startPlaybackSync();
     }
   }
 }
