@@ -111,7 +111,7 @@ export class PlayerStateService {
     effect(() => {
         const track = this.currentTrack();
         if (!track.spotifyUri) {
-          this.isLiked.set(false);
+          this.isLiked.set(this.libraryState.likedTrackIds().has(track.id));
           return;
         }
         void this.syncCurrentTrackLikeState(track);
@@ -252,7 +252,18 @@ export class PlayerStateService {
     const track = this.currentTrack();
 
     if (!track.spotifyUri) {
-      this.toast.error('This track cannot be added to Liked Songs.');
+      const isAlreadyLiked = this.libraryState.likedTrackIds().has(track.id);
+
+      if (isAlreadyLiked) {
+        this.removeTrackFromLikedState(track);
+        this.isLiked.set(false);
+        this.toast.info('Removed from Liked Songs.');
+        return;
+      }
+
+      this.addTrackToLikedState(track);
+      this.isLiked.set(true);
+      this.toast.success('Added to Liked Songs.');
       return;
     }
 

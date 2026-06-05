@@ -12,4 +12,28 @@
   <app-create-playlist-sheet *ngIf="create.isCreatePlaylistOpen()"></app-create-playlist-sheet>
   <app-add-to-playlist-sheet *ngIf="trackOptions.isAddToPlaylistOpen()"></app-add-to-playlist-sheet>
   <app-toast></app-toast>
+
+  <section *ngIf="!spotifyAuth.isAuthenticated() && !demo.isDemoMode()" class="fixed inset-x-4 bottom-24 z-[70] mx-auto max-w-md rounded-2xl border border-white/10 bg-black/95 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.85)] backdrop-blur-xl">
+    <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+      Demo Mode
+    </p>
+    <h2 class="mt-2 text-lg font-light text-white">
+      Try BLACK STAR! without Spotify
+    </h2>
+    <p class="mt-2 text-sm leading-6 text-white/45">
+      Explore the app with demo tracks, playlists, search and player controls.
+    </p>
+    <button type="button" (click)="startDemoMode()" class="mt-4 inline-flex h-10 w-full items-center justify-center rounded-full bg-white text-sm font-medium text-black transition hover:scale-[1.01]">
+      Start Demo Mode
+    </button>
+  </section>
+
+  <section *ngIf="demo.isDemoMode()" class="fixed left-1/2 top-3 z-[70] flex w-[calc(100%-32px)] max-w-md -translate-x-1/2 items-center justify-between gap-3 rounded-full border border-white/10 bg-black/90 px-4 py-2 backdrop-blur-xl">
+    <span class="truncate text-xs text-white/55">
+      Demo Mode active
+    </span>
+    <button type="button" (click)="exitDemoMode()" class="shrink-0 text-xs text-white/80">
+      Exit
+    </button>
+  </section>
 </main>

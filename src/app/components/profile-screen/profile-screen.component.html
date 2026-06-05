@@ -1,30 +1,37 @@
 <section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
-  <app-screen-header title="PROFILE" eyebrow="Spotify" heading="Account" [actionLabel]="spotifyAuth.isAuthenticated() ? 'Logout' : ''" actionTitle="Disconnect Spotify" (action)="disconnectSpotify()"></app-screen-header>
+  <app-screen-header title="PROFILE" eyebrow="BLACK STAR" [heading]="demo.isDemoMode() ? 'Demo Profile' : 'Account'" [description]="demo.isDemoMode() ? 'You are exploring BLACK STAR with demo data.' : ''" [actionLabel]="spotifyAuth.isAuthenticated() && !demo.isDemoMode() ? 'Logout' : ''" actionTitle="Disconnect Spotify" (action)="disconnectSpotify()"></app-screen-header>
   <section class="flex-1 overflow-y-auto px-5 py-5">
-    <ng-container *ngIf="spotifyAuth.isAuthenticated(); else disconnectedState">
+    <ng-container *ngIf="demo.isDemoMode(); else spotifyProfileState">
       <section class="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
         <div class="flex items-center gap-4">
           <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05]">
-            <img *ngIf="spotifyAuth.profile()?.images?.[0]?.url; else fallbackAvatar" [src]="spotifyAuth.profile()?.images?.[0]?.url" alt="Spotify profile" class="h-full w-full object-cover grayscale"/>
-            <ng-template #fallbackAvatar>
-              <img src="assets/icons/icon-profile.svg" alt="" class="icon-soft h-9 w-9 object-contain"/>
-            </ng-template>
+            <img src="assets/icons/icon-profile.svg" alt="" class="icon-soft h-10 w-10 object-contain"/>
           </div>
           <div class="min-w-0 flex-1">
             <p class="mb-1 text-[10px] uppercase tracking-[0.35em] text-white/30">
-              Connected as
+              Demo user
             </p>
             <h3 class="truncate text-xl font-light text-white">
-              {{ spotifyAuth.profile()?.display_name || 'Spotify User' }}
+              BLACK STAR Guest
             </h3>
             <p class="mt-1 truncate text-xs text-white/45">
-              {{ spotifyAuth.profile()?.email || 'No email available' }}
+              Demo data only
             </p>
           </div>
         </div>
-        <a *ngIf="spotifyAuth.profile()?.external_urls?.spotify" [href]="spotifyAuth.profile()?.external_urls?.spotify" target="_blank" rel="noreferrer" class="mt-5 flex h-11 items-center justify-center rounded-full border border-white/10 bg-white text-sm font-medium text-black transition hover:scale-[1.02]">
-          Open Spotify Profile
-        </a>
+        <div class="mt-5 rounded-2xl border border-white/10 bg-black/25 p-4">
+          <p class="text-sm leading-6 text-white/50">
+            This mode uses demo tracks, playlists and player controls. It does not require Spotify Premium, Spotify login or dashboard authorization.
+          </p>
+        </div>
+        <div class="mt-5 grid gap-3">
+          <button type="button" (click)="connectSpotify()" class="flex h-11 items-center justify-center rounded-full bg-white text-sm font-medium text-black transition hover:scale-[1.02]">
+            Connect Spotify real
+          </button>
+          <button type="button" (click)="exitDemoMode()" class="flex h-11 items-center justify-center rounded-full border border-white/10 text-sm text-white/70 transition hover:bg-white/[0.06] hover:text-white">
+            Exit demo mode
+          </button>
+        </div>
       </section>
       <section class="mb-5 rounded-3xl border border-white/10 bg-white/[0.03] p-5">
         <div class="mb-4 flex items-center justify-between">
@@ -33,22 +40,25 @@
               Account details
             </p>
             <h3 class="mt-1 text-lg font-light text-white">
-              Spotify data
+              Demo session
             </h3>
           </div>
+          <span class="rounded-full border border-white/10 px-3 py-1 text-[11px] text-white/60">
+            Demo
+          </span>
         </div>
         <div class="space-y-3">
           <div class="flex items-center justify-between gap-4 border-b border-white/5 pb-3">
             <span class="text-sm text-white/45">Plan</span>
-            <span class="truncate text-sm text-white">
-              {{ spotifyAuth.profile()?.product || 'Unknown' }}
-            </span>
+            <span class="truncate text-sm text-white">Demo</span>
           </div>
           <div class="flex items-center justify-between gap-4 border-b border-white/5 pb-3">
-            <span class="text-sm text-white/45">Country</span>
-            <span class="truncate text-sm text-white">
-              {{ spotifyAuth.profile()?.country || 'Unknown' }}
-            </span>
+            <span class="text-sm text-white/45">Source</span>
+            <span class="truncate text-sm text-white">Mock data</span>
+          </div>
+          <div class="flex items-center justify-between gap-4">
+            <span class="text-sm text-white/45">Spotify API</span>
+            <span class="truncate text-sm text-white">Disabled</span>
           </div>
         </div>
       </section>
@@ -59,11 +69,11 @@
               Playback
             </p>
             <h3 class="mt-1 text-lg font-light text-white">
-              BLACK STAR Player
+              BLACK STAR Demo Player
             </h3>
           </div>
-          <span class="rounded-full border px-3 py-1 text-[11px]" [class.border-white]="spotifyPlayer.isReady()" [class.text-white]="spotifyPlayer.isReady()" [class.border-white-10]="!spotifyPlayer.isReady()" [class.text-white-45]="!spotifyPlayer.isReady()">
-            {{ spotifyPlayer.isReady() ? 'Ready' : 'Offline' }}
+          <span class="rounded-full border border-white px-3 py-1 text-[11px] text-white">
+            Ready
           </span>
         </div>
         <div class="space-y-3">
@@ -85,36 +95,131 @@
               {{ player.volumePercent() }}%
             </span>
           </div>
-          <div class="flex items-center justify-between gap-4 border-b border-white/5 pb-3">
-            <span class="text-sm text-white/45">Device</span>
-            <span class="max-w-[180px] truncate text-sm text-white">
-              {{ player.activeSpotifyDeviceName() || 'Not connected' }}
-            </span>
-          </div>
           <div class="flex items-center justify-between gap-4">
-            <span class="text-sm text-white/45">Source</span>
+            <span class="text-sm text-white/45">Queue</span>
             <span class="max-w-[180px] truncate text-sm text-white">
-              {{ player.isExternalPlaybackActive() ? 'External Spotify device' : 'BLACK STAR Player' }}
+              {{ player.queueName() || 'Demo Queue' }}
             </span>
           </div>
         </div>
       </section>
     </ng-container>
-    <ng-template #disconnectedState>
-      <section class="empty-state">
-        <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
-          Disconnected
-        </p>
-        <h2 class="mt-3 text-2xl font-light text-white">
-          Connect Spotify
-        </h2>
-        <p class="mt-3 max-w-[270px] text-sm leading-6 text-white/45">
-          Connect your Spotify account to load your profile, library and player data.
-        </p>
-        <button type="button" (click)="connectSpotify()" class="mt-7 rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:scale-105">
-          Connect Spotify
-        </button>
-      </section>
+    <ng-template #spotifyProfileState>
+      <ng-container *ngIf="spotifyAuth.isAuthenticated(); else disconnectedState">
+        <section class="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+          <div class="flex items-center gap-4">
+            <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05]">
+              <img *ngIf="spotifyAuth.profile()?.images?.[0]?.url; else fallbackAvatar" [src]="spotifyAuth.profile()?.images?.[0]?.url" alt="Spotify profile" class="h-full w-full object-cover"/>
+              <ng-template #fallbackAvatar>
+                <img src="assets/icons/icon-profile.svg" alt="" class="icon-soft h-9 w-9 object-contain"/>
+              </ng-template>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="mb-1 text-[10px] uppercase tracking-[0.35em] text-white/30">
+                Connected as
+              </p>
+              <h3 class="truncate text-xl font-light text-white">
+                {{ spotifyAuth.profile()?.display_name || 'Spotify User' }}
+              </h3>
+              <p class="mt-1 truncate text-xs text-white/45">
+                {{ spotifyAuth.profile()?.email || 'No email available' }}
+              </p>
+            </div>
+          </div>
+          <a *ngIf="spotifyAuth.profile()?.external_urls?.spotify" [href]="spotifyAuth.profile()?.external_urls?.spotify" target="_blank" rel="noreferrer" class="mt-5 flex h-11 items-center justify-center rounded-full border border-white/10 bg-white text-sm font-medium text-black transition hover:scale-[1.02]">
+            Open Spotify Profile
+          </a>
+        </section>
+        <section class="mb-5 rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+          <div class="mb-4 flex items-center justify-between">
+            <div>
+              <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+                Account details
+              </p>
+              <h3 class="mt-1 text-lg font-light text-white">
+                Spotify data
+              </h3>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between gap-4 border-b border-white/5 pb-3">
+              <span class="text-sm text-white/45">Plan</span>
+              <span class="truncate text-sm text-white">
+                {{ spotifyAuth.profile()?.product || 'Unknown' }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between gap-4 border-b border-white/5 pb-3">
+              <span class="text-sm text-white/45">Country</span>
+              <span class="truncate text-sm text-white">
+                {{ spotifyAuth.profile()?.country || 'Unknown' }}
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+          <div class="mb-4 flex items-center justify-between">
+            <div>
+              <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+                Playback
+              </p>
+              <h3 class="mt-1 text-lg font-light text-white">
+                BLACK STAR Player
+              </h3>
+            </div>
+            <span class="rounded-full border px-3 py-1 text-[11px]" [class.border-white]="spotifyPlayer.isReady()" [class.text-white]="spotifyPlayer.isReady()" [class.border-white-10]="!spotifyPlayer.isReady()" [class.text-white-45]="!spotifyPlayer.isReady()">
+              {{ spotifyPlayer.isReady() ? 'Ready' : 'Offline' }}
+            </span>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between gap-4 border-b border-white/5 pb-3">
+              <span class="text-sm text-white/45">Current track</span>
+              <span class="max-w-[180px] truncate text-sm text-white">
+                {{ player.currentTrack().title }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between gap-4 border-b border-white/5 pb-3">
+              <span class="text-sm text-white/45">Status</span>
+              <span class="text-sm text-white">
+                {{ player.isPlaying() ? 'Playing' : 'Paused' }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between gap-4 border-b border-white/5 pb-3">
+              <span class="text-sm text-white/45">Volume</span>
+              <span class="text-sm text-white">
+                {{ player.volumePercent() }}%
+              </span>
+            </div>
+            <div class="flex items-center justify-between gap-4 border-b border-white/5 pb-3">
+              <span class="text-sm text-white/45">Device</span>
+              <span class="max-w-[180px] truncate text-sm text-white">
+                {{ player.activeSpotifyDeviceName() || 'Not connected' }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between gap-4">
+              <span class="text-sm text-white/45">Source</span>
+              <span class="max-w-[180px] truncate text-sm text-white">
+                {{ player.isExternalPlaybackActive() ? 'External Spotify device' : 'BLACK STAR Player' }}
+              </span>
+            </div>
+          </div>
+        </section>
+      </ng-container>
+      <ng-template #disconnectedState>
+        <section class="empty-state">
+          <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+            Disconnected
+          </p>
+          <h2 class="mt-3 text-2xl font-light text-white">
+            Connect Spotify
+          </h2>
+          <p class="mt-3 max-w-[270px] text-sm leading-6 text-white/45">
+            Connect your Spotify account to load your profile, library and player data.
+          </p>
+          <button type="button" (click)="connectSpotify()" class="mt-7 rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:scale-105">
+            Connect Spotify
+          </button>
+        </section>
+      </ng-template>
     </ng-template>
   </section>
 </section>

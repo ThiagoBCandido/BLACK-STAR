@@ -3,6 +3,8 @@ import { Playlist, Track } from '../models/music.model';
 import { SpotifyApiService } from '../services/spotify-api.service';
 import { SpotifyAuthService } from '../services/spotify-auth.service';
 import { ToastService } from '../services/toast.service';
+import { DEMO_PLAYLIST_TRACKS, PLAYLISTS, TRACKS } from '../data/mock-music.data';
+import { DemoModeService } from '../services/demo-mode.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +13,8 @@ export class LibraryStateService {
   private readonly spotifyApi = inject(SpotifyApiService);
   private readonly spotifyAuth = inject(SpotifyAuthService);
   private readonly toast = inject(ToastService);
-
+  private readonly demo = inject(DemoModeService);
+  
   readonly libraryPlaylists = signal<Playlist[]>([]);
   readonly selectedPlaylist = signal<Playlist | null>(null);
   readonly selectedPlaylistTracks = signal<Track[]>([]);
@@ -51,6 +54,12 @@ export class LibraryStateService {
     this.isLoadingLibrary.set(true);
     this.libraryError.set(null);
     try {
+      if (this.demo.isDemoMode()) {
+        this.libraryPlaylists.set(PLAYLISTS);
+        this.libraryError.set(null);
+        return;
+      }
+
       const currentUserId = this.spotifyAuth.profile()?.id;
       const playlists = await this.spotifyApi.getUserPlaylists(currentUserId);
       this.libraryPlaylists.set(playlists);
@@ -83,6 +92,15 @@ export class LibraryStateService {
     this.libraryError.set(null);
 
     try {
+      if (this.demo.isDemoMode()) {
+        const tracks = TRACKS.slice(0, 5);
+
+        this.likedSongs.set(tracks);
+        this.likedTrackIds.set(new Set(tracks.map((track) => track.id)));
+        this.libraryError.set(null);
+        return;
+      }
+
       const tracks = await this.spotifyApi.getSavedTracks();
 
       if (tracks === null) {
@@ -122,6 +140,15 @@ export class LibraryStateService {
     this.selectedPlaylistTracks.set([]);
     this.isLoadingPlaylistTracks.set(true);
     this.libraryError.set(null);
+
+    if (this.demo.isDemoMode()) {
+      const tracks = DEMO_PLAYLIST_TRACKS[playlist.id] ?? TRACKS;
+
+      this.selectedPlaylistTracks.set(tracks);
+      this.libraryError.set(null);
+      this.isLoadingPlaylistTracks.set(false);
+      return;
+    }
 
     try {
       const tracks = await this.spotifyApi.getPlaylistTracks(playlist.id);
@@ -179,8 +206,8 @@ export class LibraryStateService {
   }
 
   async checkTrackLikeState(track: Track): Promise<boolean> {
-    if (!track.spotifyUri) {
-      return false;
+    if (this.demo.isDemoMode() || !track.spotifyUri) {
+      return this.likedTrackIds().has(track.id);
     }
 
     if (this.likedTrackIds().has(track.id)) {

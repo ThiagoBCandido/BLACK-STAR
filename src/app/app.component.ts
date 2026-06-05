@@ -16,10 +16,12 @@ import { TrackOptionsSheetComponent } from './components/track-options-sheet/tra
 import { PlayerStateService } from './core/services/player-state.service';
 import { SpotifyAuthService } from './core/services/spotify-auth.service';
 import { SpotifyPlayerService } from './core/services/spotify-player.service';
+import { DemoModeService } from './core/services/demo-mode.service';
 import { CreatePlaylistStateService } from './core/state/create-playlist-state.service';
 import { NavigationStateService } from './core/state/navigation-state.service';
 import { TrackOptionsStateService } from './core/state/track-options-state.service';
 import { BrowseStateService } from './core/state/browse-state.service';
+import { LibraryStateService } from './core/state/library-state.service';
 
 @Component({
   selector: 'app-root',
@@ -48,13 +50,20 @@ export class AppComponent implements OnInit {
   readonly trackOptions = inject(TrackOptionsStateService);
   readonly create = inject(CreatePlaylistStateService);
   readonly navigation = inject(NavigationStateService);
+  readonly spotifyAuth = inject(SpotifyAuthService);
+  readonly demo = inject(DemoModeService);
 
-  private readonly spotifyAuth = inject(SpotifyAuthService);
   private readonly spotifyPlayer = inject(SpotifyPlayerService);
   private readonly browse = inject(BrowseStateService);
+  private readonly library = inject(LibraryStateService);
 
   async ngOnInit(): Promise<void> {
     await this.spotifyAuth.initialize();
+
+    if (this.demo.isDemoMode()) {
+      await this.loadDemoData();
+      return;
+    }
 
     if (this.spotifyAuth.isAuthenticated()) {
       const recentlyPlayedTracks = await this.browse.loadRecentlyPlayedTracks();
@@ -62,7 +71,28 @@ export class AppComponent implements OnInit {
       this.player.setInitialTrack(recentlyPlayedTracks[0]);
 
       await this.browse.loadTopTracks();
+      await this.library.loadLibraryPlaylists();
       await this.spotifyPlayer.initialize();
     }
+  }
+
+  async startDemoMode(): Promise<void> {
+    this.demo.enableDemoMode();
+    this.navigation.goHome();
+    await this.loadDemoData();
+  }
+
+  exitDemoMode(): void {
+    this.demo.disableDemoMode();
+    window.location.reload();
+  }
+
+  private async loadDemoData(): Promise<void> {
+    const recentlyPlayedTracks = await this.browse.loadRecentlyPlayedTracks();
+
+    this.player.setInitialTrack(recentlyPlayedTracks[0]);
+
+    await this.browse.loadTopTracks();
+    await this.library.loadLibraryPlaylists();
   }
 }

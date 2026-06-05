@@ -86,6 +86,10 @@ export class PlaybackStateService {
     this.setPlaying(true);
     this.browseState.moveTrackToTop(track);
 
+    if (!track.spotifyUri) {
+      return;
+    }
+
     try {
       await this.playCurrentTrackOnSpotify();
     } catch (error) {
@@ -118,7 +122,7 @@ export class PlaybackStateService {
   }
 
   setQueue(tracks: Track[], queueName = 'Queue'): Track[] {
-    const playableTracks = tracks.filter((track) => Boolean(track.spotifyUri));
+    const playableTracks = tracks;
     const uniqueTracks = this.removeDuplicateTracks(playableTracks);
 
     this.queueTracks.set(uniqueTracks);
@@ -156,6 +160,10 @@ export class PlaybackStateService {
     const wasPlaying = this.isPlaying();
 
     this.setPlaying(!wasPlaying);
+
+    if (!this.currentTrack().spotifyUri) {
+      return;
+    }
 
     try {
       await this.spotifyPlayer.togglePlayback();
@@ -313,6 +321,10 @@ export class PlaybackStateService {
 
     this.setVolume(volume);
 
+    if (!this.currentTrack().spotifyUri) {
+      return;
+    }
+
     try {
       await this.spotifyPlayer.setVolume(volume / 100);
     } catch (error) {
@@ -331,6 +343,10 @@ export class PlaybackStateService {
 
     const nextVolume = this.toggleMuteState();
 
+    if (!this.currentTrack().spotifyUri) {
+      return;
+    }
+
     try {
       await this.spotifyPlayer.setVolume(nextVolume / 100);
     } catch (error) {
@@ -346,6 +362,10 @@ export class PlaybackStateService {
   async toggleSpotifyShuffle(): Promise<void> {
     const nextValue = this.toggleShuffleState();
 
+    if (!this.currentTrack().spotifyUri) {
+      return;
+    }
+
     try {
       await this.spotifyPlayer.setShuffle(nextValue);
     } catch (error) {
@@ -360,6 +380,10 @@ export class PlaybackStateService {
   async cycleSpotifyRepeatMode(): Promise<void> {
     const previousMode = this.repeatMode();
     const nextMode = this.cycleRepeatState();
+
+    if (!this.currentTrack().spotifyUri) {
+      return;
+    }
 
     try {
       await this.spotifyPlayer.setRepeat(nextMode);

@@ -1,5 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { TRACKS } from '../data/mock-music.data';
 import { Track } from '../models/music.model';
+import { DemoModeService } from '../services/demo-mode.service';
 import { SpotifyApiService } from '../services/spotify-api.service';
 import { ToastService } from '../services/toast.service';
 
@@ -9,6 +11,7 @@ import { ToastService } from '../services/toast.service';
 export class BrowseStateService {
   private readonly spotifyApi = inject(SpotifyApiService);
   private readonly toast = inject(ToastService);
+  private readonly demo = inject(DemoModeService);
 
   readonly recentlyPlayedTracks = signal<Track[]>([]);
   readonly topTracks = signal<Track[]>([]);
@@ -20,6 +23,12 @@ export class BrowseStateService {
     this.isLoadingRecentlyPlayed.set(true);
 
     try {
+      if (this.demo.isDemoMode()) {
+        const tracks = this.removeDuplicateTracks(TRACKS);
+        this.recentlyPlayedTracks.set(tracks);
+        return tracks;
+      }
+
       let tracks = await this.spotifyApi.getRecentlyPlayedTracks();
 
       if (!tracks.length) {
@@ -44,6 +53,12 @@ export class BrowseStateService {
     this.isLoadingTopTracks.set(true);
 
     try {
+      if (this.demo.isDemoMode()) {
+        const tracks = this.removeDuplicateTracks([...TRACKS].reverse());
+        this.topTracks.set(tracks);
+        return tracks;
+      }
+
       const tracks = await this.spotifyApi.getTopTracks();
       const uniqueTracks = this.removeDuplicateTracks(tracks);
 

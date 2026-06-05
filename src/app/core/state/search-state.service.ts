@@ -2,6 +2,8 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Track } from '../models/music.model';
 import { SpotifyApiService } from '../services/spotify-api.service';
 import { ToastService } from '../services/toast.service';
+import { TRACKS } from '../data/mock-music.data';
+import { DemoModeService } from '../services/demo-mode.service';
 
 @Injectable({
   providedIn: 'root',
@@ -9,7 +11,7 @@ import { ToastService } from '../services/toast.service';
 export class SearchStateService {
   private readonly spotifyApi = inject(SpotifyApiService);
   private readonly toast = inject(ToastService);
-
+  private readonly demo = inject(DemoModeService);
   readonly searchQuery = signal('');
   readonly lastSearchedQuery = signal('');
   readonly searchResults = signal<Track[]>([]);
@@ -21,7 +23,7 @@ export class SearchStateService {
 
   readonly showMinimumCharsHint = computed(() => {
     const query = this.trimmedQuery();
-
+    
     return query.length > 0 && query.length < 2;
   });
 
@@ -43,7 +45,6 @@ export class SearchStateService {
   async searchTracks(): Promise<void> {
     const query = this.trimmedQuery();
     const requestId = ++this.searchRequestId;
-
     if (query.length < 2) {
       this.resetSearchState();
       return;
@@ -55,8 +56,7 @@ export class SearchStateService {
     this.errorMessage.set(null);
 
     try {
-      const results = await this.spotifyApi.searchTracks(query);
-
+      const results = this.demo.isDemoMode() ? this.searchDemoTracks(query) : await this.spotifyApi.searchTracks(query);
       if (requestId !== this.searchRequestId) {
         return;
       }
@@ -93,5 +93,10 @@ export class SearchStateService {
     this.hasSearched.set(false);
     this.isSearching.set(false);
     this.errorMessage.set(null);
+  }
+
+  private searchDemoTracks(query: string): Track[] {
+    const normalizedQuery = query.toLowerCase();
+    return TRACKS.filter((track) => `${track.title} ${track.artist} ${track.album}`.toLowerCase().includes(normalizedQuery));
   }
 }
