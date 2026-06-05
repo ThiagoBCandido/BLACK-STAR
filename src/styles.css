@@ -42,3 +42,27 @@ button {
   filter: none;
   opacity: 1;
 }
+
+html,
+body {
+  min-height: 100%;
+  background: #000000;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}

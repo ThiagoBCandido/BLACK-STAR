@@ -1,3 +1,19 @@
+.mini-player-shell {
+  position: fixed;
+  left: 50%;
+  bottom: calc(4rem + env(safe-area-inset-bottom));
+  z-index: 50;
+  width: 100%;
+  max-width: 448px;
+  transform: translateX(-50%);
+  border-top: 1px solid rgb(255 255 255 / 0.1);
+  background: rgb(0 0 0 / 0.95);
+  padding: 12px 16px;
+  box-shadow: 0 -20px 50px rgb(0 0 0 / 0.8);
+  backdrop-filter: blur(18px);
+  outline: none;
+}
+
 .mini-progress {
   position: absolute;
   left: 0;
@@ -5,28 +21,83 @@
   width: 100%;
   height: 2px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgb(255 255 255 / 0.08);
 }
 
 .mini-progress span {
   display: block;
   height: 100%;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgb(255 255 255 / 0.9);
+}
+
+.mini-player-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mini-cover {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.mini-track-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.mini-track-info h4,
+.mini-track-info p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mini-track-info h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 300;
+  color: #ffffff;
+}
+
+.mini-track-info p {
+  margin: 3px 0 0;
+  font-size: 12px;
+  color: rgb(255 255 255 / 0.45);
 }
 
 .mini-controls {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
-.mini-control-btn {
+.mini-control-btn,
+.mini-play-btn {
   display: flex;
-  width: 34px;
-  height: 34px;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
+  transition: background 160ms ease;
+}
+
+.mini-control-btn {
+  width: 34px;
+  height: 34px;
+}
+
+.mini-play-btn {
+  width: 38px;
+  height: 38px;
+}
+
+.mini-control-btn:hover,
+.mini-play-btn:hover {
+  background: rgb(255 255 255 / 0.06);
 }
 
 .mini-control-icon {
@@ -35,17 +106,22 @@
   object-fit: contain;
 }
 
-.mini-play-btn {
-  display: flex;
-  width: 38px;
-  height: 38px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-}
-
 .mini-play-icon {
   width: 20px;
   height: 20px;
   object-fit: contain;
+}
+
+@media (max-width: 360px) {
+  .mini-player-shell {
+    padding-inline: 12px;
+  }
+
+  .mini-controls {
+    gap: 4px;
+  }
+
+  .mini-control-btn {
+    width: 30px;
+  }
 }

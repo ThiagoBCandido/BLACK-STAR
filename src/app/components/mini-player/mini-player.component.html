@@ -1,16 +1,12 @@
-<section class="fixed bottom-16 left-1/2 z-50 w-full max-w-md -translate-x-1/2 border-t border-white/10 bg-black/95 px-4 py-3 shadow-[0_-20px_50px_rgba(0,0,0,.8)] backdrop-blur-xl" (click)="player.openPlayer()">
+<section class="mini-player-shell" role="button" tabindex="0" (click)="player.openPlayer()" (keydown.enter)="player.openPlayer()" (keydown.space)="player.openPlayer()">
   <div class="mini-progress">
     <span [style.width.%]="player.progressPercent()"></span>
   </div>
-  <div class="flex items-center gap-3">
-    <img [src]="player.currentTrack().cover" [alt]="player.currentTrack().title" class="h-12 w-12 rounded object-cover"/>
-    <div class="min-w-0 flex-1">
-      <h4 class="truncate text-sm font-light text-white">
-        {{ player.currentTrack().title }}
-      </h4>
-      <p class="truncate text-xs text-white/45">
-        {{ player.currentTrack().artist }}
-      </p>
+  <div class="mini-player-content">
+    <img [src]="player.currentTrack().cover" [alt]="player.currentTrack().title" class="mini-cover"/>
+    <div class="mini-track-info">
+      <h4>{{ player.currentTrack().title }}</h4>
+      <p>{{ player.currentTrack().artist }}</p>
     </div>
     <div class="mini-controls">
       <button type="button" (click)="player.previousTrack($event)" class="mini-control-btn" aria-label="Previous track">
