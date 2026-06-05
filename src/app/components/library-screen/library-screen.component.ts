@@ -53,4 +53,14 @@ export class LibraryScreenComponent {
 
     void this.player.playQueue(tracks, playlistName);
   }
+
+  playLikedSongs(): void {
+    const tracks = this.library.filteredLikedSongs().length ? this.library.filteredLikedSongs() : this.library.likedSongs();
+
+    if (!tracks.length) {
+      return;
+    }
+
+    void this.player.playQueue(tracks, 'Liked Songs');
+  }
 }

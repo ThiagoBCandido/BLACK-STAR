@@ -23,4 +23,14 @@ export class RecentlyPlayedScreenComponent {
   readonly player = inject(PlayerStateService);
   readonly browse = inject(BrowseStateService);
   readonly navigation = inject(NavigationStateService);
+
+  playRecentlyPlayed(): void {
+    const tracks = this.browse.recentlyPlayedTracks();
+
+    if (!tracks.length) {
+      return;
+    }
+
+    void this.player.playQueue(tracks, 'Recently Played');
+  }
 }

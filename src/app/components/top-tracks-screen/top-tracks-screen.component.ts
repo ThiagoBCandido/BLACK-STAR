@@ -18,4 +18,14 @@ export class TopTracksScreenComponent {
   readonly player = inject(PlayerStateService);
   readonly browse = inject(BrowseStateService);
   readonly navigation = inject(NavigationStateService);
+
+  playTopTracks(): void {
+    const tracks = this.browse.topTracks();
+
+    if (!tracks.length) {
+      return;
+    }
+
+    void this.player.playQueue(tracks, 'Top Tracks');
+  }
 }

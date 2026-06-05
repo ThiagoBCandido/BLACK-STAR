@@ -1,6 +1,23 @@
 <section class="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-black pb-36">
-  <app-screen-header title="TOP TRACKS" eyebrow="Spotify" heading="Your Top Tracks" description="Tracks based on your recent Spotify listening history." [showBackButton]="true" (back)="navigation.goHome()" actionIcon="assets/icons/return.svg" actionTitle="Refresh top tracks" (action)="browse.loadTopTracks()"></app-screen-header>
+  <app-screen-header title="TOP TRACKS" eyebrow="Spotify" heading="Your Top Tracks" description="Tracks based on your recent Spotify listening history." [showBackButton]="true" (back)="navigation.goLibrary()" actionIcon="assets/icons/loop.svg" actionTitle="Refresh top tracks" (action)="browse.loadTopTracks()"></app-screen-header>
   <section class="flex-1 overflow-y-auto px-5 py-5">
+    <section *ngIf="!browse.isLoadingTopTracks() && browse.topTracks().length" class="collection-hero">
+      <div>
+        <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+          Collection
+        </p>
+        <h2 class="mt-2 text-2xl font-light text-white">
+          Top Tracks
+        </h2>
+        <p class="mt-2 text-sm leading-6 text-white/45">
+          {{ browse.topTracks().length }} tracks loaded from your Spotify profile.
+        </p>
+      </div>
+      <button type="button" (click)="playTopTracks()" class="collection-play-btn">
+        <img src="assets/icons/play-button.svg" alt=""/>
+        <span>Play</span>
+      </button>
+    </section>
     <app-track-list-skeleton *ngIf="browse.isLoadingTopTracks()" [items]="8"></app-track-list-skeleton>
     <div *ngIf="!browse.isLoadingTopTracks() && !browse.topTracks().length" class="empty-state">
       <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
@@ -14,7 +31,7 @@
       </p>
     </div>
     <div *ngIf="!browse.isLoadingTopTracks() && browse.topTracks().length" class="space-y-2">
-      <app-track-list-item *ngFor="let track of browse.topTracks()" [track]="track" [showAlbum]="true"></app-track-list-item>
+      <app-track-list-item *ngFor="let track of browse.topTracks()" [track]="track" [showAlbum]="true" [queueContext]="browse.topTracks()" queueName="Top Tracks"></app-track-list-item>
     </div>
   </section>
 </section>
