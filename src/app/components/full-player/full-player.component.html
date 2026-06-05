@@ -77,7 +77,7 @@
             <img [src]="player.isPlaying() ? 'assets/icons/pause.svg' : 'assets/icons/play-button.svg'" alt="" class="icon-white main-play-icon"/>
           </button>
           <button type="button" (click)="player.nextTrack($event)" class="main-skip-btn" aria-label="Next track">
-            <img src="assets/icons/next.svg" alt=" class="icon-white main-skip-icon"/>
+            <img src="assets/icons/next.svg" alt="" class="icon-white main-skip-icon"/>
           </button>
           <button type="button" class="main-side-btn relative" [class.is-active]="player.repeatMode() !== 'off'" (click)="player.cycleRepeatMode()" aria-label="Repeat">
             <img src="assets/icons/loop.svg" alt="" class="h-5 w-5 object-contain" [class.icon-active]="player.repeatMode() !== 'off'" [class.icon-soft]="player.repeatMode() === 'off'"/>
@@ -87,17 +87,21 @@
           </button>
         </div>
         <section class="rounded-t-3xl border border-white/10 bg-white/[0.04] px-4 py-5">
-          <div class="mb-5 grid grid-cols-2 text-center text-sm">
-            <button class="relative pb-3 text-white">
-              Queue
-              <span class="absolute bottom-0 left-1/2 h-px w-10 -translate-x-1/2 bg-white"></span>
-            </button>
-            <button class="pb-3 text-white/40">
-              Lyrics
-            </button>
+          <div class="mb-5 flex items-end justify-between gap-4">
+            <div class="min-w-0">
+              <p class="text-[10px] uppercase tracking-[0.35em] text-white/30">
+                Queue
+              </p>
+              <h3 class="mt-1 truncate text-base font-light text-white">
+                {{ player.queueName() || 'Recently Played' }}
+              </h3>
+            </div>
+            <p class="shrink-0 text-xs text-white/35">
+              {{ player.queueTracks().length ? player.queueTracks().length : browse.recentlyPlayedTracks().length }} tracks
+            </p>
           </div>
           <div class="space-y-2">
-            <app-track-list-item *ngFor="let track of player.queueTracks().length ? player.queueTracks() : browse.recentlyPlayedTracks()" [track]="track" variant="queue" [showOptions]="true" [queueContext]="player.queueTracks().length ? player.queueTracks() : browse.recentlyPlayedTracks()" [queueName]="player.queueName() || 'Queue'"></app-track-list-item>
+            <app-track-list-item *ngFor="let track of player.queueTracks().length ? player.queueTracks() : browse.recentlyPlayedTracks()" [track]="track" variant="queue" [showOptions]="true" [queueContext]="player.queueTracks().length ? player.queueTracks() : browse.recentlyPlayedTracks()" [queueName]="player.queueName() || 'Recently Played'"></app-track-list-item>
           </div>
         </section>
       </section>
