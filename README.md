@@ -196,7 +196,7 @@ Exemplo:
 ```ts
 export const environment = {
   spotify: {
-    clientId: 'SEU_CLIENT_ID',
+    clientId: 'SEU_CLIENT_ID_AQUI!',
     redirectUri: 'http://127.0.0.1:4200',
     scopes: [
       'user-read-private',
