@@ -1,0 +1,294 @@
+.turntable {
+  position: relative;
+  width: min(92vw, 360px);
+  aspect-ratio: 1 / 1;
+  margin-inline: auto;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 5px),
+    linear-gradient(145deg, #171717 0%, #070707 48%, #111111 100%);
+  background-size:
+    5px 5px,
+    auto;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 0 0 8px rgba(255, 255, 255, 0.012),
+    inset 0 -40px 90px rgba(0, 0, 0, 0.75),
+    0 30px 80px rgba(0, 0, 0, 0.75);
+}
+
+.turntable::before {
+  content: '';
+  position: absolute;
+  left: 4%;
+  top: 5%;
+  z-index: 0;
+  width: 82%;
+  height: 82%;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 0 0 5px rgba(255, 255, 255, 0.015),
+    0 0 0 9px rgba(0, 0, 0, 0.65),
+    0 0 0 12px rgba(255, 255, 255, 0.035),
+    inset 0 0 24px rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+}
+
+.record {
+  --cover-image: none;
+
+  position: absolute;
+  left: 5.5%;
+  top: 6.5%;
+  z-index: 1;
+  width: 78%;
+  height: 78%;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 17%, rgba(255, 255, 255, 0.18) 17.3% 17.8%, transparent 18.2%),
+    repeating-radial-gradient(circle, #050505 0 4px, #111111 4px 6px, #030303 6px 8px);
+  box-shadow:
+    inset 0 0 30px rgba(255, 255, 255, 0.08),
+    inset 0 0 80px rgba(0, 0, 0, 0.9),
+    0 18px 50px rgba(0, 0, 0, 0.85);
+}
+
+.record::before {
+  content: '';
+  position: absolute;
+  inset: 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  background:
+    conic-gradient(from 0deg, transparent 0 18%, rgba(255, 255, 255, 0.055) 24%, transparent 31% 55%, rgba(255, 255, 255, 0.035) 62%, transparent 70% 100%);
+  box-shadow:
+    0 0 0 8px rgba(255, 255, 255, 0.012),
+    0 0 0 15px rgba(255, 255, 255, 0.016),
+    0 0 0 23px rgba(255, 255, 255, 0.01),
+    0 0 0 34px rgba(255, 255, 255, 0.013),
+    0 0 0 46px rgba(255, 255, 255, 0.011),
+    0 0 0 60px rgba(255, 255, 255, 0.012),
+    0 0 0 76px rgba(255, 255, 255, 0.011);
+  animation: spin-record-grooves 5s linear infinite;
+  animation-play-state: paused;
+  pointer-events: none;
+}
+
+.record-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 96px;
+  height: 96px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background-image: var(--cover-image);
+  background-position: center;
+  background-size: cover;
+  box-shadow:
+    inset 0 0 24px rgba(0, 0, 0, 0.38),
+    0 0 0 8px rgba(255, 255, 255, 0.03),
+    0 12px 35px rgba(0, 0, 0, 0.75);
+  transform: translate(-50%, -50%);
+  animation: spin-record-label 5s linear infinite;
+  animation-play-state: paused;
+}
+
+.record.is-playing::before,
+.record.is-playing .record-label {
+  animation-play-state: running;
+}
+
+.record-hole {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #020202;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.tonearm {
+  position: absolute;
+  right: 6.5%;
+  top: 7%;
+  z-index: 4;
+  width: 32%;
+  height: 58%;
+  transform-origin: 82% 15%;
+  transition: transform 700ms ease;
+}
+
+.tonearm.is-playing {
+  transform: rotate(11deg);
+}
+
+.tonearm-base {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 48%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 50%, #d8d8d8 0 5%, #747474 6% 9%, #090909 10% 32%, #1c1c1c 33% 55%, #050505 56% 100%);
+  box-shadow:
+    inset 0 0 15px rgba(255, 255, 255, 0.08),
+    0 15px 30px rgba(0, 0, 0, 0.8);
+}
+
+.tonearm-base::before {
+  content: '';
+  position: absolute;
+  inset: 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 0 12px rgba(0, 0, 0, 0.9),
+    0 0 0 7px rgba(0, 0, 0, 0.35);
+}
+
+.tonearm-line {
+  position: absolute;
+  right: 24%;
+  top: 16%;
+  width: 9%;
+  height: 65%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3f3f3f 0%, #f0f0f0 28%, #8d8d8d 49%, #ffffff 61%, #4c4c4c 100%);
+  box-shadow:
+    inset 0 0 5px rgba(0, 0, 0, 0.8),
+    0 0 12px rgba(255, 255, 255, 0.14),
+    8px 10px 18px rgba(0, 0, 0, 0.7);
+  transform: rotate(22deg);
+  transform-origin: top center;
+}
+
+.tonearm-line::before {
+  content: '';
+  position: absolute;
+  left: 18%;
+  top: 8%;
+  width: 26%;
+  height: 76%;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.36);
+}
+
+.tonearm-head {
+  position: absolute;
+  right: 42%;
+  bottom: 20%;
+  width: 38%;
+  height: 11%;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent 28%),
+    linear-gradient(145deg, #2c2c2c, #050505);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transform: rotate(22deg);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
+}
+
+.tonearm-head::before,
+.tonearm-head::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.38);
+  box-shadow: 0 9px 0 rgba(255, 255, 255, 0.18);
+}
+
+.tonearm-head::before {
+  left: 10px;
+}
+
+.tonearm-head::after {
+  right: 10px;
+}
+
+.turntable-button {
+  position: absolute;
+  right: 7%;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: radial-gradient(circle, #1a1a1a, #050505);
+}
+
+.turntable-logo-mark {
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+  opacity: 1;
+  transform: scale(1.18);
+  pointer-events: none;
+}
+
+.button-one {
+  bottom: calc(24% - 1px);
+  width: 10.5%;
+  height: 10.5%;
+  background: #070707;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 0 14px rgba(255, 255, 255, 0.08),
+    0 10px 25px rgba(0, 0, 0, 0.55);
+}
+
+.button-two {
+  bottom: calc(9% + 2px);
+  width: 9.5%;
+  height: 9.5%;
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 255, 255, 0.03),
+    inset 0 0 16px rgba(255, 255, 255, 0.08),
+    0 9px 24px rgba(0, 0, 0, 0.65);
+}
+
+@keyframes spin-record-label {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes spin-record-grooves {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-height: 760px) {
+  .turntable {
+    width: min(88vw, 334px);
+  }
+}
+
+@media (max-height: 690px) {
+  .turntable {
+    width: min(84vw, 306px);
+  }
+}

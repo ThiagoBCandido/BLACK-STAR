@@ -4,7 +4,6 @@ import { PlayerStateService } from '../../core/services/player-state.service';
 import { TrackListItemComponent } from '../track-list-item/track-list-item.component';
 import { BrowseStateService } from '../../core/state/browse-state.service';
 import { TrackOptionsStateService } from '../../core/state/track-options-state.service';
-import { Track } from '../../core/models/music.model';
 
 type PlayerPanel = 'queue' | 'details';
 
@@ -13,7 +12,7 @@ type PlayerPanel = 'queue' | 'details';
   standalone: true,
   imports: [CommonModule, TrackListItemComponent],
   templateUrl: './full-player.component.html',
-  styleUrl: './full-player.component.css',
+  styleUrls: ['./full-player.component.css', './full-player-turntable.component.css'],
 })
 export class FullPlayerComponent {
   readonly player = inject(PlayerStateService);
@@ -49,14 +48,6 @@ export class FullPlayerComponent {
 
   setPanel(panel: PlayerPanel): void {
     this.activePanel.set(panel);
-  }
-
-  selectQueueTrack(track: Track): void {
-    void this.player.selectTrackFromQueue(
-      track,
-      this.currentQueue(),
-      this.queueTitle()
-    );
   }
 
   openSpotifyTrack(): void {
