@@ -9,11 +9,12 @@
   background: rgba(0, 0, 0, 0.72);
   backdrop-filter: blur(12px);
   overscroll-behavior: contain;
-  animation: overlay-fade-in 320ms ease forwards;
+  animation: overlay-fade-in 260ms ease forwards;
+  contain: layout paint;
 }
 
 .player-overlay.is-closing {
-  animation: overlay-fade-out 320ms ease forwards;
+  animation: overlay-fade-out 240ms ease forwards;
 }
 
 .player-sheet::before,
@@ -57,7 +58,10 @@
   color: #ffffff;
   box-shadow: 0 -30px 80px rgba(0, 0, 0, 0.85);
   overscroll-behavior: contain;
-  animation: player-slide-up 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform: translate3d(0, 100%, 0);
+  backface-visibility: hidden;
+  will-change: transform;
+  animation: player-slide-up 300ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .player-sheet::before {
@@ -99,7 +103,7 @@
 }
 
 .player-overlay.is-closing .player-sheet {
-  animation: player-slide-down 320ms ease forwards;
+  animation: player-slide-down 240ms cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 .player-content {
@@ -173,21 +177,21 @@
 
 @keyframes player-slide-up {
   from {
-    transform: translateY(100%);
+    transform: translate3d(0, 100%, 0);
   }
 
   to {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes player-slide-down {
   from {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 
   to {
-    transform: translateY(100%);
+    transform: translate3d(0, 100%, 0);
   }
 }
 
@@ -398,6 +402,12 @@
   border: 0;
   background: rgb(255 255 255 / 0.035);
   transition: background 160ms ease, transform 160ms ease;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .player-overlay {
+    backdrop-filter: none;
+  }
 }
 
 .player-action-btn:hover {

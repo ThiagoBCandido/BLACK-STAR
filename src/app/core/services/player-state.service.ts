@@ -37,6 +37,7 @@ export class PlayerStateService {
 
   /* playback signals */
   readonly currentTrack = this.playbackState.currentTrack;
+  readonly hasCurrentTrack = this.playbackState.hasCurrentTrack;
   readonly isPlaying = this.playbackState.isPlaying;
   readonly isPlayerOpen = this.playbackState.isPlayerOpen;
   readonly isPlayerClosing = signal(false);
@@ -133,7 +134,7 @@ export class PlayerStateService {
       return;
     }
 
-    this.playbackState.setCurrentTrack(track);
+    this.playbackState.setCurrentTrack(track, { markAsCurrent: false });
     this.playbackState.setPlaying(false);
   }
 
@@ -237,11 +238,27 @@ export class PlayerStateService {
   }
 
   openPlayer(): void {
+    if (this.closeTimeoutId) {
+      clearTimeout(this.closeTimeoutId);
+      this.closeTimeoutId = null;
+    }
+
+    this.isPlayerClosing.set(false);
     this.playbackState.openPlayer();
   }
 
   closePlayer(): void {
-    this.playbackState.closePlayer();
+    if (this.closeTimeoutId) {
+      return;
+    }
+
+    this.isPlayerClosing.set(true);
+
+    this.closeTimeoutId = setTimeout(() => {
+      this.playbackState.closePlayer();
+      this.isPlayerClosing.set(false);
+      this.closeTimeoutId = null;
+    }, 240);
   }
 
   togglePlay(event?: Event): Promise<void> {

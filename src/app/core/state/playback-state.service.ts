@@ -17,6 +17,7 @@ export class PlaybackStateService {
   private readonly toast = inject(ToastService);
 
   readonly currentTrack = signal<Track>(TRACKS[0]);
+  readonly hasCurrentTrack = signal(false);
   readonly isPlaying = signal(false);
   readonly isPlayerOpen = signal(false);
 
@@ -58,10 +59,17 @@ export class PlaybackStateService {
   readonly durationTime = computed(() => this.formatTime(this.durationMs()));
   readonly totalTime = this.durationTime;
 
-  setCurrentTrack(track: Track): void {
+  setCurrentTrack(
+    track: Track,
+    options: { markAsCurrent?: boolean } = {}
+  ): void {
     this.currentTrack.set(track);
     this.durationMs.set(track.durationMs ?? 0);
     this.positionMs.set(0);
+
+    if (options.markAsCurrent ?? true) {
+      this.hasCurrentTrack.set(true);
+    }
   }
 
   setPlaying(isPlaying: boolean): void {

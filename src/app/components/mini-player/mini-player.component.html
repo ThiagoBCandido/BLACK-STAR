@@ -1,4 +1,4 @@
-<section *ngIf="player.isPlaying()" class="mini-player-shell" role="button" tabindex="0" (click)="player.openPlayer()" (keydown.enter)="player.openPlayer()" (keydown.space)="player.openPlayer()">
+<section *ngIf="player.hasCurrentTrack()" class="mini-player-shell" role="button" tabindex="0" (click)="player.openPlayer()" (keydown.enter)="player.openPlayer()" (keydown.space)="player.openPlayer()">
   <div class="mini-player-content">
     <img [src]="player.currentTrack().cover" [alt]="player.currentTrack().title" class="mini-cover"/>
 

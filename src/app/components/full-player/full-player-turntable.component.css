@@ -191,31 +191,15 @@
   height: 11%;
   border-radius: 4px;
   background:
+    radial-gradient(circle at 28% 34%, rgba(255, 255, 255, 0.38) 0 5%, transparent 6%),
+    radial-gradient(circle at 70% 34%, rgba(255, 255, 255, 0.38) 0 5%, transparent 6%),
+    radial-gradient(circle at 28% 72%, rgba(255, 255, 255, 0.18) 0 5%, transparent 6%),
+    radial-gradient(circle at 70% 72%, rgba(255, 255, 255, 0.18) 0 5%, transparent 6%),
     linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent 28%),
     linear-gradient(145deg, #2c2c2c, #050505);
   border: 1px solid rgba(255, 255, 255, 0.18);
   transform: rotate(22deg);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
-}
-
-.tonearm-head::before,
-.tonearm-head::after {
-  content: '';
-  position: absolute;
-  top: 6px;
-  width: 4px;
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.38);
-  box-shadow: 0 9px 0 rgba(255, 255, 255, 0.18);
-}
-
-.tonearm-head::before {
-  left: 10px;
-}
-
-.tonearm-head::after {
-  right: 10px;
 }
 
 .turntable-button {
