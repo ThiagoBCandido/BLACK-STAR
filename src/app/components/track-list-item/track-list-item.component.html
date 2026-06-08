@@ -1,10 +1,10 @@
 <div role="button" tabindex="0" (click)="selectTrack()" (keydown.enter)="handleKeyboardSelect($event)" (keydown.space)="handleKeyboardSelect($event)" class="flex w-full items-center gap-3 rounded-2xl p-2 text-left outline-none transition hover:bg-white/[0.05] focus:bg-white/[0.06]" [class.bg-white]="isCurrentTrack" [class.bg-opacity-5]="isCurrentTrack">
   <img [src]="track.cover" [alt]="track.title" class="shrink-0 rounded object-cover" [ngClass]="size === 'compact' ? 'h-11 w-11' : 'h-14 w-14'"/>
   <div class="min-w-0 flex-1">
-    <h4 class="truncate text-sm font-light text-white">
+    <h4 class="truncate pb-0.5 text-sm font-light leading-[1.35] text-white">
       {{ track.title }}
     </h4>
-    <p class="truncate text-xs text-white/45">
+    <p class="truncate pb-0.5 text-xs leading-[1.35] text-white/45">
       {{ resolvedSubtitle }}
     </p>
   </div>

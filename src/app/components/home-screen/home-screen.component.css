@@ -108,29 +108,34 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  padding-bottom: 3px;
   font-size: 26px;
   font-weight: 300;
-  line-height: 1.05;
+  line-height: 1.25;
   color: #ffffff;
 }
 
 .featured-artist {
+  margin-top: 5px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-bottom: 2px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: rgb(255 255 255 / 0.65);
+}
+
+.featured-description {
   margin-top: 8px;
   max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 14px;
-  color: rgb(255 255 255 / 0.65);
-}
-
-.featured-description {
-  margin-top: 10px;
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  padding-bottom: 2px;
   font-size: 13px;
+  line-height: 1.35;
   color: rgb(255 255 255 / 0.55);
 }
 
